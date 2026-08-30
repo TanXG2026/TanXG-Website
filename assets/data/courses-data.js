@@ -12,8 +12,8 @@ window.TANXG_COURSES = [
     ],
     "followups": [
       "力学",
-      "电磁学",
       "热学",
+      "电磁学",
       "数学物理方法",
       "量子力学",
       "微分几何",
@@ -39,8 +39,8 @@ window.TANXG_COURSES = [
     ],
     "followups": [
       "数学物理方法",
-      "群论",
       "量子力学",
+      "群论",
       "量子场论"
     ],
     "textbooks": [
@@ -87,8 +87,8 @@ window.TANXG_COURSES = [
       "高等数学"
     ],
     "followups": [
-      "电磁学",
       "热学",
+      "电磁学",
       "理论力学",
       "量子力学"
     ],
@@ -108,6 +108,7 @@ window.TANXG_COURSES = [
     "hours": "24h",
     "content": "温度与热量、热力学定律、气体动理论",
     "prerequisites": [
+      "高中物理",
       "高等数学",
       "力学"
     ],
@@ -131,6 +132,7 @@ window.TANXG_COURSES = [
     "hours": "32h",
     "content": "静电场、静磁场、电磁感应、光学",
     "prerequisites": [
+      "高中物理",
       "高等数学",
       "力学"
     ],
@@ -201,8 +203,7 @@ window.TANXG_COURSES = [
     "hours": "24h",
     "content": "热力学势、系综理论、量子统计",
     "prerequisites": [
-      "热学",
-      "高等数学"
+      "热学"
     ],
     "followups": [],
     "textbooks": [
@@ -221,9 +222,9 @@ window.TANXG_COURSES = [
     "hours": "32h",
     "content": "基本原理、一维问题、角动量",
     "prerequisites": [
-      "原子物理学",
-      "理论力学",
-      "线性代数"
+      "线性代数",
+      "数学物理方法",
+      "理论力学"
     ],
     "followups": [
       "量子场论"
