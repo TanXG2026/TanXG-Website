@@ -72,6 +72,8 @@
 	function initFilters() {
 		document.querySelectorAll('[data-filter-group]').forEach(function (group) {
 			group.querySelectorAll('[data-filter]').forEach(function (button) {
+				if (button.hasAttribute('data-filter-bound')) return;
+				button.setAttribute('data-filter-bound', '');
 				button.addEventListener('click', function () {
 					setActiveFilter(group, button.getAttribute('data-filter'));
 				});
@@ -79,6 +81,8 @@
 		});
 
 		document.querySelectorAll('[data-domain-filter]').forEach(function (card) {
+			if (card.hasAttribute('data-domain-filter-bound')) return;
+			card.setAttribute('data-domain-filter-bound', '');
 			card.addEventListener('click', function () {
 				var value = card.getAttribute('data-domain-filter');
 				var group = document.querySelector('[data-filter-group="research"]');
@@ -175,7 +179,6 @@
 		var list = document.querySelector('[data-course-list]');
 		if (!input || !list) return;
 
-		var cards = Array.prototype.slice.call(list.querySelectorAll('[data-course-card]'));
 		var clearButton = document.querySelector('[data-course-search-clear]');
 		var status = document.querySelector('.course-search-status');
 		var empty = document.querySelector('[data-course-empty]');
@@ -187,6 +190,7 @@
 		}
 
 		function renderResults() {
+			var cards = Array.prototype.slice.call(list.querySelectorAll('[data-course-card]'));
 			var query = normalizeCourseQuery(input.value);
 			var terms = query ? query.split(' ') : [];
 			var visibleCount = 0;
@@ -210,15 +214,19 @@
 			saveCourseDirectoryHistoryState(input);
 		}
 
-		input.addEventListener('input', renderAndSave);
-		input.addEventListener('search', renderAndSave);
-		input.addEventListener('keydown', function (event) {
-			if (event.key !== 'Escape' || !input.value) return;
-			input.value = '';
-			renderAndSave();
-		});
+		if (!input.hasAttribute('data-course-search-bound')) {
+			input.setAttribute('data-course-search-bound', '');
+			input.addEventListener('input', renderAndSave);
+			input.addEventListener('search', renderAndSave);
+			input.addEventListener('keydown', function (event) {
+				if (event.key !== 'Escape' || !input.value) return;
+				input.value = '';
+				renderAndSave();
+			});
+		}
 
-		if (clearButton) {
+		if (clearButton && !clearButton.hasAttribute('data-course-clear-bound')) {
+			clearButton.setAttribute('data-course-clear-bound', '');
 			clearButton.addEventListener('click', function () {
 				input.value = '';
 				renderAndSave();
@@ -226,23 +234,28 @@
 			});
 		}
 
-		cards.forEach(function (card) {
-			card.addEventListener('click', function () {
+		if (!list.hasAttribute('data-course-list-bound')) {
+			list.setAttribute('data-course-list-bound', '');
+			list.addEventListener('click', function (event) {
+				if (!event.target.closest('[data-course-card]')) return;
 				saveCourseDirectoryHistoryState(input);
 			});
-		});
+		}
 
-		window.addEventListener('scroll', function () {
-			if (scrollFrame !== null) return;
-			scrollFrame = window.requestAnimationFrame(function () {
-				scrollFrame = null;
+		if (!document.documentElement.hasAttribute('data-course-history-bound')) {
+			document.documentElement.setAttribute('data-course-history-bound', '');
+			window.addEventListener('scroll', function () {
+				if (scrollFrame !== null) return;
+				scrollFrame = window.requestAnimationFrame(function () {
+					scrollFrame = null;
+					saveCourseDirectoryHistoryState(input);
+				});
+			}, { passive: true });
+
+			window.addEventListener('pagehide', function () {
 				saveCourseDirectoryHistoryState(input);
 			});
-		}, { passive: true });
-
-		window.addEventListener('pagehide', function () {
-			saveCourseDirectoryHistoryState(input);
-		});
+		}
 
 		renderResults();
 
@@ -263,7 +276,8 @@
 		var selected = getCourseData().find(function (item) { return item.id === id; });
 		var backLink = document.querySelector('[data-course-back]');
 
-		if (backLink && params.get('from') === 'directory') {
+		if (backLink && params.get('from') === 'directory' && !backLink.hasAttribute('data-history-back-bound')) {
+			backLink.setAttribute('data-history-back-bound', '');
 			backLink.addEventListener('click', function (event) {
 				if (window.history.length <= 1) return;
 				event.preventDefault();
@@ -352,5 +366,17 @@
 		initFilters();
 		initCourseSearch();
 		initFullscreen();
+	});
+
+	document.addEventListener('tanxg:courses-updated', function () {
+		initCourseDirectory();
+		initCourseTemplate();
+		initCourseSearch();
+		initReveal();
+	});
+
+	document.addEventListener('tanxg:content-rendered', function () {
+		initReveal();
+		initFilters();
 	});
 })();

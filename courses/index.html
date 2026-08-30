@@ -27,9 +27,9 @@
 
 			<main id="main" class="framework-main">
 				<section>
-					<header class="page-hero">
-						<h1>课程讲义</h1>
-						<p>按学习阶段查看探星阁物理与天文讲义。</p>
+					<header class="page-hero" data-sanity-page="courses">
+						<h1 data-sanity-page-title>课程讲义</h1>
+						<p data-sanity-page-intro>按学习阶段查看探星阁物理与天文讲义。</p>
 					</header>
 
 					<section class="lecture-notice" aria-labelledby="lecture-notice-title">
@@ -48,7 +48,7 @@
 							</button>
 							<div class="accordion-panel">
 								<div class="accordion-panel-inner">
-									<div class="accordion-content">
+									<div class="accordion-content" data-sanity-lecture-level="基础课程">
 										<div class="empty-state"><p>基础课程讲义暂待添加。</p></div>
 									</div>
 								</div>
@@ -61,7 +61,7 @@
 							</button>
 							<div class="accordion-panel">
 								<div class="accordion-panel-inner">
-									<div class="accordion-content">
+									<div class="accordion-content" data-sanity-lecture-level="核心课程">
 										<div class="card-grid">
 											<a class="content-card lecture-card" href="lecture-notes/theoretical-mechanics.html">
 												<img class="lecture-card-cover" src="lecture-notes/assets/mcover.jpg" alt="理论力学讲义封面" />
@@ -93,7 +93,7 @@
 							</button>
 							<div class="accordion-panel">
 								<div class="accordion-panel-inner">
-									<div class="accordion-content">
+									<div class="accordion-content" data-sanity-lecture-level="高阶课程">
 										<div class="card-grid">
 											<a class="content-card lecture-card" href="lecture-notes/general-relativity.html">
 												<img class="lecture-card-cover" src="lecture-notes/assets/grcover.png" alt="广义相对论讲义封面" />
@@ -121,6 +121,7 @@
 		<script src="../assets/js/breakpoints.min.js"></script>
 		<script src="../assets/js/util.js"></script>
 		<script src="../assets/js/main.js"></script>
+		<script src="../assets/js/sanity-content.js"></script>
 		<script src="../assets/js/framework.js"></script>
 	</body>
 </html>

@@ -27,13 +27,13 @@
 
 			<main id="main" class="framework-main">
 				<section>
-					<header class="page-hero">
-						<h1>科学研究</h1>
-						<p>六个领域同级展示，不使用折叠；点击领域卡片可筛选下方条目。</p>
+					<header class="page-hero" data-sanity-page="research">
+						<h1 data-sanity-page-title>科学研究</h1>
+						<p data-sanity-page-intro>六个研究领域与专题内容。</p>
 					</header>
 
 					<div class="section-block">
-						<div class="domain-grid">
+						<div class="domain-grid" data-sanity-research-domains>
 							<button class="domain-card reveal" type="button" data-domain-filter="aa" aria-pressed="false"><span class="domain-code">A&amp;A</span><h3>天文学与天体物理</h3></button>
 							<button class="domain-card reveal" type="button" data-domain-filter="grc" aria-pressed="false"><span class="domain-code">GR&amp;C</span><h3>引力与宇宙学</h3></button>
 							<button class="domain-card reveal" type="button" data-domain-filter="hep" aria-pressed="false"><span class="domain-code">HEP</span><h3>高能物理</h3></button>
@@ -48,7 +48,7 @@
 							<h2>专题内容</h2>
 						</header>
 
-						<div class="filter-bar" data-filter-group="research" data-filter-target="#research-cards" aria-label="研究领域筛选">
+						<div class="filter-bar" data-filter-group="research" data-filter-target="#research-cards" data-sanity-research-filters aria-label="研究领域筛选">
 							<button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部</button>
 							<button class="filter-button" type="button" data-filter="aa" aria-pressed="false">A&amp;A</button>
 							<button class="filter-button" type="button" data-filter="grc" aria-pressed="false">GR&amp;C</button>
@@ -58,7 +58,7 @@
 							<button class="filter-button" type="button" data-filter="qst" aria-pressed="false">QST</button>
 						</div>
 
-						<div id="research-cards" class="card-grid">
+						<div id="research-cards" class="card-grid" data-sanity-research-cards>
 							<a class="content-card filter-card" data-filter-card data-tags="aa" href="../content-template.html"><p class="card-kicker">A&amp;A</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">A&amp;A</span><span class="tag">专题讲义</span></div></a>
 							<a class="content-card filter-card" data-filter-card data-tags="grc" href="../content-template.html"><p class="card-kicker">GR&amp;C</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">GR&amp;C</span><span class="tag">专题讲义</span></div></a>
 							<a class="content-card filter-card" data-filter-card data-tags="hep" href="../content-template.html"><p class="card-kicker">HEP</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">HEP</span><span class="tag">专题讲义</span></div></a>
@@ -79,6 +79,7 @@
 		<script src="../assets/js/breakpoints.min.js"></script>
 		<script src="../assets/js/util.js"></script>
 		<script src="../assets/js/main.js"></script>
+		<script src="../assets/js/sanity-content.js"></script>
 		<script src="../assets/js/framework.js"></script>
 	</body>
 </html>
