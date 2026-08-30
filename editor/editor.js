@@ -413,7 +413,7 @@
 			state.dirty = false;
 			localStorage.removeItem(DRAFT_KEY);
 			setSaveState('saved', '所有修改已保存');
-			showToast('课程内容已经保存到网站');
+			showToast('课程简介已经保存到网站');
 		} catch (error) {
 			setSaveState('error', '保存失败，草稿仍保留');
 			showToast(error.message || '保存失败，请检查编辑器是否仍在运行。');

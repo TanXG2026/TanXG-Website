@@ -15,10 +15,10 @@
 			<nav id="nav" aria-label="主导航">
 				<ul class="links">
 					<li><a href="../index.html">首页</a></li>
-					<li><a href="../learning/index.html">学习地图</a></li>
+					<li><a href="../learning/index.html">课程检索</a></li>
 					<li class="active"><a href="index.html" aria-current="page">课程讲义</a></li>
 					<li><a href="../research/index.html">科学研究</a></li>
-					<li><a href="../visualizations/index.html">交互可视化</a></li>
+					<li><a href="../visualizations/index.html">可视化实验室</a></li>
 					<li><a href="../popsci/index.html">科普</a></li>
 					<li><a href="../community/index.html">科学社区</a></li>
 					<li><a href="../team/index.html">团队</a></li>
@@ -28,27 +28,28 @@
 			<main id="main" class="framework-main">
 				<section>
 					<header class="page-hero">
-						<p class="eyebrow">Course Notes</p>
 						<h1>课程讲义</h1>
-						<p>课程数量会持续增长，因此仅本栏目使用分级折叠。</p>
+						<p>按学习阶段查看探星阁物理与天文讲义。</p>
 					</header>
+
+					<section class="lecture-notice" aria-labelledby="lecture-notice-title">
+						<h2 id="lecture-notice-title">下载说明</h2>
+						<ol>
+							<li>探星阁所有讲义均免费下载；转载时请注明出处，严禁私自用于商业用途。</li>
+							<li>点击相应卡片进入详情页，可查看讲义介绍并获取 PDF 下载入口。</li>
+							<li>讲义随时更新，请及时留意；如下载链接失效，请通过电子邮件或官方微信公众号反馈。</li>
+						</ol>
+					</section>
 
 					<div class="section-block accordion-list" data-accordion data-accordion-single>
 						<div class="accordion-item reveal">
-							<button class="accordion-trigger" type="button" data-accordion-trigger aria-expanded="true">
+							<button class="accordion-trigger" type="button" data-accordion-trigger aria-expanded="false">
 								<span>基础课程</span><span class="accordion-mark" aria-hidden="true">+</span>
 							</button>
 							<div class="accordion-panel">
 								<div class="accordion-panel-inner">
 									<div class="accordion-content">
-										<div class="card-grid">
-											<a class="content-card" href="../content-template.html">
-												<p class="card-kicker">Course Card</p>
-												<h3>课程标题占位</h3>
-												<p>课程简介与讲义入口。</p>
-												<div class="tag-row"><span class="tag">基础</span><span class="tag">PDF</span><span class="tag">更新中</span></div>
-											</a>
-										</div>
+										<div class="empty-state"><p>基础课程讲义暂待添加。</p></div>
 									</div>
 								</div>
 							</div>
@@ -62,11 +63,23 @@
 								<div class="accordion-panel-inner">
 									<div class="accordion-content">
 										<div class="card-grid">
-											<a class="content-card" href="../content-template.html">
-												<p class="card-kicker">Course Card</p>
-												<h3>课程标题占位</h3>
-												<p>课程简介与讲义入口。</p>
-												<div class="tag-row"><span class="tag">核心</span><span class="tag">PDF</span><span class="tag">待添加</span></div>
+											<a class="content-card lecture-card" href="lecture-notes/theoretical-mechanics.html">
+												<img class="lecture-card-cover" src="lecture-notes/assets/mcover.jpg" alt="理论力学讲义封面" />
+												<div class="lecture-card-body">
+													<p class="card-kicker">2026 年春季</p>
+													<h3>理论力学讲义（中文）</h3>
+													<p>解析力学与经典场论中文讲义。</p>
+													<div class="tag-row"><span class="tag">核心课程</span><span class="tag">PDF</span></div>
+												</div>
+											</a>
+											<a class="content-card lecture-card" href="lecture-notes/electrodynamics.html">
+												<img class="lecture-card-cover" src="lecture-notes/assets/emcover.jpg" alt="电动力学讲义封面" />
+												<div class="lecture-card-body">
+													<p class="card-kicker">2026 年春季</p>
+													<h3>电动力学讲义（中文）</h3>
+													<p>经典电动力学中文讲义。</p>
+													<div class="tag-row"><span class="tag">核心课程</span><span class="tag">PDF</span></div>
+												</div>
 											</a>
 										</div>
 									</div>
@@ -82,11 +95,14 @@
 								<div class="accordion-panel-inner">
 									<div class="accordion-content">
 										<div class="card-grid">
-											<a class="content-card" href="../content-template.html">
-												<p class="card-kicker">Course Card</p>
-												<h3>课程标题占位</h3>
-												<p>课程简介与讲义入口。</p>
-												<div class="tag-row"><span class="tag">高阶</span><span class="tag">PDF</span><span class="tag">待添加</span></div>
+											<a class="content-card lecture-card" href="lecture-notes/general-relativity.html">
+												<img class="lecture-card-cover" src="lecture-notes/assets/grcover.png" alt="广义相对论讲义封面" />
+												<div class="lecture-card-body">
+													<p class="card-kicker">2026 年春季</p>
+													<h3>广义相对论讲义（中文）</h3>
+													<p>面向初学者的广义相对论研讨课中文讲义。</p>
+													<div class="tag-row"><span class="tag">高阶课程</span><span class="tag">PDF</span></div>
+												</div>
 											</a>
 										</div>
 									</div>
@@ -97,7 +113,6 @@
 				</section>
 			</main>
 
-			<div id="copyright"><ul><li>&copy; TanXG</li><li>课程讲义框架</li></ul></div>
 		</div>
 		<script src="../assets/js/jquery.min.js"></script>
 		<script src="../assets/js/jquery.scrollex.min.js"></script>

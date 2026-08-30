@@ -103,6 +103,27 @@
 		return Array.isArray(window.TANXG_COURSES) ? window.TANXG_COURSES : [];
 	}
 
+	function getCourseDirectoryHistoryState() {
+		var state = window.history.state;
+		if (!state || typeof state !== 'object' || !state.courseDirectory) return null;
+		return state.courseDirectory;
+	}
+
+	function saveCourseDirectoryHistoryState(input) {
+		if (!window.history || !window.history.replaceState) return;
+
+		var currentState = window.history.state;
+		var nextState = currentState && typeof currentState === 'object'
+			? Object.assign({}, currentState)
+			: {};
+
+		nextState.courseDirectory = {
+			query: input ? input.value : '',
+			scrollY: window.scrollY || window.pageYOffset || 0
+		};
+		window.history.replaceState(nextState, document.title, window.location.href);
+	}
+
 	function createTextElement(tagName, className, textValue) {
 		var element = document.createElement(tagName);
 		if (className) element.className = className;
@@ -115,7 +136,7 @@
 		var searchParts = [course.title, course.stage, course.field, course.nature];
 
 		card.className = 'content-card course-card reveal';
-		card.href = 'course-template.html?id=' + encodeURIComponent(course.id);
+		card.href = 'course-template.html?id=' + encodeURIComponent(course.id) + '&from=directory';
 		card.setAttribute('data-course-card', '');
 		card.setAttribute('data-course-search-text', searchParts.join(' '));
 
@@ -158,6 +179,12 @@
 		var clearButton = document.querySelector('[data-course-search-clear]');
 		var status = document.querySelector('.course-search-status');
 		var empty = document.querySelector('[data-course-empty]');
+		var savedState = getCourseDirectoryHistoryState();
+		var scrollFrame = null;
+
+		if (savedState && typeof savedState.query === 'string') {
+			input.value = savedState.query;
+		}
 
 		function renderResults() {
 			var query = normalizeCourseQuery(input.value);
@@ -178,23 +205,54 @@
 			if (clearButton) clearButton.hidden = !query;
 		}
 
-		input.addEventListener('input', renderResults);
-		input.addEventListener('search', renderResults);
+		function renderAndSave() {
+			renderResults();
+			saveCourseDirectoryHistoryState(input);
+		}
+
+		input.addEventListener('input', renderAndSave);
+		input.addEventListener('search', renderAndSave);
 		input.addEventListener('keydown', function (event) {
 			if (event.key !== 'Escape' || !input.value) return;
 			input.value = '';
-			renderResults();
+			renderAndSave();
 		});
 
 		if (clearButton) {
 			clearButton.addEventListener('click', function () {
 				input.value = '';
-				renderResults();
+				renderAndSave();
 				input.focus();
 			});
 		}
 
+		cards.forEach(function (card) {
+			card.addEventListener('click', function () {
+				saveCourseDirectoryHistoryState(input);
+			});
+		});
+
+		window.addEventListener('scroll', function () {
+			if (scrollFrame !== null) return;
+			scrollFrame = window.requestAnimationFrame(function () {
+				scrollFrame = null;
+				saveCourseDirectoryHistoryState(input);
+			});
+		}, { passive: true });
+
+		window.addEventListener('pagehide', function () {
+			saveCourseDirectoryHistoryState(input);
+		});
+
 		renderResults();
+
+		if (savedState && Number.isFinite(Number(savedState.scrollY))) {
+			window.requestAnimationFrame(function () {
+				window.requestAnimationFrame(function () {
+					window.scrollTo(0, Number(savedState.scrollY));
+				});
+			});
+		}
 	}
 
 	function initCourseTemplate() {
@@ -203,6 +261,15 @@
 		var params = new URLSearchParams(window.location.search);
 		var id = params.get('id');
 		var selected = getCourseData().find(function (item) { return item.id === id; });
+		var backLink = document.querySelector('[data-course-back]');
+
+		if (backLink && params.get('from') === 'directory') {
+			backLink.addEventListener('click', function (event) {
+				if (window.history.length <= 1) return;
+				event.preventDefault();
+				window.history.back();
+			});
+		}
 
 		if (!selected && params.get('course')) {
 			selected = {
@@ -258,7 +325,7 @@
 			return item;
 		});
 
-		document.title = (selected.title || '课程详情') + ' · 学习地图 · 探星阁';
+		document.title = (selected.title || '课程详情') + ' · 课程检索 · 探星阁';
 	}
 
 	function initFullscreen() {

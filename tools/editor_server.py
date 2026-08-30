@@ -195,7 +195,7 @@ def make_server() -> tuple[ThreadingHTTPServer, int]:
 def main() -> None:
     server, port = make_server()
     url = f"http://{HOST}:{port}/editor/"
-    print("\n探星阁课程内容编辑器已经启动。")
+    print("\n探星阁课程简介编辑器已经启动。")
     print(f"如果浏览器没有自动打开，请访问：{url}")
     print("编辑完成后可关闭这个终端窗口。\n")
     if os.environ.get("TANXG_EDITOR_NO_BROWSER") != "1":
