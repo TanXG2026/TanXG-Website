@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 课程编辑器在每台电脑上生成的本地备份与临时文件
+backups/
+*.tmp
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 常见编辑器的本机设置
+.vscode/
+.idea/
+*.swp
+

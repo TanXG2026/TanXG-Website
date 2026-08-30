@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+	<head>
+		<title>课程内容编辑器 · 探星阁</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
+		<link rel="stylesheet" href="../assets/css/fontawesome-all.min.css" />
+		<link rel="stylesheet" href="editor.css" />
+	</head>
+	<body>
+		<div class="editor-app">
+			<header class="editor-topbar">
+				<div class="editor-brand">
+					<span class="editor-brand-mark">TXG</span>
+					<div><strong>课程内容编辑器</strong><span>学习地图</span></div>
+				</div>
+				<div class="editor-topbar-actions">
+					<span class="editor-save-state" data-save-state><i></i>所有修改已保存</span>
+					<button class="editor-button is-quiet" type="button" data-undo disabled><span class="fas fa-undo" aria-hidden="true"></span>撤销</button>
+					<a class="editor-button is-quiet" href="../learning/index.html" target="_blank" rel="noopener"><span class="fas fa-external-link-alt" aria-hidden="true"></span>查看网站</a>
+					<button class="editor-button is-primary" type="button" data-save><span class="fas fa-save" aria-hidden="true"></span>保存到网站</button>
+				</div>
+			</header>
+
+			<div class="draft-banner" data-draft-banner hidden>
+				<span>检测到上次未保存的草稿。</span>
+				<div><button type="button" data-restore-draft>恢复草稿</button><button type="button" data-discard-draft>忽略</button></div>
+			</div>
+
+			<main class="editor-layout">
+				<section class="editor-canvas" aria-labelledby="editor-canvas-title">
+					<div class="editor-canvas-heading">
+						<div><h1 id="editor-canvas-title">学习地图</h1></div>
+						<button class="editor-button is-primary" type="button" data-add-course><span class="fas fa-plus" aria-hidden="true"></span>添加课程</button>
+					</div>
+
+					<div class="editor-tip"><span class="fas fa-mouse-pointer" aria-hidden="true"></span>直接点击卡片标题即可修改；拖动卡片左上角的手柄可以排序。</div>
+
+					<label class="editor-search">
+						<span class="fas fa-search" aria-hidden="true"></span>
+						<span class="sr-only">搜索课程</span>
+						<input type="search" placeholder="搜索课程名称" data-editor-search />
+					</label>
+
+					<div class="editor-course-grid" data-editor-course-grid></div>
+					<div class="editor-empty" data-editor-empty hidden>没有找到对应课程。</div>
+				</section>
+
+				<aside class="editor-inspector" aria-label="课程属性编辑区">
+					<div class="inspector-empty" data-inspector-empty>
+						<span class="fas fa-hand-pointer" aria-hidden="true"></span>
+						<h2>选择一张课程卡片</h2>
+						<p>详细信息会显示在这里。</p>
+					</div>
+
+					<form data-course-form hidden>
+						<div class="inspector-heading">
+							<div><span>当前课程</span><h2 data-inspector-title>课程名称</h2></div>
+							<a href="../learning/course-template.html" target="_blank" rel="noopener" data-preview-course>预览详情</a>
+						</div>
+
+						<div class="field-group">
+							<label>课程名称<input type="text" data-field="title" required /></label>
+						</div>
+
+						<div class="field-row">
+							<label>推荐学习阶段<input type="text" data-field="stage" placeholder="例如：大三" /></label>
+							<label>课程类别<input type="text" data-field="field" placeholder="例如：核心课程" /></label>
+						</div>
+						<div class="field-row">
+							<label>课程性质<input type="text" data-field="nature" placeholder="例如：专业核心课" /></label>
+							<label>建议学时<input type="text" data-field="hours" placeholder="例如：64 学时" /></label>
+						</div>
+
+						<div class="field-divider"><span>课程衔接</span></div>
+						<label>前置课程<small>每行一门课程</small><textarea rows="4" data-field="prerequisites" data-list-field="lines"></textarea></label>
+						<label>后续衔接课程<small>每行一门课程</small><textarea rows="4" data-field="followups" data-list-field="lines"></textarea></label>
+
+						<div class="field-divider"><span>课程内容</span></div>
+						<label>内容简介<textarea rows="8" data-field="content"></textarea></label>
+						<label>推荐教材<small>每行一本，格式：书名 | 作者与版本</small><textarea rows="5" data-field="textbooks" data-list-field="books"></textarea></label>
+
+						<div class="inspector-actions">
+							<button type="button" class="editor-button is-quiet" data-move-course="up"><span class="fas fa-arrow-up" aria-hidden="true"></span>上移</button>
+							<button type="button" class="editor-button is-quiet" data-move-course="down"><span class="fas fa-arrow-down" aria-hidden="true"></span>下移</button>
+							<button type="button" class="editor-button is-danger" data-delete-course><span class="fas fa-trash-alt" aria-hidden="true"></span>删除课程</button>
+						</div>
+					</form>
+				</aside>
+			</main>
+
+			<div class="editor-toast" role="status" aria-live="polite" data-toast hidden></div>
+		</div>
+
+		<script src="../assets/data/courses-data.js"></script>
+		<script src="editor.js"></script>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+* text=auto
+
+# 各平台启动器使用各自稳定的换行格式
+*.command text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.bat text eol=crlf
+
+# 网站文本文件统一使用 LF，避免跨平台产生无意义的整页改动
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+

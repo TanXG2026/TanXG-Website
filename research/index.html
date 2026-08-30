@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+	<head>
+		<title>科学研究 · 探星阁</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="stylesheet" href="../assets/css/framework.css" />
+		<noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<nav id="nav" aria-label="主导航">
+				<ul class="links">
+					<li><a href="../index.html">首页</a></li>
+					<li><a href="../learning/index.html">学习地图</a></li>
+					<li><a href="../courses/index.html">课程讲义</a></li>
+					<li class="active"><a href="index.html" aria-current="page">科学研究</a></li>
+					<li><a href="../visualizations/index.html">交互可视化</a></li>
+					<li><a href="../popsci/index.html">科普</a></li>
+					<li><a href="../community/index.html">科学社区</a></li>
+					<li><a href="../team/index.html">团队</a></li>
+				</ul>
+			</nav>
+
+			<main id="main" class="framework-main">
+				<section>
+					<header class="page-hero">
+						<p class="eyebrow">Research Fields</p>
+						<h1>科学研究</h1>
+						<p>六个领域同级展示，不使用折叠；点击领域卡片可筛选下方条目。</p>
+					</header>
+
+					<div class="section-block">
+						<div class="domain-grid">
+							<button class="domain-card reveal" type="button" data-domain-filter="aa" aria-pressed="false"><span class="domain-code">A&amp;A</span><h3>天文学与天体物理</h3></button>
+							<button class="domain-card reveal" type="button" data-domain-filter="grc" aria-pressed="false"><span class="domain-code">GR&amp;C</span><h3>引力与宇宙学</h3></button>
+							<button class="domain-card reveal" type="button" data-domain-filter="hep" aria-pressed="false"><span class="domain-code">HEP</span><h3>高能物理</h3></button>
+							<button class="domain-card reveal" type="button" data-domain-filter="amo" aria-pressed="false"><span class="domain-code">AMO</span><h3>原子、分子与光物理</h3></button>
+							<button class="domain-card reveal" type="button" data-domain-filter="cmp" aria-pressed="false"><span class="domain-code">CMP</span><h3>凝聚态物理</h3></button>
+							<button class="domain-card reveal" type="button" data-domain-filter="qst" aria-pressed="false"><span class="domain-code">QST</span><h3>量子科学与技术</h3></button>
+						</div>
+					</div>
+
+					<div class="section-block" id="research-list">
+						<header class="section-heading">
+							<p class="eyebrow">Research Notes</p>
+							<h2>专题内容</h2>
+						</header>
+
+						<div class="filter-bar" data-filter-group="research" data-filter-target="#research-cards" aria-label="研究领域筛选">
+							<button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部</button>
+							<button class="filter-button" type="button" data-filter="aa" aria-pressed="false">A&amp;A</button>
+							<button class="filter-button" type="button" data-filter="grc" aria-pressed="false">GR&amp;C</button>
+							<button class="filter-button" type="button" data-filter="hep" aria-pressed="false">HEP</button>
+							<button class="filter-button" type="button" data-filter="amo" aria-pressed="false">AMO</button>
+							<button class="filter-button" type="button" data-filter="cmp" aria-pressed="false">CMP</button>
+							<button class="filter-button" type="button" data-filter="qst" aria-pressed="false">QST</button>
+						</div>
+
+						<div id="research-cards" class="card-grid">
+							<a class="content-card filter-card" data-filter-card data-tags="aa" href="../content-template.html"><p class="card-kicker">A&amp;A</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">A&amp;A</span><span class="tag">专题讲义</span></div></a>
+							<a class="content-card filter-card" data-filter-card data-tags="grc" href="../content-template.html"><p class="card-kicker">GR&amp;C</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">GR&amp;C</span><span class="tag">专题讲义</span></div></a>
+							<a class="content-card filter-card" data-filter-card data-tags="hep" href="../content-template.html"><p class="card-kicker">HEP</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">HEP</span><span class="tag">专题讲义</span></div></a>
+							<a class="content-card filter-card" data-filter-card data-tags="amo" href="../content-template.html"><p class="card-kicker">AMO</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">AMO</span><span class="tag">专题讲义</span></div></a>
+							<a class="content-card filter-card" data-filter-card data-tags="cmp" href="../content-template.html"><p class="card-kicker">CMP</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">CMP</span><span class="tag">专题讲义</span></div></a>
+							<a class="content-card filter-card" data-filter-card data-tags="qst" href="../content-template.html"><p class="card-kicker">QST</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">QST</span><span class="tag">专题讲义</span></div></a>
+							<p class="empty-state" data-empty-state hidden>该分类暂无内容。</p>
+						</div>
+					</div>
+				</section>
+			</main>
+
+			<div id="copyright"><ul><li>&copy; TanXG</li><li>科学研究框架</li></ul></div>
+		</div>
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.scrollex.min.js"></script>
+		<script src="../assets/js/jquery.scrolly.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+		<script src="../assets/js/framework.js"></script>
+	</body>
+</html>

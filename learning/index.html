@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+	<head>
+		<title>学习地图 · 探星阁</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="stylesheet" href="../assets/css/framework.css" />
+		<noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+		<div id="wrapper">
+			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<nav id="nav" aria-label="主导航">
+				<ul class="links">
+					<li><a href="../index.html">首页</a></li>
+					<li class="active"><a href="index.html" aria-current="page">学习地图</a></li>
+					<li><a href="../courses/index.html">课程讲义</a></li>
+					<li><a href="../research/index.html">科学研究</a></li>
+					<li><a href="../visualizations/index.html">交互可视化</a></li>
+					<li><a href="../popsci/index.html">科普</a></li>
+					<li><a href="../community/index.html">科学社区</a></li>
+					<li><a href="../team/index.html">团队</a></li>
+				</ul>
+			</nav>
+
+			<main id="main" class="framework-main">
+				<section class="course-directory" aria-labelledby="course-directory-title">
+					<header class="page-hero course-directory-hero">
+						<h1 id="course-directory-title">学习地图</h1>
+						<p>搜索课程名称，查看课程定位、修读顺序与教材建议。</p>
+					</header>
+
+					<div class="course-search-panel" role="search" aria-label="搜索课程">
+						<label class="course-search-label" for="course-search">查找课程</label>
+						<div class="course-search-control">
+							<span class="icon solid fa-search" aria-hidden="true"></span>
+							<input id="course-search" type="search" placeholder="输入课程名称，例如：量子力学" autocomplete="off" data-course-search />
+							<button class="course-search-clear" type="button" data-course-search-clear hidden>清除</button>
+						</div>
+						<p class="course-search-status" aria-live="polite">正在载入课程…</p>
+					</div>
+
+					<div class="course-card-grid" data-course-list aria-live="polite"></div>
+
+					<div class="empty-state course-empty-state" data-course-empty hidden>
+						<h2>没有找到对应课程</h2>
+						<p>可以尝试缩短关键词，或搜索课程的其他常用名称。</p>
+					</div>
+
+					<noscript>
+						<div class="empty-state"><p>课程目录需要启用 JavaScript 才能显示。</p></div>
+					</noscript>
+				</section>
+			</main>
+
+			<div id="copyright"><ul><li>&copy; TanXG</li><li>学习地图</li></ul></div>
+		</div>
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/jquery.scrollex.min.js"></script>
+		<script src="../assets/js/jquery.scrolly.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+		<script src="../assets/data/courses-data.js"></script>
+		<script src="../assets/js/framework.js"></script>
+	</body>
+</html>
