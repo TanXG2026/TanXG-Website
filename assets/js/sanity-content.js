@@ -4,6 +4,8 @@
 	var PROJECT_ID = 'o9vxg32e';
 	var DATASET = 'production';
 	var API_VERSION = '2026-08-30';
+	var UI_TEXT = {};
+	var loadErrors = [];
 	var scriptUrl = document.currentScript ? new URL(document.currentScript.src, window.location.href) : new URL('assets/js/sanity-content.js', window.location.href);
 	var siteRootUrl = new URL('../../', scriptUrl);
 
@@ -22,6 +24,49 @@
 
 	function quote(value) {
 		return JSON.stringify(String(value || ''));
+	}
+
+	function valueAtPath(source, path) {
+		return String(path || '').split('.').reduce(function (value, key) {
+			return value && typeof value === 'object' ? value[key] : undefined;
+		}, source);
+	}
+
+	function uiText(path) {
+		var value = valueAtPath(UI_TEXT, path);
+		return value === undefined || value === null ? '' : String(value);
+	}
+
+	function applyUiSettings(settings) {
+		UI_TEXT = settings || {};
+		window.TANXG_UI_TEXT = UI_TEXT;
+
+		document.querySelectorAll('[data-ui-text]').forEach(function (element) {
+			element.textContent = uiText(element.getAttribute('data-ui-text'));
+		});
+		document.querySelectorAll('[data-ui-placeholder]').forEach(function (element) {
+			element.setAttribute('placeholder', uiText(element.getAttribute('data-ui-placeholder')));
+		});
+		document.querySelectorAll('[data-ui-alt]').forEach(function (element) {
+			element.setAttribute('alt', uiText(element.getAttribute('data-ui-alt')));
+		});
+		document.querySelectorAll('[data-ui-list]').forEach(function (element) {
+			var values = valueAtPath(UI_TEXT, element.getAttribute('data-ui-list'));
+			element.replaceChildren();
+			(Array.isArray(values) ? values : []).forEach(function (value) {
+				element.appendChild(createElement('li', '', value));
+			});
+		});
+
+		var description = document.querySelector('meta[name="description"]');
+		if (description) description.setAttribute('content', uiText('global.metaDescription'));
+	}
+
+	function loadUiSettings() {
+		return apiQuery('*[_id == "uiSettings-main"][0]').then(function (settings) {
+			if (!settings) throw new Error('Missing uiSettings-main');
+			applyUiSettings(settings);
+		});
 	}
 
 	function siteUrl(value) {
@@ -112,6 +157,7 @@
 			setText(hero, '[data-sanity-page-title]', page.title);
 			setText(hero, '[data-sanity-page-intro]', page.intro);
 			setText(hero, '[data-sanity-page-date]', formatDate(page.date));
+			if (page.title) document.title = page.title + ' · ' + uiText('global.titleSuffix');
 		});
 	}
 
@@ -132,7 +178,7 @@
 					copy.appendChild(createElement('p', '', paragraph));
 				});
 				if (settings.contactEmail) {
-					var contact = createElement('p', '', '联系邮箱：');
+					var contact = createElement('p', '', uiText('global.contactPrefix'));
 					var link = createElement('a', '', settings.contactEmail);
 					link.href = 'mailto:' + settings.contactEmail;
 					contact.appendChild(link);
@@ -146,11 +192,12 @@
 				settings.news.forEach(function (item) {
 					var card = createElement('article', 'home-news-card reveal');
 					card.appendChild(createElement('p', 'home-date', formatDate(item.date)));
-					card.appendChild(createElement('h2', '', item.title || '新闻'));
+					card.appendChild(createElement('h2', '', item.title || uiText('common.newsFallback')));
 					card.appendChild(createElement('p', '', item.summary || ''));
 					news.appendChild(card);
 				});
 			}
+			document.title = uiText('global.homeTitle');
 			notifyRendered();
 		});
 	}
@@ -159,8 +206,7 @@
 		if (!document.querySelector('[data-course-list], [data-course-template]')) return Promise.resolve();
 		var query = '*[_type == "course" && enabled != false] | order(order asc, title asc){"id": slug.current,title,stage,field,nature,hours,"content": summary,prerequisites,followups,textbooks[]{title,author}}';
 		return apiQuery(query).then(function (courses) {
-			if (!Array.isArray(courses) || !courses.length) return;
-			window.TANXG_COURSES = courses;
+			window.TANXG_COURSES = Array.isArray(courses) ? courses : [];
 			document.dispatchEvent(new CustomEvent('tanxg:courses-updated'));
 		});
 	}
@@ -174,16 +220,16 @@
 		if (coverUrl) {
 			var image = createElement('img', 'lecture-card-cover');
 			image.src = coverUrl;
-			image.alt = (lecture.title || '讲义') + '封面';
+			image.alt = (lecture.title || uiText('common.unnamedLecture')) + uiText('common.coverSuffix');
 			image.loading = 'lazy';
 			card.appendChild(image);
 		}
 		var body = createElement('div', 'lecture-card-body');
-		body.appendChild(createElement('p', 'card-kicker', lecture.term || '持续更新'));
-		body.appendChild(createElement('h3', '', lecture.title || '未命名讲义'));
+		body.appendChild(createElement('p', 'card-kicker', lecture.term || uiText('common.emptyValue')));
+		body.appendChild(createElement('h3', '', lecture.title || uiText('common.unnamedLecture')));
 		body.appendChild(createElement('p', '', lecture.summary || ''));
 		var tags = createElement('div', 'tag-row');
-		appendTags(tags, [lecture.level, lecture.language || 'PDF']);
+		appendTags(tags, [lecture.level, lecture.language || uiText('common.pdfLabel')]);
 		body.appendChild(tags);
 		card.appendChild(body);
 		return card;
@@ -200,7 +246,7 @@
 				container.replaceChildren();
 				if (!items.length) {
 					var empty = createElement('div', 'empty-state');
-					empty.appendChild(createElement('p', '', level + '讲义暂待添加。'));
+					empty.appendChild(createElement('p', '', level + uiText('lectures.emptySuffix')));
 					container.appendChild(empty);
 					return;
 				}
@@ -218,7 +264,7 @@
 		var params = new URLSearchParams(window.location.search);
 		var slugValue = root.getAttribute('data-lecture-slug') || params.get('slug');
 		if (!slugValue) return Promise.resolve();
-		var query = '*[_type == "lectureNote" && slug.current == ' + quote(slugValue) + '][0]{title,"slug":slug.current,level,term,language,summary,coverPath,"coverUrl":cover.asset->url,body,outline,downloads[]{label,filePath,"fileUrl":file.asset->url}}';
+		var query = '*[_type == "lectureNote" && slug.current == ' + quote(slugValue) + '][0]{title,"slug":slug.current,level,term,language,summary,coverPath,"coverUrl":cover.asset->url,body,outlineIntro,outline,feedback,downloads[]{label,filePath,"fileUrl":file.asset->url}}';
 		return apiQuery(query).then(function (lecture) {
 			if (!lecture) return;
 			setText(root, '[data-lecture-term]', lecture.term);
@@ -228,29 +274,39 @@
 			var coverUrl = lecture.coverUrl || siteUrl(lecture.coverPath);
 			if (cover && coverUrl) {
 				cover.src = coverUrl;
-				cover.alt = (lecture.title || '讲义') + '封面';
+				cover.alt = (lecture.title || uiText('common.unnamedLecture')) + uiText('common.coverSuffix');
+				cover.hidden = false;
 			}
 			appendTags(root.querySelector('[data-lecture-tags]'), [lecture.level, lecture.language]);
-			renderBlocks(root.querySelector('[data-lecture-body]'), lecture.body, lecture.summary || '内容待补充。');
+			renderBlocks(root.querySelector('[data-lecture-body]'), lecture.body, lecture.summary || uiText('lectures.summaryFallback'));
+			setText(root, '[data-lecture-outline-intro]', lecture.outlineIntro);
 
 			var outline = root.querySelector('[data-lecture-outline]');
-			if (outline && Array.isArray(lecture.outline)) {
+			if (outline) {
 				outline.replaceChildren();
-				lecture.outline.forEach(function (item) { outline.appendChild(createElement('li', '', item)); });
+				(Array.isArray(lecture.outline) ? lecture.outline : []).forEach(function (item) { outline.appendChild(createElement('li', '', item)); });
+				if (!outline.childNodes.length) outline.appendChild(createElement('li', '', uiText('lectures.outlineFallback')));
+			}
+
+			var feedbackSection = root.querySelector('[data-lecture-feedback-section]');
+			if (feedbackSection) {
+				feedbackSection.hidden = !Array.isArray(lecture.feedback) || lecture.feedback.length === 0;
+				if (!feedbackSection.hidden) renderBlocks(feedbackSection.querySelector('[data-lecture-feedback]'), lecture.feedback, '');
 			}
 
 			var downloads = root.querySelector('[data-lecture-downloads]');
-			if (downloads && Array.isArray(lecture.downloads)) {
+			if (downloads) {
 				downloads.replaceChildren();
-				lecture.downloads.forEach(function (download) {
-					var link = createElement('a', 'button primary', download.label || '下载文件');
+				(Array.isArray(lecture.downloads) ? lecture.downloads : []).forEach(function (download) {
+					var link = createElement('a', 'button primary', download.label || uiText('common.downloadFileLabel'));
 					link.href = download.fileUrl || siteUrl(download.filePath);
 					link.target = '_blank';
 					link.rel = 'noopener noreferrer';
 					downloads.appendChild(link);
 				});
+				if (!downloads.childNodes.length) downloads.appendChild(createElement('p', '', uiText('lectures.fileFallback')));
 			}
-			document.title = lecture.title + ' · 探星阁';
+			document.title = lecture.title + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});
 	}
@@ -287,7 +343,7 @@
 
 			var filters = document.querySelector('[data-sanity-research-filters]');
 			if (filters) {
-				filters.replaceChildren(filterButton('all', '全部', true));
+				filters.replaceChildren(filterButton('all', uiText('common.allLabel'), true));
 				domains.forEach(function (domain) { filters.appendChild(filterButton(domain.key, domain.code, false)); });
 			}
 
@@ -298,15 +354,15 @@
 				card.setAttribute('data-filter-card', '');
 				card.setAttribute('data-tags', domain.key || '');
 				card.href = article.externalUrl || siteUrl('content-template.html?type=research&slug=' + encodeURIComponent(article.slug));
-				card.appendChild(createElement('p', 'card-kicker', domain.code || '研究'));
-				card.appendChild(createElement('h3', '', article.title || '未命名专题'));
+				card.appendChild(createElement('p', 'card-kicker', domain.code || uiText('common.researchFallback')));
+				card.appendChild(createElement('h3', '', article.title || uiText('common.unnamedTopic')));
 				card.appendChild(createElement('p', '', article.summary || ''));
 				var tags = createElement('div', 'tag-row');
 				appendTags(tags, [domain.code].concat(article.tags || []));
 				card.appendChild(tags);
 				cardsContainer.appendChild(card);
 			});
-			var empty = createElement('p', 'empty-state', '该分类暂无内容。');
+			var empty = createElement('p', 'empty-state', uiText('research.emptyText'));
 			empty.hidden = true;
 			empty.setAttribute('data-empty-state', '');
 			cardsContainer.appendChild(empty);
@@ -343,7 +399,7 @@
 					if (coverUrl) {
 						var image = createElement('img', 'resource-card-cover');
 						image.src = coverUrl;
-						image.alt = item.title + '封面';
+						image.alt = item.title + uiText('common.coverSuffix');
 						image.loading = 'lazy';
 						card.appendChild(image);
 					}
@@ -351,7 +407,7 @@
 					body.appendChild(createElement('h3', '', item.title));
 					if (item.summary) body.appendChild(createElement('p', '', item.summary));
 					var tags = createElement('div', 'tag-row');
-					appendTags(tags, [item.category, 'PDF']);
+					appendTags(tags, [item.category, uiText('common.pdfLabel')]);
 					body.appendChild(tags);
 					card.appendChild(body);
 					grid.appendChild(card);
@@ -376,7 +432,7 @@
 			});
 			var filters = document.querySelector('[data-sanity-visualization-filters]');
 			if (filters) {
-				filters.replaceChildren(filterButton('all', '全部', true));
+				filters.replaceChildren(filterButton('all', uiText('common.allLabel'), true));
 				domains.forEach(function (domain) { filters.appendChild(filterButton(domain.key, domain.code, false)); });
 			}
 
@@ -390,19 +446,19 @@
 				if (item.previewUrl) {
 					var image = createElement('img', 'resource-card-cover');
 					image.src = item.previewUrl;
-					image.alt = item.title + '预览';
+					image.alt = item.title + uiText('common.previewSuffix');
 					card.appendChild(image);
 				} else {
-					card.appendChild(createElement('div', 'visual-placeholder', '交互预览区域'));
+					card.appendChild(createElement('div', 'visual-placeholder', uiText('visualizations.previewPlaceholder')));
 				}
-				card.appendChild(createElement('h3', '', item.title));
+				card.appendChild(createElement('h3', '', item.title || uiText('common.unnamedVisualization')));
 				card.appendChild(createElement('p', '', item.summary || ''));
 				var tags = createElement('div', 'tag-row');
 				appendTags(tags, (item.domains || []).map(function (domain) { return domain.code; }));
 				card.appendChild(tags);
 				cardsContainer.appendChild(card);
 			});
-			var empty = createElement('p', 'empty-state', '该分类暂无可视化项目。');
+			var empty = createElement('p', 'empty-state', uiText('visualizations.emptyText'));
 			empty.hidden = true;
 			empty.setAttribute('data-empty-state', '');
 			cardsContainer.appendChild(empty);
@@ -455,10 +511,10 @@
 				if (avatarUrl) {
 					var image = createElement('img', 'person-avatar');
 					image.src = avatarUrl;
-					image.alt = member.name + '头像';
+					image.alt = member.name + uiText('common.avatarSuffix');
 					card.appendChild(image);
 				} else {
-					card.appendChild(createElement('span', 'person-avatar', '成员 ' + String(index + 1).padStart(2, '0')));
+					card.appendChild(createElement('span', 'person-avatar', uiText('team.avatarPrefix') + ' ' + String(index + 1).padStart(2, '0')));
 				}
 				card.appendChild(createElement('h3', '', member.name));
 				card.appendChild(createElement('p', '', member.summary || member.role || ''));
@@ -488,21 +544,21 @@
 			setText(root, '[data-detail-title]', item.title);
 			setText(root, '[data-detail-summary]', item.summary);
 			var values = type === 'research'
-				? [['类型', item.domain && (item.domain.code || item.domain.title)], ['作者', item.author], ['难度', item.difficulty], ['更新', item.updatedAtText]]
-				: [['类型', item.section], ['作者', item.author], ['日期', formatDate(item.date)], ['标签', (item.tags || []).join('、')]];
+				? [[uiText('detail.typeLabel'), item.domain && (item.domain.code || item.domain.title)], [uiText('detail.authorLabel'), item.author], [uiText('detail.difficultyLabel'), item.difficulty], [uiText('detail.updatedLabel'), item.updatedAtText]]
+				: [[uiText('detail.typeLabel'), item.section], [uiText('detail.authorLabel'), item.author], [uiText('detail.dateLabel'), formatDate(item.date)], [uiText('detail.tagsLabel'), (item.tags || []).join('、')]];
 			root.querySelectorAll('[data-detail-meta]').forEach(function (meta, index) {
 				var value = values[index] || ['', ''];
 				setText(meta, 'strong', value[0]);
-				setText(meta, 'span', value[1] || '待补充');
+				setText(meta, 'span', value[1] || uiText('common.emptyValue'));
 			});
-			renderBlocks(root.querySelector('[data-detail-body]'), item.body, item.summary || '内容待补充。');
+			renderBlocks(root.querySelector('[data-detail-body]'), item.body, item.summary || uiText('detail.bodyFallback'));
 			appendTags(root.querySelector('[data-detail-tags]'), (item.domain ? [item.domain.code] : []).concat(item.tags || []));
 			var files = root.querySelector('[data-detail-files]');
 			if (files) {
 				files.replaceChildren();
 				var fileUrl = item.fileUrl || siteUrl(item.filePath);
 				if (fileUrl) {
-					var link = createElement('a', 'button primary', '打开附件');
+					var link = createElement('a', 'button primary', uiText('detail.openFileLabel'));
 					link.href = fileUrl;
 					link.target = '_blank';
 					link.rel = 'noopener noreferrer';
@@ -512,9 +568,9 @@
 			var back = root.querySelector('[data-detail-back]');
 			if (back) {
 				back.href = siteUrl(type === 'research' ? 'research/index.html' : 'community/index.html');
-				back.textContent = type === 'research' ? '← 返回科学研究' : '← 返回科学社区';
+				back.textContent = type === 'research' ? uiText('detail.backResearch') : uiText('detail.backCommunity');
 			}
-			document.title = item.title + ' · 探星阁';
+			document.title = item.title + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});
 	}
@@ -534,24 +590,24 @@
 			if (avatar && avatarUrl) {
 				var image = createElement('img', 'person-avatar');
 				image.src = avatarUrl;
-				image.alt = member.name + '头像';
+				image.alt = member.name + uiText('common.avatarSuffix');
 				avatar.replaceWith(image);
 			}
 			appendTags(root.querySelector('[data-member-tags]'), member.tags || []);
-			renderBlocks(root.querySelector('[data-member-bio]'), member.bio, member.summary || '待填写。');
-			renderBlocks(root.querySelector('[data-member-education]'), member.education, '待填写。');
-			renderBlocks(root.querySelector('[data-member-research]'), member.researchInterests, '待填写。');
+			renderBlocks(root.querySelector('[data-member-bio]'), member.bio, member.summary || uiText('common.emptyValue'));
+			renderBlocks(root.querySelector('[data-member-education]'), member.education, uiText('common.emptyValue'));
+			renderBlocks(root.querySelector('[data-member-research]'), member.researchInterests, uiText('common.emptyValue'));
 			var links = root.querySelector('[data-member-links]');
 			if (links) {
 				links.replaceChildren();
 				(member.contentLinks || []).forEach(function (item) {
-					var link = createElement('a', 'button', item.label || '查看内容');
+					var link = createElement('a', 'button', item.label || uiText('common.viewContentLabel'));
 					link.href = siteUrl(item.url);
 					links.appendChild(link);
 				});
-				if (!links.childNodes.length) links.appendChild(createElement('p', '', '内容待添加。'));
+				if (!links.childNodes.length) links.appendChild(createElement('p', '', uiText('team.emptyLinks')));
 			}
-			document.title = member.name + ' · 团队 · 探星阁';
+			document.title = member.name + ' · ' + uiText('global.navTeam') + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});
 	}
@@ -567,50 +623,67 @@
 			setText(root, '[data-visual-title]', item.title);
 			setText(root, '[data-visual-summary]', item.summary);
 			var values = [
-				['领域', (item.domains || []).map(function (domain) { return domain.code; }).join('、')],
-				['难度', item.difficulty],
-				['作者', item.author],
-				['关联课程', (item.relatedCourses || []).join('、')],
+				[uiText('visualizations.domainLabel'), (item.domains || []).map(function (domain) { return domain.code; }).join('、')],
+				[uiText('visualizations.difficultyLabel'), item.difficulty],
+				[uiText('visualizations.authorLabel'), item.author],
+				[uiText('visualizations.relatedCoursesLabel'), (item.relatedCourses || []).join('、')],
 			];
 			root.querySelectorAll('[data-visual-meta]').forEach(function (meta, index) {
 				setText(meta, 'strong', values[index][0]);
-				setText(meta, 'span', values[index][1] || '待补充');
+				setText(meta, 'span', values[index][1] || uiText('common.emptyValue'));
 			});
 			var frame = root.querySelector('[data-visual-frame]');
 			var open = root.querySelector('[data-visual-open]');
 			var source = item.externalUrl || siteUrl(item.sitePath);
-			if (frame && source) frame.src = source;
+			if (frame) {
+				frame.title = item.title || uiText('common.unnamedVisualization');
+				if (source) frame.src = source;
+			}
 			if (open && source) open.href = source;
-			renderBlocks(root.querySelector('[data-visual-instructions]'), item.instructions, '待填写。');
-			renderBlocks(root.querySelector('[data-visual-principles]'), item.principles, '待填写。');
-			renderBlocks(root.querySelector('[data-visual-related]'), item.relatedText, '内容待添加。');
-			document.title = item.title + ' · 可视化实验室 · 探星阁';
+			renderBlocks(root.querySelector('[data-visual-instructions]'), item.instructions, uiText('common.emptyValue'));
+			renderBlocks(root.querySelector('[data-visual-principles]'), item.principles, uiText('common.emptyValue'));
+			renderBlocks(root.querySelector('[data-visual-related]'), item.relatedText, uiText('team.emptyLinks'));
+			document.title = item.title + ' · ' + uiText('global.navVisualizations') + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});
 	}
 
 	function safely(loader) {
 		return Promise.resolve().then(loader).catch(function (error) {
-			console.warn('[TanXG Content] 使用本地备用内容：', error);
+			loadErrors.push(error);
+			console.warn('[TanXG Content] 内容加载失败：', error);
 		});
 	}
 
+	function showLoadError(error) {
+		console.warn('[TanXG Content] 无法载入页面：', error);
+		var main = document.querySelector('#main');
+		if (!main) return;
+		var state = createElement('div', 'empty-state', uiText('common.loadError') || '内容加载失败，请刷新页面重试。');
+		main.replaceChildren(state);
+	}
+
 	function refreshAll() {
-		return Promise.all([
-			safely(loadPageSettings),
-			safely(loadHome),
-			safely(loadCourses),
-			safely(loadLectureList),
-			safely(loadLectureDetail),
-			safely(loadResearch),
-			safely(loadPopularScience),
-			safely(loadVisualizations),
-			safely(loadCommunity),
-			safely(loadTeam),
-			safely(loadContentDetail),
-			safely(loadMemberDetail),
-			safely(loadVisualizationDetail),
-		]);
+		loadErrors = [];
+		return loadUiSettings().then(function () {
+			return Promise.all([
+				safely(loadPageSettings),
+				safely(loadHome),
+				safely(loadCourses),
+				safely(loadLectureList),
+				safely(loadLectureDetail),
+				safely(loadResearch),
+				safely(loadPopularScience),
+				safely(loadVisualizations),
+				safely(loadCommunity),
+				safely(loadTeam),
+				safely(loadContentDetail),
+				safely(loadMemberDetail),
+				safely(loadVisualizationDetail),
+			]);
+		}).then(function () {
+			if (loadErrors.length) showLoadError(loadErrors[0]);
+		});
 	}
 
 	function finishContentLoading() {
@@ -629,6 +702,9 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
-		refreshAll().then(finishContentLoading, finishContentLoading);
+		refreshAll().then(finishContentLoading, function (error) {
+			showLoadError(error);
+			finishContentLoading();
+		});
 	});
 })();

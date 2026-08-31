@@ -1,9 +1,10 @@
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 	<head>
-		<title>可视化实验室 · 探星阁</title>
+		<title></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
 		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
 		<link rel="stylesheet" href="../assets/css/framework.css" />
@@ -12,32 +13,20 @@
 	</head>
 	<body class="is-preload">
 		<div id="wrapper">
-			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<header id="header"><a href="../index.html" class="logo" data-ui-text="global.brand"></a></header>
 			<nav id="nav" aria-label="主导航">
 				<ul class="links">
-					<li><a href="../index.html">首页</a></li><li><a href="../learning/index.html">课程检索</a></li><li><a href="../courses/index.html">课程讲义</a></li><li><a href="../research/index.html">科学研究</a></li>
-					<li class="active"><a href="index.html" aria-current="page">可视化实验室</a></li><li><a href="../popsci/index.html">科普</a></li><li><a href="../community/index.html">科学社区</a></li><li><a href="../team/index.html">团队</a></li>
+					<li><a href="../index.html" data-ui-text="global.navHome"></a></li><li><a href="../learning/index.html" data-ui-text="global.navLearning"></a></li><li><a href="../courses/index.html" data-ui-text="global.navCourses"></a></li><li><a href="../research/index.html" data-ui-text="global.navResearch"></a></li>
+					<li class="active"><a href="index.html" aria-current="page" data-ui-text="global.navVisualizations"></a></li><li><a href="../popsci/index.html" data-ui-text="global.navPopsci"></a></li><li><a href="../community/index.html" data-ui-text="global.navCommunity"></a></li><li><a href="../team/index.html" data-ui-text="global.navTeam"></a></li>
 				</ul>
 			</nav>
 
 			<main id="main" class="framework-main">
 				<section>
-					<header class="page-hero" data-sanity-page="visualizations"><h1 data-sanity-page-title>可视化实验室</h1><p data-sanity-page-intro>交互页面与科学演示。</p></header>
+					<header class="page-hero" data-sanity-page="visualizations"><h1 data-sanity-page-title></h1><p data-sanity-page-intro></p></header>
 					<div class="section-block">
-						<div class="filter-bar" data-filter-group="visual" data-filter-target="#visual-cards" data-sanity-visualization-filters aria-label="可视化分类筛选">
-							<button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部</button>
-							<button class="filter-button" type="button" data-filter="aa" aria-pressed="false">A&amp;A</button>
-							<button class="filter-button" type="button" data-filter="grc" aria-pressed="false">GR&amp;C</button>
-							<button class="filter-button" type="button" data-filter="amo" aria-pressed="false">AMO</button>
-							<button class="filter-button" type="button" data-filter="cmp" aria-pressed="false">CMP</button>
-							<button class="filter-button" type="button" data-filter="qst" aria-pressed="false">QST</button>
-						</div>
-						<div id="visual-cards" class="card-grid" data-sanity-visualizations>
-							<a class="content-card filter-card reveal" data-filter-card data-tags="aa grc" href="../visualization-template.html"><div class="visual-placeholder">交互预览区域</div><h3>可视化标题占位</h3><p>操作说明与关联课程位置。</p><div class="tag-row"><span class="tag">A&amp;A</span><span class="tag">GR&amp;C</span></div></a>
-							<a class="content-card filter-card reveal" data-filter-card data-tags="amo qst" href="../visualization-template.html"><div class="visual-placeholder">交互预览区域</div><h3>可视化标题占位</h3><p>操作说明与关联课程位置。</p><div class="tag-row"><span class="tag">AMO</span><span class="tag">QST</span></div></a>
-							<a class="content-card filter-card reveal" data-filter-card data-tags="cmp qst" href="../visualization-template.html"><div class="visual-placeholder">交互预览区域</div><h3>可视化标题占位</h3><p>操作说明与关联课程位置。</p><div class="tag-row"><span class="tag">CMP</span><span class="tag">QST</span></div></a>
-							<p class="empty-state" data-empty-state hidden>该分类暂无可视化项目。</p>
-						</div>
+						<div class="filter-bar" data-filter-group="visual" data-filter-target="#visual-cards" data-sanity-visualization-filters aria-label="可视化分类筛选"></div>
+						<div id="visual-cards" class="card-grid" data-sanity-visualizations></div>
 					</div>
 				</section>
 			</main>

@@ -14,6 +14,7 @@ const API_VERSION = '2026-08-31'
 
 const PUBLISHABLE_TYPES = [
   'siteSettings',
+  'uiSettings',
   'pageSettings',
   'course',
   'lectureNote',

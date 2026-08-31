@@ -29,7 +29,7 @@ html.sanity-loading #main > * {
 
 html.sanity-loading #main::before {
 	color: var(--framework-muted);
-	content: "正在加载最新内容…";
+	content: "加载中...";
 	font-family: "Source Sans Pro", Helvetica, sans-serif;
 	font-size: 0.9rem;
 	font-weight: 700;

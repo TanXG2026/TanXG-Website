@@ -1,9 +1,10 @@
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 	<head>
-		<title>科学研究 · 探星阁</title>
+		<title></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
 		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
 		<link rel="stylesheet" href="../assets/css/framework.css" />
@@ -12,62 +13,39 @@
 	</head>
 	<body class="is-preload">
 		<div id="wrapper">
-			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<header id="header"><a href="../index.html" class="logo" data-ui-text="global.brand"></a></header>
 			<nav id="nav" aria-label="主导航">
 				<ul class="links">
-					<li><a href="../index.html">首页</a></li>
-					<li><a href="../learning/index.html">课程检索</a></li>
-					<li><a href="../courses/index.html">课程讲义</a></li>
-					<li class="active"><a href="index.html" aria-current="page">科学研究</a></li>
-					<li><a href="../visualizations/index.html">可视化实验室</a></li>
-					<li><a href="../popsci/index.html">科普</a></li>
-					<li><a href="../community/index.html">科学社区</a></li>
-					<li><a href="../team/index.html">团队</a></li>
+					<li><a href="../index.html" data-ui-text="global.navHome"></a></li>
+					<li><a href="../learning/index.html" data-ui-text="global.navLearning"></a></li>
+					<li><a href="../courses/index.html" data-ui-text="global.navCourses"></a></li>
+					<li class="active"><a href="index.html" aria-current="page" data-ui-text="global.navResearch"></a></li>
+					<li><a href="../visualizations/index.html" data-ui-text="global.navVisualizations"></a></li>
+					<li><a href="../popsci/index.html" data-ui-text="global.navPopsci"></a></li>
+					<li><a href="../community/index.html" data-ui-text="global.navCommunity"></a></li>
+					<li><a href="../team/index.html" data-ui-text="global.navTeam"></a></li>
 				</ul>
 			</nav>
 
 			<main id="main" class="framework-main">
 				<section>
 					<header class="page-hero" data-sanity-page="research">
-						<h1 data-sanity-page-title>科学研究</h1>
-						<p data-sanity-page-intro>六个研究领域与专题内容。</p>
+						<h1 data-sanity-page-title></h1>
+						<p data-sanity-page-intro></p>
 					</header>
 
 					<div class="section-block">
-						<div class="domain-grid" data-sanity-research-domains>
-							<button class="domain-card reveal" type="button" data-domain-filter="aa" aria-pressed="false"><span class="domain-code">A&amp;A</span><h3>天文学与天体物理</h3></button>
-							<button class="domain-card reveal" type="button" data-domain-filter="grc" aria-pressed="false"><span class="domain-code">GR&amp;C</span><h3>引力与宇宙学</h3></button>
-							<button class="domain-card reveal" type="button" data-domain-filter="hep" aria-pressed="false"><span class="domain-code">HEP</span><h3>高能物理</h3></button>
-							<button class="domain-card reveal" type="button" data-domain-filter="amo" aria-pressed="false"><span class="domain-code">AMO</span><h3>原子、分子与光物理</h3></button>
-							<button class="domain-card reveal" type="button" data-domain-filter="cmp" aria-pressed="false"><span class="domain-code">CMP</span><h3>凝聚态物理</h3></button>
-							<button class="domain-card reveal" type="button" data-domain-filter="qst" aria-pressed="false"><span class="domain-code">QST</span><h3>量子科学与技术</h3></button>
-						</div>
+						<div class="domain-grid" data-sanity-research-domains></div>
 					</div>
 
 					<div class="section-block" id="research-list">
 						<header class="section-heading">
-							<h2>专题内容</h2>
+							<h2 data-ui-text="research.topicsHeading"></h2>
 						</header>
 
-						<div class="filter-bar" data-filter-group="research" data-filter-target="#research-cards" data-sanity-research-filters aria-label="研究领域筛选">
-							<button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true">全部</button>
-							<button class="filter-button" type="button" data-filter="aa" aria-pressed="false">A&amp;A</button>
-							<button class="filter-button" type="button" data-filter="grc" aria-pressed="false">GR&amp;C</button>
-							<button class="filter-button" type="button" data-filter="hep" aria-pressed="false">HEP</button>
-							<button class="filter-button" type="button" data-filter="amo" aria-pressed="false">AMO</button>
-							<button class="filter-button" type="button" data-filter="cmp" aria-pressed="false">CMP</button>
-							<button class="filter-button" type="button" data-filter="qst" aria-pressed="false">QST</button>
-						</div>
+						<div class="filter-bar" data-filter-group="research" data-filter-target="#research-cards" data-sanity-research-filters aria-label="研究领域筛选"></div>
 
-						<div id="research-cards" class="card-grid" data-sanity-research-cards>
-							<a class="content-card filter-card" data-filter-card data-tags="aa" href="../content-template.html"><p class="card-kicker">A&amp;A</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">A&amp;A</span><span class="tag">专题讲义</span></div></a>
-							<a class="content-card filter-card" data-filter-card data-tags="grc" href="../content-template.html"><p class="card-kicker">GR&amp;C</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">GR&amp;C</span><span class="tag">专题讲义</span></div></a>
-							<a class="content-card filter-card" data-filter-card data-tags="hep" href="../content-template.html"><p class="card-kicker">HEP</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">HEP</span><span class="tag">专题讲义</span></div></a>
-							<a class="content-card filter-card" data-filter-card data-tags="amo" href="../content-template.html"><p class="card-kicker">AMO</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">AMO</span><span class="tag">专题讲义</span></div></a>
-							<a class="content-card filter-card" data-filter-card data-tags="cmp" href="../content-template.html"><p class="card-kicker">CMP</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">CMP</span><span class="tag">专题讲义</span></div></a>
-							<a class="content-card filter-card" data-filter-card data-tags="qst" href="../content-template.html"><p class="card-kicker">QST</p><h3>专题标题占位</h3><p>摘要与作者位置。</p><div class="tag-row"><span class="tag">QST</span><span class="tag">专题讲义</span></div></a>
-							<p class="empty-state" data-empty-state hidden>该分类暂无内容。</p>
-						</div>
+						<div id="research-cards" class="card-grid" data-sanity-research-cards></div>
 					</div>
 				</section>
 			</main>

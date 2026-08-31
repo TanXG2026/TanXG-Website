@@ -1,6 +1,14 @@
 (function () {
 	'use strict';
 
+	function uiText(path) {
+		var source = window.TANXG_UI_TEXT || {};
+		var value = String(path || '').split('.').reduce(function (current, key) {
+			return current && typeof current === 'object' ? current[key] : undefined;
+		}, source);
+		return value === undefined || value === null ? '' : String(value);
+	}
+
 	function initReveal() {
 		var items = document.querySelectorAll('.reveal');
 		if (!items.length) return;
@@ -144,8 +152,8 @@
 		card.setAttribute('data-course-card', '');
 		card.setAttribute('data-course-search-text', searchParts.join(' '));
 
-		card.appendChild(createTextElement('p', 'card-kicker', course.field || '课程'));
-		card.appendChild(createTextElement('h2', '', course.title || '未命名课程'));
+		card.appendChild(createTextElement('p', 'card-kicker', course.field || uiText('learning.courseFallback')));
+		card.appendChild(createTextElement('h2', '', course.title || uiText('learning.courseFallback')));
 
 		var tags = createTextElement('div', 'tag-row', '');
 		[course.stage].filter(Boolean).forEach(function (tag) {
@@ -169,7 +177,7 @@
 		if (!courses.length) {
 			var status = document.querySelector('.course-search-status');
 			var empty = document.querySelector('[data-course-empty]');
-			if (status) status.textContent = '课程资料暂时无法载入';
+			if (status) status.textContent = uiText('learning.unavailableText');
 			if (empty) empty.hidden = false;
 		}
 	}
@@ -203,7 +211,9 @@
 			});
 
 			if (status) {
-				status.textContent = query ? '找到 ' + visibleCount + ' 门课程' : visibleCount + ' 门课程';
+				status.textContent = query
+					? uiText('learning.foundPrefix') + ' ' + visibleCount + ' ' + uiText('learning.countSuffix')
+					: visibleCount + ' ' + uiText('learning.countSuffix');
 			}
 			if (empty) empty.hidden = visibleCount !== 0;
 			if (clearButton) clearButton.hidden = !query;
@@ -295,7 +305,7 @@
 
 		function setText(selector, value, fallback) {
 			document.querySelectorAll(selector).forEach(function (item) {
-				item.textContent = value || fallback || '待补充';
+				item.textContent = value || fallback || uiText('common.emptyValue');
 			});
 		}
 
@@ -303,13 +313,13 @@
 			var container = document.querySelector(selector);
 			if (!container) return;
 			container.replaceChildren();
-			(values && values.length ? values : ['待补充']).forEach(function (value) {
+			(values && values.length ? values : [uiText('common.emptyValue')]).forEach(function (value) {
 				container.appendChild(renderer(value));
 			});
 		}
 
 		function renderPathway(selector, values) {
-			var items = values && values.length ? values : ['待补充'];
+			var items = values && values.length ? values : [uiText('common.emptyValue')];
 			var container = document.querySelector(selector);
 			if (!container) return;
 			container.classList.toggle('is-single', items.length === 1);
@@ -320,11 +330,11 @@
 			});
 		}
 
-		setText('[data-course-title]', selected.title, '课程名称');
+		setText('[data-course-title]', selected.title, uiText('learning.courseFallback'));
 		setText('[data-course-stage]', selected.stage);
 		setText('[data-course-nature]', selected.nature);
 		setText('[data-course-hours]', selected.hours);
-		setText('[data-course-content]', selected.content, '内容简介待补充。');
+		setText('[data-course-content]', selected.content, uiText('learning.summaryFallback'));
 
 		renderPathway('[data-course-prerequisites]', selected.prerequisites);
 		renderPathway('[data-course-followups]', selected.followups);
@@ -334,12 +344,12 @@
 				item.appendChild(createTextElement('strong', '', book));
 				return item;
 			}
-			item.appendChild(createTextElement('strong', '', book.title || '教材待补充'));
-			item.appendChild(createTextElement('span', '', book.author || '作者与版本待补充'));
+			item.appendChild(createTextElement('strong', '', book.title || uiText('learning.textbookFallback')));
+			item.appendChild(createTextElement('span', '', book.author || uiText('learning.authorFallback')));
 			return item;
 		});
 
-		document.title = (selected.title || '课程详情') + ' · 课程检索 · 探星阁';
+		document.title = (selected.title || uiText('learning.courseFallback')) + ' · ' + uiText('global.navLearning') + ' · ' + uiText('global.titleSuffix');
 	}
 
 	function initFullscreen() {

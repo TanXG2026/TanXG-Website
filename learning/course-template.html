@@ -1,9 +1,10 @@
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 	<head>
-		<title>课程详情 · 探星阁</title>
+		<title></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
 		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
 		<link rel="stylesheet" href="../assets/css/framework.css" />
@@ -12,56 +13,52 @@
 	</head>
 	<body class="is-preload">
 		<div id="wrapper">
-			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<header id="header"><a href="../index.html" class="logo" data-ui-text="global.brand"></a></header>
 			<nav id="nav" aria-label="主导航">
 				<ul class="links">
-					<li><a href="../index.html">首页</a></li>
-					<li class="active"><a href="index.html" aria-current="page">课程检索</a></li>
-					<li><a href="../courses/index.html">课程讲义</a></li>
-					<li><a href="../research/index.html">科学研究</a></li>
-					<li><a href="../visualizations/index.html">可视化实验室</a></li>
-					<li><a href="../popsci/index.html">科普</a></li>
-					<li><a href="../community/index.html">科学社区</a></li>
-					<li><a href="../team/index.html">团队</a></li>
+					<li><a href="../index.html" data-ui-text="global.navHome"></a></li>
+					<li class="active"><a href="index.html" aria-current="page" data-ui-text="global.navLearning"></a></li>
+					<li><a href="../courses/index.html" data-ui-text="global.navCourses"></a></li>
+					<li><a href="../research/index.html" data-ui-text="global.navResearch"></a></li>
+					<li><a href="../visualizations/index.html" data-ui-text="global.navVisualizations"></a></li>
+					<li><a href="../popsci/index.html" data-ui-text="global.navPopsci"></a></li>
+					<li><a href="../community/index.html" data-ui-text="global.navCommunity"></a></li>
+					<li><a href="../team/index.html" data-ui-text="global.navTeam"></a></li>
 				</ul>
 			</nav>
 
 			<main id="main" class="framework-main">
 				<article class="course-detail" data-course-template>
-					<a class="back-link" href="index.html" data-course-back>← 返回</a>
+					<a class="back-link" href="index.html" data-course-back data-ui-text="learning.backLabel"></a>
 
 					<header class="page-hero course-detail-hero">
-						<h1 data-course-title>课程名称</h1>
+						<h1 data-course-title></h1>
 					</header>
 
 					<section class="course-facts" aria-label="课程基本信息">
-						<div><span>推荐学习阶段</span><strong data-course-stage>待补充</strong></div>
-						<div><span>课程性质</span><strong data-course-nature>待补充</strong></div>
-						<div><span>建议学时</span><strong data-course-hours>待补充</strong></div>
+						<div><span data-ui-text="learning.stageLabel"></span><strong data-course-stage></strong></div>
+						<div><span data-ui-text="learning.natureLabel"></span><strong data-course-nature></strong></div>
+						<div><span data-ui-text="learning.hoursLabel"></span><strong data-course-hours></strong></div>
 					</section>
 
 					<section class="section-block course-pathway-section">
 						<div class="course-pathway-tree" aria-label="课程先修与后续关系">
-							<div class="pathway-node-list pathway-prerequisite-list" data-course-prerequisites>
-								<span class="pathway-node">待补充</span>
-							</div>
+							<div class="pathway-node-list pathway-prerequisite-list" data-course-prerequisites></div>
 							<span class="pathway-connector pathway-connector-incoming" aria-hidden="true"></span>
-							<div class="pathway-current" data-course-title>当前课程</div>
+							<div class="pathway-current" data-course-title></div>
 							<span class="pathway-connector pathway-connector-outgoing" aria-hidden="true"></span>
-							<div class="pathway-node-list pathway-followup-list" data-course-followups>
-								<span class="pathway-node">待补充</span>
-							</div>
+							<div class="pathway-node-list pathway-followup-list" data-course-followups></div>
 						</div>
 					</section>
 
 					<section class="section-block course-detail-stack">
 						<div class="course-detail-panel">
-							<h2>课程简介</h2>
-							<div class="course-content-text" data-course-content>内容简介待补充。</div>
+							<h2 data-ui-text="learning.summaryHeading"></h2>
+							<div class="course-content-text" data-course-content></div>
 						</div>
 						<div class="course-detail-panel">
-							<h2>推荐教材与参考书</h2>
-							<ol class="textbook-list" data-course-textbooks><li><strong>教材待补充</strong><span>作者与版本信息</span></li></ol>
+							<h2 data-ui-text="learning.textbooksHeading"></h2>
+							<ol class="textbook-list" data-course-textbooks></ol>
 						</div>
 					</section>
 				</article>
@@ -75,7 +72,6 @@
 		<script src="../assets/js/breakpoints.min.js"></script>
 		<script src="../assets/js/util.js"></script>
 		<script src="../assets/js/main.js"></script>
-		<script src="../assets/data/courses-data.js"></script>
 		<script src="../assets/js/sanity-content.js"></script>
 		<script src="../assets/js/framework.js"></script>
 	</body>

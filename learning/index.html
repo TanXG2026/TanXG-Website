@@ -1,9 +1,10 @@
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 	<head>
-		<title>课程检索 · 探星阁</title>
+		<title></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="" />
 		<link rel="icon" href="../logo.jpg" type="image/jpeg" />
 		<link rel="stylesheet" href="../assets/css/main.css" />
 		<link rel="stylesheet" href="../assets/css/framework.css" />
@@ -12,47 +13,43 @@
 	</head>
 	<body class="is-preload">
 		<div id="wrapper">
-			<header id="header"><a href="../index.html" class="logo">TanXG · P&amp;A</a></header>
+			<header id="header"><a href="../index.html" class="logo" data-ui-text="global.brand"></a></header>
 			<nav id="nav" aria-label="主导航">
 				<ul class="links">
-					<li><a href="../index.html">首页</a></li>
-					<li class="active"><a href="index.html" aria-current="page">课程检索</a></li>
-					<li><a href="../courses/index.html">课程讲义</a></li>
-					<li><a href="../research/index.html">科学研究</a></li>
-					<li><a href="../visualizations/index.html">可视化实验室</a></li>
-					<li><a href="../popsci/index.html">科普</a></li>
-					<li><a href="../community/index.html">科学社区</a></li>
-					<li><a href="../team/index.html">团队</a></li>
+					<li><a href="../index.html" data-ui-text="global.navHome"></a></li>
+					<li class="active"><a href="index.html" aria-current="page" data-ui-text="global.navLearning"></a></li>
+					<li><a href="../courses/index.html" data-ui-text="global.navCourses"></a></li>
+					<li><a href="../research/index.html" data-ui-text="global.navResearch"></a></li>
+					<li><a href="../visualizations/index.html" data-ui-text="global.navVisualizations"></a></li>
+					<li><a href="../popsci/index.html" data-ui-text="global.navPopsci"></a></li>
+					<li><a href="../community/index.html" data-ui-text="global.navCommunity"></a></li>
+					<li><a href="../team/index.html" data-ui-text="global.navTeam"></a></li>
 				</ul>
 			</nav>
 
 			<main id="main" class="framework-main">
 				<section class="course-directory" aria-labelledby="course-directory-title">
 					<header class="page-hero course-directory-hero" data-sanity-page="learning">
-						<h1 id="course-directory-title" data-sanity-page-title>课程检索</h1>
-						<p data-sanity-page-intro>搜索课程名称，查看课程定位、修读顺序与教材建议。</p>
+						<h1 id="course-directory-title" data-sanity-page-title></h1>
+						<p data-sanity-page-intro></p>
 					</header>
 
 					<div class="course-search-panel" role="search" aria-label="搜索课程">
-						<label class="course-search-label" for="course-search">查找课程</label>
+						<label class="course-search-label" for="course-search" data-ui-text="learning.searchLabel"></label>
 						<div class="course-search-control">
 							<span class="icon solid fa-search" aria-hidden="true"></span>
-							<input id="course-search" type="search" placeholder="输入课程名称，例如：量子力学" autocomplete="off" data-course-search />
-							<button class="course-search-clear" type="button" data-course-search-clear hidden>清除</button>
+							<input id="course-search" type="search" placeholder="" autocomplete="off" data-course-search data-ui-placeholder="learning.searchPlaceholder" />
+							<button class="course-search-clear" type="button" data-course-search-clear data-ui-text="learning.clearLabel" hidden></button>
 						</div>
-						<p class="course-search-status" aria-live="polite">正在载入课程…</p>
+						<p class="course-search-status" aria-live="polite" data-ui-text="learning.loadingStatus"></p>
 					</div>
 
 					<div class="course-card-grid" data-course-list aria-live="polite"></div>
 
 					<div class="empty-state course-empty-state" data-course-empty hidden>
-						<h2>没有找到对应课程</h2>
-						<p>可以尝试缩短关键词，或搜索课程的其他常用名称。</p>
+						<h2 data-ui-text="learning.noResultsTitle"></h2>
+						<p data-ui-text="learning.noResultsText"></p>
 					</div>
-
-					<noscript>
-						<div class="empty-state"><p>课程目录需要启用 JavaScript 才能显示。</p></div>
-					</noscript>
 				</section>
 			</main>
 
@@ -64,7 +61,6 @@
 		<script src="../assets/js/breakpoints.min.js"></script>
 		<script src="../assets/js/util.js"></script>
 		<script src="../assets/js/main.js"></script>
-		<script src="../assets/data/courses-data.js"></script>
 		<script src="../assets/js/sanity-content.js"></script>
 		<script src="../assets/js/framework.js"></script>
 	</body>
