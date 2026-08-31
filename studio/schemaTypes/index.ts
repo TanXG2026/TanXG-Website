@@ -74,6 +74,8 @@ const pageSettings = defineType({
       name: 'pageKey',
       title: '对应页面',
       type: 'string',
+      hidden: true,
+      readOnly: true,
       options: {
         list: [
           {title: '课程检索', value: 'learning'},
