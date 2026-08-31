@@ -613,11 +613,22 @@
 		]);
 	}
 
+	function finishContentLoading() {
+		if (typeof window.TANXG_FINISH_CONTENT_LOADING === 'function') {
+			window.TANXG_FINISH_CONTENT_LOADING();
+			return;
+		}
+		document.documentElement.classList.remove('sanity-loading');
+		document.documentElement.classList.add('sanity-ready');
+	}
+
 	window.TANXG_SANITY = {
 		projectId: PROJECT_ID,
 		dataset: DATASET,
 		refresh: refreshAll,
 	};
 
-	document.addEventListener('DOMContentLoaded', refreshAll);
+	document.addEventListener('DOMContentLoaded', function () {
+		refreshAll().then(finishContentLoading, finishContentLoading);
+	});
 })();

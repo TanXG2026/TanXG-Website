@@ -18,6 +18,48 @@ body {
 	color: var(--framework-ink);
 }
 
+html.sanity-loading #main {
+	min-height: 30rem;
+	position: relative;
+}
+
+html.sanity-loading #main > * {
+	visibility: hidden !important;
+}
+
+html.sanity-loading #main::before {
+	color: var(--framework-muted);
+	content: "正在加载最新内容…";
+	font-family: "Source Sans Pro", Helvetica, sans-serif;
+	font-size: 0.9rem;
+	font-weight: 700;
+	left: 50%;
+	letter-spacing: 0.08em;
+	position: absolute;
+	top: 8rem;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+html.sanity-loading #main::after {
+	animation: sanity-loading-spin 0.8s linear infinite;
+	border: 2px solid var(--framework-line);
+	border-radius: 50%;
+	border-top-color: var(--framework-accent);
+	content: "";
+	height: 1.5rem;
+	left: calc(50% - 0.75rem);
+	position: absolute;
+	top: 5.5rem;
+	width: 1.5rem;
+}
+
+@keyframes sanity-loading-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 #nav {
 	padding-right: 0;
 }
@@ -1160,6 +1202,10 @@ button.filter-button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	html.sanity-loading #main::after {
+		animation: none;
+	}
+
 	html {
 		scroll-behavior: auto;
 	}

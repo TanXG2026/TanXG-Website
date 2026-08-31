@@ -3,7 +3,7 @@ import type {StructureResolver} from 'sanity/structure'
 export const structure: StructureResolver = (S) =>
   S.list()
     .id('tanxg-content-root')
-    .title('探星阁内容中心')
+    .title('TanXG-Web内容编辑中心')
     .items([
       S.listItem()
         .id('site-settings')

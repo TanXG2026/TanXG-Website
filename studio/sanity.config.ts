@@ -3,10 +3,11 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
+import {BulkPublishNavbar} from './components/BulkPublishNavbar'
 
 export default defineConfig({
   name: 'default',
-  title: '探星阁内容中心',
+  title: 'TanXG-Web内容编辑中心',
 
   projectId: 'o9vxg32e',
   dataset: 'production',
@@ -15,5 +16,11 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+  },
+
+  studio: {
+    components: {
+      navbar: BulkPublishNavbar,
+    },
   },
 })
