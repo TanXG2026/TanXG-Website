@@ -29,6 +29,21 @@
 		items.forEach(function (item) { observer.observe(item); });
 	}
 
+	function initHomeScroll() {
+		var button = document.querySelector('[data-home-scroll]');
+		var target = document.querySelector('#nav');
+		if (!button || !target || button.hasAttribute('data-home-scroll-bound')) return;
+
+		button.setAttribute('data-home-scroll-bound', '');
+		button.addEventListener('click', function (event) {
+			event.preventDefault();
+			window.scrollTo({
+				top: target.getBoundingClientRect().top + window.pageYOffset,
+				behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+			});
+		});
+	}
+
 	function initAccordions() {
 		document.querySelectorAll('[data-accordion]').forEach(function (accordion) {
 			var single = accordion.hasAttribute('data-accordion-single');
@@ -368,6 +383,7 @@
 	}
 
 	document.addEventListener('DOMContentLoaded', function () {
+		initHomeScroll();
 		initCourseDirectory();
 		initCourseTemplate();
 		document.documentElement.classList.add('reveal-ready');
