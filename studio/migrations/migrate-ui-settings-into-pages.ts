@@ -16,9 +16,7 @@ async function main() {
   const ui = await client.fetch<TextMap | null>('*[_id == "uiSettings-main"][0]')
   if (!ui) throw new Error('找不到已发布的 uiSettings-main，无法迁移。')
 
-  const global = Object.fromEntries(
-    Object.entries(object(ui.global)).filter(([key]) => key !== 'brand'),
-  )
+  const global = object(ui.global)
   const common = object(ui.common)
   const learning = object(ui.learning)
   const lectures = object(ui.lectures)

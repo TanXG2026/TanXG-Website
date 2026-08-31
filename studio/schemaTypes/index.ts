@@ -50,6 +50,7 @@ const siteSettings = defineType({
       title: '全站导航与公共文字',
       type: 'object',
       fields: [
+        defineField({name: 'brand', title: '网站标识文字', type: 'string'}),
         defineField({name: 'homeTitle', title: '首页浏览器标题', type: 'string'}),
         defineField({name: 'titleSuffix', title: '浏览器标题后缀', type: 'string'}),
         defineField({name: 'metaDescription', title: '网站搜索摘要', type: 'text', rows: 2}),
