@@ -14,7 +14,6 @@ function block(text: string, key: string) {
 
 const uiSettings = {
   global: {
-    brand: 'TanXG · P&A',
     homeTitle: '探星阁 · P&A',
     titleSuffix: '探星阁',
     metaDescription: '探星阁物理与天文网站',
