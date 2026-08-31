@@ -18,7 +18,7 @@ export default defineConfig({
     types: schemaTypes,
     templates: (templates) =>
       templates.filter(
-        (template) => !['siteSettings', 'uiSettings', 'pageSettings'].includes(template.schemaType),
+        (template) => !['siteSettings', 'pageSettings'].includes(template.schemaType),
       ),
   },
 

@@ -19,10 +19,6 @@ export const structure: StructureResolver = (S) =>
         .id('site-settings')
         .title('首页与网站设置')
         .child(S.document().schemaType('siteSettings').documentId('siteSettings-main')),
-      S.listItem()
-        .id('ui-settings')
-        .title('网站界面文字')
-        .child(S.document().schemaType('uiSettings').documentId('uiSettings-main')),
       S.divider(),
       ...pageSettingsPages.map((page) =>
         S.listItem()

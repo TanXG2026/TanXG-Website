@@ -62,10 +62,61 @@
 		if (description) description.setAttribute('content', uiText('global.metaDescription'));
 	}
 
+	function detectPageKey() {
+		var hero = document.querySelector('[data-sanity-page]');
+		if (hero) return hero.getAttribute('data-sanity-page') || '';
+
+		if (document.querySelector('[data-course-list], [data-course-template]')) return 'learning';
+		if (document.querySelector('[data-sanity-lecture-level], [data-sanity-lecture-detail]')) return 'courses';
+		if (document.querySelector('[data-sanity-research-domains], [data-sanity-research-cards]')) return 'research';
+		if (document.querySelector('[data-sanity-popsci]')) return 'popsci';
+		if (document.querySelector('[data-sanity-visualizations], [data-sanity-visual-detail]')) return 'visualizations';
+		if (document.querySelector('[data-sanity-community]')) return 'community';
+		if (document.querySelector('[data-sanity-team], [data-sanity-member-detail]')) return 'team';
+
+		if (document.querySelector('[data-sanity-content-detail]')) {
+			var detailType = new URLSearchParams(window.location.search).get('type');
+			if (detailType === 'research' || detailType === 'community') return detailType;
+		}
+
+		return '';
+	}
+
 	function loadUiSettings() {
-		return apiQuery('*[_id == "uiSettings-main"][0]').then(function (settings) {
-			if (!settings) throw new Error('Missing uiSettings-main');
-			applyUiSettings(settings);
+		var pageKey = detectPageKey();
+		var pageFields = {
+			learning: 'learningInterface',
+			courses: 'coursesInterface',
+			research: 'researchInterface',
+			visualizations: 'visualizationsInterface',
+			popsci: 'popsciInterface',
+			community: 'communityInterface',
+			team: 'teamInterface'
+		};
+		var pageQuery = pageKey
+			? '*[_id == ' + quote('pageSettings-' + pageKey) + '][0]'
+			: 'null';
+		var query = '{"site": *[_id == "siteSettings-main"][0]{globalInterface,homeInterface}, "page": ' + pageQuery + '}';
+
+		return apiQuery(query).then(function (result) {
+			var site = result && result.site;
+			var page = result && result.page;
+			if (!site) throw new Error('Missing siteSettings-main');
+			if (pageKey && !page) throw new Error('Missing pageSettings-' + pageKey);
+
+			var fieldName = pageFields[pageKey];
+			var pageInterface = fieldName && page ? page[fieldName] || {} : site.homeInterface || {};
+			applyUiSettings({
+				global: site.globalInterface || {},
+				common: pageInterface,
+				learning: pageInterface,
+				lectures: pageInterface,
+				research: pageInterface,
+				popsci: pageInterface,
+				visualizations: pageInterface,
+				team: pageInterface,
+				detail: pageInterface
+			});
 		});
 	}
 
@@ -568,7 +619,7 @@
 			var back = root.querySelector('[data-detail-back]');
 			if (back) {
 				back.href = siteUrl(type === 'research' ? 'research/index.html' : 'community/index.html');
-				back.textContent = type === 'research' ? uiText('detail.backResearch') : uiText('detail.backCommunity');
+					back.textContent = uiText('detail.backLabel');
 			}
 			document.title = item.title + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
@@ -642,7 +693,7 @@
 			if (open && source) open.href = source;
 			renderBlocks(root.querySelector('[data-visual-instructions]'), item.instructions, uiText('common.emptyValue'));
 			renderBlocks(root.querySelector('[data-visual-principles]'), item.principles, uiText('common.emptyValue'));
-			renderBlocks(root.querySelector('[data-visual-related]'), item.relatedText, uiText('team.emptyLinks'));
+			renderBlocks(root.querySelector('[data-visual-related]'), item.relatedText, uiText('visualizations.relatedFallback'));
 			document.title = item.title + ' · ' + uiText('global.navVisualizations') + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});
