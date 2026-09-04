@@ -102,6 +102,12 @@
       background: #fff;
       color: var(--ink);
       font: inherit;
+      transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        color 160ms ease,
+        transform 120ms ease;
     }
 
     input, select { padding: 6px 8px; }
@@ -115,6 +121,7 @@
     }
 
     button:hover { background: #34383e; }
+    button:active:not(:disabled) { transform: translateY(1px) scale(0.995); }
     button:disabled { cursor: not-allowed; opacity: 0.45; }
 
     input:focus, select:focus, button:focus-visible {
@@ -168,11 +175,34 @@
     .trace-mode:last-child { border-bottom: 1px solid var(--line); }
 
     .trace-mode summary {
+      position: relative;
       padding: 9px 2px;
+      padding-right: 25px;
       cursor: pointer;
+      list-style: none;
       font-size: 12px;
       font-weight: 600;
+      transition: color 170ms ease, padding-left 170ms ease;
     }
+
+    .trace-mode summary::-webkit-details-marker { display: none; }
+    .trace-mode summary::marker { content: ""; }
+    .trace-mode summary:hover { color: var(--blue); padding-left: 5px; }
+    .trace-mode summary::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 6px;
+      height: 6px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: translateY(-68%) rotate(45deg);
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .trace-mode[open] summary::after { transform: translateY(-32%) rotate(225deg); }
+    .trace-mode.animating { overflow: hidden; will-change: height; }
+    .trace-mode.animating .mode-body { overflow: hidden; }
 
     .mode-body { padding: 0 2px 11px; }
     .coordinate-system-label { margin-top: 0; }
@@ -352,6 +382,15 @@
     }
     .playback-control button:hover { background: #252c38; }
 
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
     @media (min-width: 901px) {
       html, body { height: 100%; overflow: hidden; }
       body { display: flex; flex-direction: column; }
@@ -434,7 +473,7 @@
         </div>
 
         <div class="trace-modes">
-        <details class="trace-mode" data-trace-mode="whole" name="trace-mode" open>
+        <details class="trace-mode" data-trace-mode="whole" open>
           <summary>整根光线</summary>
           <div class="mode-body">
             <label class="coordinate-system-label" for="wholeCoordinateSystem">坐标形式</label>
@@ -502,7 +541,7 @@
           </div>
         </details>
 
-        <details class="trace-mode" data-trace-mode="single" name="trace-mode">
+        <details class="trace-mode" data-trace-mode="single">
           <summary>单根光线</summary>
           <div class="mode-body">
             <label class="coordinate-system-label" for="singleCoordinateSystem">坐标形式</label>
@@ -542,7 +581,7 @@
           </div>
         </details>
 
-        <details class="trace-mode" data-trace-mode="multi" name="trace-mode">
+        <details class="trace-mode" data-trace-mode="multi">
           <summary>多根光线</summary>
           <div class="mode-body">
             <label class="coordinate-system-label" for="multiCoordinateSystem">坐标形式</label>
@@ -580,7 +619,7 @@
             <div class="inline-value" aria-live="polite"><span>已选屏幕点</span><output id="multiPointCount">0 个</output></div>
             <ol class="point-list" id="multiPointList" aria-label="多根光线已选屏幕点"></ol>
             <button class="quiet-button" id="clearMultiPoints" type="button">清空</button>
-            <button id="startMultiRays" type="button">开始同步反向追踪</button>
+            <button id="startMultiRays" type="button">开始同步追踪</button>
           </div>
         </details>
         </div>
@@ -655,6 +694,7 @@
     let currentResult = null;
     let traceTimer = null;
     let activeTraceMode = "whole";
+    const selectedTraceModes = { whole: false, single: false, multi: false };
     let trailFraction = 0.18;
     const multiSelectedPoints = [];
     const polarAngles = { whole: 0, single: 0, multi: 0 };
@@ -1606,15 +1646,17 @@
           ctx.beginPath(); ctx.arc(x, y, 2.7, 0, TWO_PI); ctx.fill();
         }
       }
-      const [selectedX, selectedY] = toCanvas([params.u, params.v]);
-      ctx.strokeStyle = "#ef4c36";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(selectedX - 7, selectedY); ctx.lineTo(selectedX + 7, selectedY);
-      ctx.moveTo(selectedX, selectedY - 7); ctx.lineTo(selectedX, selectedY + 7);
-      ctx.stroke();
-      ctx.fillStyle = "#ffd34d";
-      ctx.beginPath(); ctx.arc(selectedX, selectedY, 3.2, 0, TWO_PI); ctx.fill();
+      if (selectedTraceModes[activeTraceMode]) {
+        const [selectedX, selectedY] = toCanvas([params.u, params.v]);
+        ctx.strokeStyle = "#ef4c36";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(selectedX - 7, selectedY); ctx.lineTo(selectedX + 7, selectedY);
+        ctx.moveTo(selectedX, selectedY - 7); ctx.lineTo(selectedX, selectedY + 7);
+        ctx.stroke();
+        ctx.fillStyle = "#ffd34d";
+        ctx.beginPath(); ctx.arc(selectedX, selectedY, 3.2, 0, TWO_PI); ctx.fill();
+      }
       ctx.restore();
 
       ctx.strokeStyle = "#c4c9cf";
@@ -1656,13 +1698,15 @@
         this.context = canvas.getContext("2d");
         this.defaultYaw = 0.80;
         this.defaultPitch = 0.34;
+        this.defaultZoom = 1.22;
+        this.verticalCenterRatio = 0.56;
         this.yaw = this.defaultYaw;
         this.pitch = this.defaultPitch;
         this.cameraRight = [1, 0, 0];
         this.cameraUp = [0, 0, 1];
         this.cameraDepth = [0, 1, 0];
         this.updateCameraBasis();
-        this.zoom = 1;
+        this.zoom = this.defaultZoom;
         this.result = null;
         this.params = null;
         this.path = [];
@@ -1699,7 +1743,7 @@
         this.yaw = this.defaultYaw;
         this.pitch = this.defaultPitch;
         this.updateCameraBasis();
-        this.zoom = 1;
+        this.zoom = this.defaultZoom;
         this.draw();
       }
 
@@ -1907,7 +1951,13 @@
       layout() {
         const rect = this.canvas.getBoundingClientRect();
         const scaleValue = Math.min(rect.width, rect.height) / 32 * this.zoom;
-        return { width: rect.width, height: rect.height, cx: rect.width / 2, cy: rect.height / 2, scale: scaleValue };
+        return {
+          width: rect.width,
+          height: rect.height,
+          cx: rect.width / 2,
+          cy: rect.height * this.verticalCenterRatio,
+          scale: scaleValue
+        };
       }
 
       project(point, layout = this.layout()) {
@@ -2019,22 +2069,72 @@
         }
       }
 
-      drawAxes(ctx, layout) {
+      drawAxes(ctx, layout, layer = "all") {
         const axes = [
           { endpoint: [9, 0, 0], label: "x" },
           { endpoint: [0, 9, 0], label: "y" },
           { endpoint: [0, 0, 9], label: "z" }
         ];
         const origin = this.project([0, 0, 0], layout);
-        ctx.lineWidth = 0.8;
-        ctx.strokeStyle = "rgba(205,213,222,0.36)";
-        ctx.fillStyle = "rgba(221,227,234,0.68)";
+        const padding = 18;
+        const keepInsideCanvas = endpoint => {
+          const dx = endpoint.x - origin.x;
+          const dy = endpoint.y - origin.y;
+          let fraction = 1;
+          if (dx > 0) fraction = Math.min(fraction, (layout.width - padding - origin.x) / dx);
+          if (dx < 0) fraction = Math.min(fraction, (padding - origin.x) / dx);
+          if (dy > 0) fraction = Math.min(fraction, (layout.height - padding - origin.y) / dy);
+          if (dy < 0) fraction = Math.min(fraction, (padding - origin.y) / dy);
+          fraction = clamp(fraction, 0, 1);
+          return {
+            x: origin.x + dx * fraction,
+            y: origin.y + dy * fraction,
+            directionX: dx,
+            directionY: dy
+          };
+        };
+
+        ctx.save();
+        ctx.lineCap = "round";
         ctx.font = "12px ui-sans-serif, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         for (const axis of axes) {
-          const endpoint = this.project(axis.endpoint, layout);
-          ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(endpoint.x, endpoint.y); ctx.stroke();
-          ctx.fillText(axis.label, endpoint.x + 4, endpoint.y - 3);
+          const endpoint = keepInsideCanvas(this.project(axis.endpoint, layout));
+          if (layer !== "labels") {
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(endpoint.x, endpoint.y);
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = "rgba(0,1,3,0.72)";
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(endpoint.x, endpoint.y);
+            ctx.lineWidth = 0.9;
+            ctx.strokeStyle = "rgba(205,213,222,0.48)";
+            ctx.stroke();
+          }
+
+          if (layer === "lines") continue;
+          const directionLength = Math.hypot(endpoint.directionX, endpoint.directionY) || 1;
+          const labelX = clamp(
+            endpoint.x + 7 * endpoint.directionX / directionLength,
+            9,
+            layout.width - 9
+          );
+          const labelY = clamp(
+            endpoint.y + 7 * endpoint.directionY / directionLength,
+            9,
+            layout.height - 9
+          );
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(0,1,3,0.9)";
+          ctx.strokeText(axis.label, labelX, labelY);
+          ctx.fillStyle = "rgba(221,227,234,0.78)";
+          ctx.fillText(axis.label, labelX, labelY);
         }
+        ctx.restore();
       }
 
       drawSightline(ctx, layout) {
@@ -2283,9 +2383,14 @@
         const layout = this.layout();
         ctx.clearRect(0, 0, width, height);
         this.drawStars(ctx, width, height);
-        this.drawAxes(ctx, layout);
         this.drawSightline(ctx, layout);
+        // Draw axes as a background reference layer. The opaque horizon is
+        // rendered afterwards and masks every axis segment inside its hull.
+        this.drawAxes(ctx, layout, "lines");
         this.drawHorizon(ctx, layout);
+        // Keep x/y/z readable even when an axis endpoint projects onto the
+        // horizon silhouette; only the axis lines themselves are occluded.
+        this.drawAxes(ctx, layout, "labels");
         if (this.visibleMode === "whole") {
           this.drawPath(ctx, layout);
           this.drawSpecialPoint(ctx, layout);
@@ -2456,11 +2561,17 @@
       }
     }
 
-    function commitCoordinateInput(input) {
+    function markTraceModeSelected(mode) {
+      selectedTraceModes[mode] = true;
+      ui.downloadGeodesic.disabled = !selectedTraceModes.whole;
+    }
+
+    function commitCoordinateInput(input, markSelection = false) {
       const mode = input.dataset.coordinateMode;
       const { u, v, textOverride } = coordinatesFromMode(mode);
       syncCoordinateInputs(u, v, textOverride, mode);
-      if (mode === "whole") queueTrace();
+      if (markSelection) markTraceModeSelected(mode);
+      if (mode === "whole" && selectedTraceModes.whole) queueTrace();
       drawScreen();
       updateDigitStepDisplay(input);
     }
@@ -2471,7 +2582,7 @@
       const step = digitStepAtCaret(input);
       input.value = exactDigitStep(input.value, step, direction)
         ?? (finiteNumber(input, 0) + direction * step).toFixed(DISPLAY_DECIMALS);
-      commitCoordinateInput(input);
+      commitCoordinateInput(input, true);
       input.focus({ preventScroll: true });
       const restored = clamp(caret, 0, input.value.length);
       input.setSelectionRange(restored, restored);
@@ -2538,6 +2649,52 @@
       ui.animationPause.setAttribute("aria-pressed", String(renderer.animationPaused));
     }
 
+    function animateTracePanel(panel, shouldOpen) {
+      if (panel.classList.contains("animating")) return;
+      const summary = panel.querySelector("summary");
+      const body = panel.querySelector(".mode-body");
+      if (!summary || !body) {
+        panel.open = shouldOpen;
+        return;
+      }
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        panel.open = shouldOpen;
+        return;
+      }
+
+      const startHeight = panel.getBoundingClientRect().height;
+      if (shouldOpen) panel.open = true;
+      const expandedHeight = panel.getBoundingClientRect().height;
+      const borderHeight = parseFloat(getComputedStyle(panel).borderTopWidth) || 0;
+      const endHeight = shouldOpen ? expandedHeight : summary.getBoundingClientRect().height + borderHeight;
+      const duration = shouldOpen ? 260 : 210;
+      panel.classList.add("animating");
+
+      const panelAnimation = panel.animate(
+        [{ height: `${startHeight}px` }, { height: `${endHeight}px` }],
+        { duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
+      );
+      const bodyAnimation = body.animate(
+        shouldOpen
+          ? [
+              { opacity: 0, transform: "translateY(-6px)" },
+              { opacity: 1, transform: "translateY(0)" }
+            ]
+          : [
+              { opacity: 1, transform: "translateY(0)" },
+              { opacity: 0, transform: "translateY(-5px)" }
+            ],
+        { duration, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "both" }
+      );
+
+      panelAnimation.addEventListener("finish", () => {
+        if (!shouldOpen) panel.open = false;
+        bodyAnimation.cancel();
+        panel.classList.remove("animating");
+      }, { once: true });
+    }
+
     function setActiveTraceMode(mode) {
       activeTraceMode = mode;
       ui.playbackControl.hidden = mode === "whole";
@@ -2554,6 +2711,7 @@
     }
 
     function addSingleAnimatedRay() {
+      markTraceModeSelected("single");
       const params = modelParameters("single");
       ui.calculationState.textContent = "正在积分单根光线…";
       try {
@@ -2562,7 +2720,7 @@
         renderer.setResult(result, params);
         renderer.addAnimatedRay(result, params, "single", performance.now() + 50);
         renderer.setAnimationMode("single", params);
-        ui.calculationState.textContent = `${result.accepted} 个接受步`;
+        ui.calculationState.textContent = "";
       } catch (error) {
         ui.calculationState.textContent = "积分失败";
         console.error(error);
@@ -2572,6 +2730,7 @@
     }
 
     function addMultiSelectedPoint() {
+      markTraceModeSelected("multi");
       const params = modelParameters("multi");
       multiSelectedPoints.push({ u: params.u, v: params.v, animationRayId: null });
       renderMultiPointList();
@@ -2610,6 +2769,7 @@
 
     function runTrace() {
       traceTimer = null;
+      if (!selectedTraceModes.whole) return;
       const params = modelParameters("whole");
       ui.mass.value = String(params.mass);
       ui.spin.value = params.spin.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
@@ -2622,7 +2782,7 @@
         drawScreen();
         renderer.setResult(currentResult, params);
         if (activeTraceMode !== "whole") renderer.setAnimationMode(activeTraceMode, modelParameters(activeTraceMode));
-        ui.calculationState.textContent = `${currentResult.accepted} 个接受步`;
+        ui.calculationState.textContent = "";
       } catch (error) {
         currentResult = null;
         ui.calculationState.textContent = "积分失败";
@@ -2631,6 +2791,7 @@
     }
 
     function queueTrace(delay = 70) {
+      if (!selectedTraceModes.whole) return;
       if (traceTimer !== null) clearTimeout(traceTimer);
       traceTimer = setTimeout(runTrace, delay);
     }
@@ -2640,6 +2801,7 @@
     }
 
     function downloadGeodesicData() {
+      if (!selectedTraceModes.whole) return;
       if (!currentResult?.points?.length) runTrace();
       if (!currentResult?.points?.length) return;
       const params = modelParameters("whole");
@@ -2696,6 +2858,7 @@
       const raw = screenCoordinatesFromPointer(event);
       const u = clamp(raw.u, -SCREEN_EXTENT, SCREEN_EXTENT);
       const v = clamp(raw.v, -SCREEN_EXTENT, SCREEN_EXTENT);
+      markTraceModeSelected(activeTraceMode);
       syncCoordinateInputs(u, v);
       drawScreen();
       if (activeTraceMode === "whole") queueTrace(0);
@@ -2774,12 +2937,12 @@
       input.addEventListener("click", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
       input.addEventListener("keyup", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
       input.addEventListener("select", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
-      input.addEventListener("change", () => commitCoordinateInput(input));
+      input.addEventListener("change", () => commitCoordinateInput(input, true));
       input.addEventListener("blur", () => commitCoordinateInput(input));
       input.addEventListener("keydown", event => {
         if (event.key === "Enter") {
           event.preventDefault();
-          commitCoordinateInput(input);
+          commitCoordinateInput(input, true);
           if (input.dataset.coordinateMode === "single") addSingleAnimatedRay();
           if (input.dataset.coordinateMode === "multi") addMultiSelectedPoint();
           input.blur();
@@ -2799,8 +2962,17 @@
       control.addEventListener("change", () => updateCoordinateSystem(control));
     }
     for (const panel of ui.traceModes) {
-      panel.addEventListener("toggle", () => {
-        if (panel.open) setActiveTraceMode(panel.dataset.traceMode);
+      panel.querySelector("summary")?.addEventListener("click", event => {
+        event.preventDefault();
+        if (panel.open) {
+          animateTracePanel(panel, false);
+          return;
+        }
+        for (const other of ui.traceModes) {
+          if (other !== panel && other.open) animateTracePanel(other, false);
+        }
+        animateTracePanel(panel, true);
+        setActiveTraceMode(panel.dataset.traceMode);
       });
     }
     for (const control of ui.trailLengthControls) {
@@ -2837,10 +3009,19 @@
       input.addEventListener("input", () => {
         renderer.clearAnimatedRays("single");
         renderer.clearAnimatedRays("multi");
-        queueTrace(100);
+        if (selectedTraceModes.whole) {
+          queueTrace(100);
+        } else {
+          const params = modelParameters("whole");
+          updateDiagnostics(null, params);
+          renderer.setResult(null, params);
+          if (activeTraceMode !== "whole") renderer.setAnimationMode(activeTraceMode, modelParameters(activeTraceMode));
+        }
         drawScreen();
       });
-      input.addEventListener("change", () => queueTrace(0));
+      input.addEventListener("change", () => {
+        if (selectedTraceModes.whole) queueTrace(0);
+      });
     }
 
     ui.screenCanvas.addEventListener("pointerdown", event => {
@@ -2899,8 +3080,11 @@
     renderer.setPlaybackDirection("reverse");
     updateSingleRayCount();
     renderMultiPointList();
+    ui.downloadGeodesic.disabled = true;
+    const initialParams = modelParameters("whole");
+    updateDiagnostics(null, initialParams);
+    renderer.setResult(null, initialParams);
     drawScreen();
-    runTrace();
     setTimeout(runSelfTests, 250);
   </script>
 </body>
