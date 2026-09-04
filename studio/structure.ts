@@ -16,16 +16,28 @@ export const structure: StructureResolver = (S) =>
     .title('TanXG-Web内容编辑中心')
     .items([
       S.listItem()
-        .id('site-settings')
-        .title('首页与网站设置')
-        .child(S.document().schemaType('siteSettings').documentId('siteSettings-main')),
-      S.divider(),
-      ...pageSettingsPages.map((page) =>
-        S.listItem()
-          .id(page.id)
-          .title(page.title)
-          .child(S.document().schemaType('pageSettings').documentId(page.id).title(page.title)),
-      ),
+        .id('page-structure-settings')
+        .title('页面结构设置')
+        .child(
+          S.list()
+            .id('page-structure-settings-list')
+            .title('页面结构设置')
+            .items([
+              S.listItem()
+                .id('site-settings')
+                .title('首页与网站设置')
+                .child(S.document().schemaType('siteSettings').documentId('siteSettings-main')),
+              S.divider(),
+              ...pageSettingsPages.map((page) =>
+                S.listItem()
+                  .id(page.id)
+                  .title(page.title)
+                  .child(
+                    S.document().schemaType('pageSettings').documentId(page.id).title(page.title),
+                  ),
+              ),
+            ]),
+        ),
       S.divider(),
       S.documentTypeListItem('course').title('课程检索'),
       S.documentTypeListItem('lectureNote').title('课程讲义'),

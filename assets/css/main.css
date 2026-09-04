@@ -3250,14 +3250,14 @@ input, select, textarea {
 
 		#wrapper.fade-in:before {
 			pointer-events: none;
-			-moz-transition: opacity 1s ease-in-out;
-			-webkit-transition: opacity 1s ease-in-out;
-			-ms-transition: opacity 1s ease-in-out;
-			transition: opacity 1s ease-in-out;
-			-moz-transition-delay: 0.75s;
-			-webkit-transition-delay: 0.75s;
-			-ms-transition-delay: 0.75s;
-			transition-delay: 0.75s;
+			-moz-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+			-webkit-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+			-ms-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+			transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+			-moz-transition-delay: 0s;
+			-webkit-transition-delay: 0s;
+			-ms-transition-delay: 0s;
+			transition-delay: 0s;
 			background: #1e252d;
 			content: '';
 			display: block;
@@ -3302,10 +3302,11 @@ input, select, textarea {
 		-webkit-justify-content: -webkit-flex-end;
 		-ms-justify-content: -ms-flex-end;
 		justify-content: flex-end;
-		-moz-transition: opacity 1s ease, -moz-transform 1s ease;
-		-webkit-transition: opacity 1s ease, -webkit-transform 1s ease;
-		-ms-transition: opacity 1s ease, -ms-transform 1s ease;
-		transition: opacity 1s ease, transform 1s ease;
+		-moz-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), -moz-transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+		-webkit-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+		-ms-transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), -ms-transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+		transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+		will-change: opacity, transform;
 		position: relative;
 		cursor: default;
 		text-align: center;
@@ -3434,10 +3435,10 @@ input, select, textarea {
 			}
 
 		body.is-preload #intro {
-			-moz-transform: translateY(2rem);
-			-webkit-transform: translateY(2rem);
-			-ms-transform: translateY(2rem);
-			transform: translateY(2rem);
+			-moz-transform: translateY(1rem);
+			-webkit-transform: translateY(1rem);
+			-ms-transform: translateY(1rem);
+			transform: translateY(1rem);
 			opacity: 0;
 		}
 

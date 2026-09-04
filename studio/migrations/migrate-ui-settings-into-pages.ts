@@ -62,7 +62,6 @@ async function main() {
     visualizations: {
       ...visualizations,
       ...pick(common, ['allLabel', 'loadError', 'previewSuffix', 'unnamedVisualization', 'emptyValue']),
-      relatedFallback: team.emptyLinks,
     },
     popsci: {
       ...popsci,

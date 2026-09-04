@@ -131,6 +131,52 @@
 		}
 	}
 
+	function sanityImagePresentation(image) {
+		var presentation = { url: image && image.url ? image.url : '', position: '' };
+		if (!presentation.url || !image) return presentation;
+
+		var crop = image.crop;
+		var dimensions = image.dimensions;
+		if (crop && dimensions && dimensions.width && dimensions.height) {
+			var left = Number(crop.left) || 0;
+			var right = Number(crop.right) || 0;
+			var top = Number(crop.top) || 0;
+			var bottom = Number(crop.bottom) || 0;
+			var cropWidthRatio = Math.max(0.001, 1 - left - right);
+			var cropHeightRatio = Math.max(0.001, 1 - top - bottom);
+			var rectangle = [
+				Math.round(left * dimensions.width),
+				Math.round(top * dimensions.height),
+				Math.max(1, Math.round(cropWidthRatio * dimensions.width)),
+				Math.max(1, Math.round(cropHeightRatio * dimensions.height)),
+			];
+
+			try {
+				var transformed = new URL(presentation.url);
+				transformed.searchParams.set('rect', rectangle.join(','));
+				transformed.searchParams.set('w', '1200');
+				transformed.searchParams.set('fit', 'max');
+				transformed.searchParams.set('auto', 'format');
+				presentation.url = transformed.href;
+			} catch (error) {
+				// Keep the original image URL if a transformation URL cannot be created.
+			}
+
+		}
+
+		if (image.hotspot) {
+			var visibleLeft = crop ? Number(crop.left) || 0 : 0;
+			var visibleTop = crop ? Number(crop.top) || 0 : 0;
+			var visibleWidth = crop ? Math.max(0.001, 1 - visibleLeft - (Number(crop.right) || 0)) : 1;
+			var visibleHeight = crop ? Math.max(0.001, 1 - visibleTop - (Number(crop.bottom) || 0)) : 1;
+			var x = ((Number(image.hotspot.x) || 0.5) - visibleLeft) / visibleWidth;
+			var y = ((Number(image.hotspot.y) || 0.5) - visibleTop) / visibleHeight;
+			presentation.position = Math.max(0, Math.min(100, x * 100)) + '% ' + Math.max(0, Math.min(100, y * 100)) + '%';
+		}
+
+		return presentation;
+	}
+
 	function createElement(tagName, className, text) {
 		var element = document.createElement(tagName);
 		if (className) element.className = className;
@@ -473,7 +519,7 @@
 	function loadVisualizations() {
 		var cardsContainer = document.querySelector('[data-sanity-visualizations]');
 		if (!cardsContainer) return Promise.resolve();
-		var query = '*[_type == "visualization" && enabled != false] | order(order asc, title asc){title,"slug":slug.current,summary,difficulty,author,relatedCourses,sitePath,externalUrl,"previewUrl":previewImage.asset->url,domains[]->{title,code,"key":key.current}}';
+		var query = '*[_type == "visualization" && enabled != false] | order(order asc, title asc){title,"slug":slug.current,summary,author,relatedCourses,sitePath,externalUrl,"previewImage":previewImage{"url":asset->url,crop,hotspot,"dimensions":asset->metadata.dimensions},domains[]->{title,code,"key":key.current}}';
 		return apiQuery(query).then(function (items) {
 			var domains = [];
 			(items || []).forEach(function (item) {
@@ -494,10 +540,13 @@
 				card.setAttribute('data-filter-card', '');
 				card.setAttribute('data-tags', domainKeys.join(' '));
 				card.href = siteUrl('visualization-template.html?slug=' + encodeURIComponent(item.slug));
-				if (item.previewUrl) {
+				var preview = sanityImagePresentation(item.previewImage);
+				if (preview.url) {
 					var image = createElement('img', 'resource-card-cover');
-					image.src = item.previewUrl;
+					image.src = preview.url;
+					if (preview.position) image.style.objectPosition = preview.position;
 					image.alt = item.title + uiText('common.previewSuffix');
+					image.loading = 'lazy';
 					card.appendChild(image);
 				} else {
 					card.appendChild(createElement('div', 'visual-placeholder', uiText('visualizations.previewPlaceholder')));
@@ -668,14 +717,13 @@
 		if (!root) return Promise.resolve();
 		var slugValue = new URLSearchParams(window.location.search).get('slug');
 		if (!slugValue) return Promise.resolve();
-		var query = '*[_type == "visualization" && slug.current == ' + quote(slugValue) + '][0]{title,summary,difficulty,author,relatedCourses,sitePath,externalUrl,instructions,principles,relatedText,domains[]->{title,code}}';
+		var query = '*[_type == "visualization" && slug.current == ' + quote(slugValue) + '][0]{title,summary,author,relatedCourses,sitePath,externalUrl,instructions,"principlesPdfUrl":principlesPdf.asset->url,domains[]->{title,code}}';
 		return apiQuery(query).then(function (item) {
 			if (!item) return;
 			setText(root, '[data-visual-title]', item.title);
 			setText(root, '[data-visual-summary]', item.summary);
 			var values = [
 				[uiText('visualizations.domainLabel'), (item.domains || []).map(function (domain) { return domain.code; }).join('、')],
-				[uiText('visualizations.difficultyLabel'), item.difficulty],
 				[uiText('visualizations.authorLabel'), item.author],
 				[uiText('visualizations.relatedCoursesLabel'), (item.relatedCourses || []).join('、')],
 			];
@@ -692,8 +740,12 @@
 			}
 			if (open && source) open.href = source;
 			renderBlocks(root.querySelector('[data-visual-instructions]'), item.instructions, uiText('common.emptyValue'));
-			renderBlocks(root.querySelector('[data-visual-principles]'), item.principles, uiText('common.emptyValue'));
-			renderBlocks(root.querySelector('[data-visual-related]'), item.relatedText, uiText('visualizations.relatedFallback'));
+			var principlesSection = root.querySelector('[data-visual-principles-section]');
+			var principlesLink = root.querySelector('[data-visual-principles-pdf]');
+			if (principlesSection && principlesLink && item.principlesPdfUrl) {
+				principlesLink.href = item.principlesPdfUrl;
+				principlesSection.hidden = false;
+			}
 			document.title = item.title + ' · ' + uiText('global.navVisualizations') + ' · ' + uiText('global.titleSuffix');
 			notifyRendered();
 		});

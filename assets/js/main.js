@@ -110,12 +110,17 @@
 
 	};
 
-	// Play initial animations on page load.
-		$window.on('load', function() {
+	// Play initial animations after Sanity content has been inserted.
+		var playInitialAnimations = function() {
 			window.setTimeout(function() {
 				$body.removeClass('is-preload');
-			}, 100);
-		});
+			}, 80);
+		};
+
+		if (document.documentElement.classList.contains('sanity-ready'))
+			playInitialAnimations();
+		else
+			window.addEventListener('tanxg:content-ready', playInitialAnimations, { once: true });
 
 	// Scrolly.
 		$('.scrolly').scrolly();

@@ -168,8 +168,8 @@ html.sanity-loading #main::after {
 	margin-top: 2.75rem;
 }
 
-.resource-notice + .resource-section {
-	margin-top: 2.75rem;
+.resource-notice + [data-sanity-popsci] {
+	margin-top: 3rem;
 }
 
 .lecture-card {
@@ -294,10 +294,18 @@ html.sanity-loading #main::after {
 	text-align: center;
 }
 
+.visual-detail-page .page-hero {
+	margin-bottom: 3rem;
+}
+
 .section-block + .section-block {
 	border-top: 1px solid var(--framework-line);
 	margin-top: 3.5rem;
 	padding-top: 3.5rem;
+}
+
+.section-block + .section-block.visual-detail-notes {
+	border-top: 0;
 }
 
 .section-heading {
@@ -962,7 +970,7 @@ button.filter-button {
 	border: 1px solid var(--framework-line);
 	display: grid;
 	gap: 1rem;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	margin-bottom: 2rem;
 	padding: 1.2rem;
 }
@@ -1036,6 +1044,10 @@ button.filter-button {
 .profile-section p {
 	color: var(--framework-muted);
 	margin: 0;
+}
+
+[data-visual-principles-section][hidden] {
+	display: none;
 }
 
 .reveal {

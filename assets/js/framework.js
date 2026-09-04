@@ -367,21 +367,6 @@
 		document.title = (selected.title || uiText('learning.courseFallback')) + ' · ' + uiText('global.navLearning') + ' · ' + uiText('global.titleSuffix');
 	}
 
-	function initFullscreen() {
-		document.querySelectorAll('[data-fullscreen-target]').forEach(function (button) {
-			var selector = button.getAttribute('data-fullscreen-target');
-			var target = selector ? document.querySelector(selector) : null;
-			if (!target || !target.requestFullscreen) {
-				button.hidden = true;
-				return;
-			}
-
-			button.addEventListener('click', function () {
-				target.requestFullscreen();
-			});
-		});
-	}
-
 	document.addEventListener('DOMContentLoaded', function () {
 		initHomeScroll();
 		initCourseDirectory();
@@ -391,7 +376,6 @@
 		initAccordions();
 		initFilters();
 		initCourseSearch();
-		initFullscreen();
 	});
 
 	document.addEventListener('tanxg:courses-updated', function () {

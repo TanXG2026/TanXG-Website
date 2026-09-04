@@ -10,6 +10,7 @@
 		window.clearTimeout(window.TANXG_SANITY_LOADING_TIMER);
 		root.classList.remove('sanity-loading');
 		root.classList.add('sanity-ready');
+		window.dispatchEvent(new CustomEvent('tanxg:content-ready'));
 	}
 
 	root.classList.add('sanity-loading');
