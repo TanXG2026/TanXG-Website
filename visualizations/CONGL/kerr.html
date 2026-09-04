@@ -1640,11 +1640,33 @@
       ctx.stroke();
 
       if (activeTraceMode === "multi") {
-        ctx.fillStyle = "rgba(93,199,255,0.90)";
-        for (const point of multiSelectedPoints) {
+        ctx.font = "600 10px ui-sans-serif, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        multiSelectedPoints.forEach((point, index) => {
           const [x, y] = toCanvas([point.u, point.v]);
-          ctx.beginPath(); ctx.arc(x, y, 2.7, 0, TWO_PI); ctx.fill();
-        }
+          ctx.beginPath();
+          ctx.arc(x, y, 4.2, 0, TWO_PI);
+          ctx.fillStyle = "#ff6f18";
+          ctx.fill();
+          ctx.strokeStyle = "#a62a17";
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(x, y, 1.65, 0, TWO_PI);
+          ctx.fillStyle = "#ffda46";
+          ctx.fill();
+
+          const label = `#${index + 1}`;
+          const labelWidth = ctx.measureText(label).width;
+          const labelX = clamp(x + 7, layout.left + 3, layout.left + layout.size - labelWidth - 3);
+          const labelY = clamp(y - 7, layout.top + 7, layout.top + layout.size - 7);
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = "rgba(255,255,255,0.94)";
+          ctx.strokeText(label, labelX, labelY);
+          ctx.fillStyle = "#ff6f18";
+          ctx.fillText(label, labelX, labelY);
+        });
       }
       if (selectedTraceModes[activeTraceMode]) {
         const [selectedX, selectedY] = toCanvas([params.u, params.v]);
