@@ -1,0 +1,3708 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="assets/congl-logo.png">
+  <link rel="apple-touch-icon" href="assets/congl-logo.png">
+  <title>CONGL · Schwarzschild Black Hole</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f5f6;
+      --panel: #ffffff;
+      --ink: #17191c;
+      --muted: #646a73;
+      --line: #d7dbe0;
+      --grid: #eceff2;
+      --blue: #1769aa;
+      --red: #b42318;
+      --green: #16794a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 58px;
+      padding: 8px 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    header .brand-logo {
+      display: block;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+
+    header span { color: var(--muted); }
+
+    main {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px;
+      max-width: 1380px;
+      margin: 0 auto;
+    }
+
+    aside, .workspace {
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    aside { padding: 15px; }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+    }
+
+    .section-hint {
+      margin: -5px 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .section + .section {
+      margin-top: 17px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input, select, button {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid #bfc5cc;
+      border-radius: 3px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input, select { padding: 6px 8px; }
+
+    .coordinate-input {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .digit-stepper {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 22px;
+    }
+
+    .digit-stepper input {
+      min-width: 0;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .digit-step-buttons {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .digit-step-button {
+      width: 22px;
+      min-height: 0;
+      height: 17px;
+      margin: 0;
+      padding: 0;
+      border-left: 0;
+      border-color: #bfc5cc;
+      border-radius: 0;
+      background: #f6f7f8;
+      color: #34383e;
+      font-size: 9px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .digit-step-button:first-child { border-radius: 0 3px 0 0; }
+    .digit-step-button:last-child {
+      border-top: 0;
+      border-radius: 0 0 3px 0;
+    }
+    .digit-step-button:hover { background: #e8eaed; }
+
+    input:focus, select:focus, button:focus-visible {
+      outline: 2px solid rgba(23, 105, 170, 0.25);
+      outline-offset: 1px;
+      border-color: var(--blue);
+    }
+
+    button {
+      margin-top: 12px;
+      cursor: pointer;
+      background: #1d2024;
+      color: #fff;
+      border-color: #1d2024;
+      font-weight: 600;
+    }
+
+    button:hover { background: #34383e; }
+    button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .inline-value {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .inline-value output {
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .screen-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .trace-modes { margin-top: 10px; }
+
+    .trace-mode {
+      border-top: 1px solid var(--line);
+    }
+
+    .trace-mode:last-child { border-bottom: 1px solid var(--line); }
+
+    .trace-mode summary {
+      padding: 9px 2px;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .mode-body {
+      padding: 0 2px 11px;
+    }
+
+    .coordinate-system-label { margin-top: 0; }
+    .coordinate-system-select { margin-bottom: 7px; }
+    .coordinate-fields[hidden] { display: none; }
+
+    .trail-control {
+      margin-top: 10px;
+    }
+
+    .trail-control label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 3px;
+    }
+
+    .trail-control output {
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .trail-control input[type="range"] {
+      min-height: 24px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      accent-color: #e25525;
+      cursor: ew-resize;
+    }
+
+    .quiet-button {
+      background: #fff;
+      color: #34383e;
+      border-color: #bfc5cc;
+      font-weight: 500;
+    }
+
+    .quiet-button:hover { background: #f0f2f4; }
+
+    .point-list {
+      max-height: 118px;
+      overflow-y: auto;
+      margin: 7px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .point-list li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 0;
+      border-bottom: 1px solid #eef0f2;
+    }
+
+    .point-list-coordinates {
+      overflow: hidden;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .point-delete-button {
+      width: auto;
+      min-height: 22px;
+      padding: 1px 7px;
+      border-color: #d3d7dc;
+      background: #fff;
+      color: #8f3428;
+      font: 11px/1.2 system-ui, sans-serif;
+      font-weight: 500;
+    }
+
+    .point-delete-button:hover {
+      border-color: #bd776d;
+      background: #fff6f4;
+    }
+
+    .turn-control {
+      margin-top: 10px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      background: #fafbfc;
+    }
+
+    .turn-control label { margin-top: 0; }
+
+    .turn-result {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    canvas { display: block; }
+
+    #screenCanvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .workspace {
+      min-width: 0;
+      padding: 15px;
+    }
+
+    .orbit-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 540px;
+      height: min(64vh, 690px);
+      border: 1px solid #242a35;
+      background: #02040a;
+      overflow: hidden;
+    }
+
+    #starCanvas, #rimCanvas, #orbitCanvas, #orbitOverlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #starCanvas {
+      z-index: 0;
+      background: #02040a;
+      pointer-events: none;
+    }
+
+    #rimCanvas {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #orbitCanvas {
+      z-index: 2;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    #orbitCanvas:active { cursor: grabbing; }
+
+    #orbitOverlay {
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .playback-control {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 6px 5px 8px;
+      border: 1px solid rgba(190, 198, 208, 0.28);
+      border-radius: 3px;
+      background: rgba(3, 6, 12, 0.78);
+    }
+
+    .playback-control[hidden] { display: none; }
+
+    .playback-control label {
+      margin: 0;
+      color: rgba(222, 227, 234, 0.78);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .playback-control select {
+      width: auto;
+      min-height: 27px;
+      padding: 3px 24px 3px 7px;
+      border-color: rgba(190, 198, 208, 0.38);
+      background: #0a0e16;
+      color: #eef1f5;
+      font-size: 11px;
+    }
+
+    .playback-control button {
+      width: auto;
+      min-height: 27px;
+      margin: 0;
+      padding: 3px 10px;
+      border-color: rgba(190, 198, 208, 0.38);
+      background: #171c25;
+      color: #eef1f5;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .playback-control button:hover { background: #252c38; }
+
+    details {
+      margin-top: 13px;
+      border-top: 1px solid var(--line);
+      padding-top: 11px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    summary { cursor: pointer; color: var(--ink); }
+
+    @media (min-width: 901px) {
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      main {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      aside, .workspace {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+      }
+
+      .workspace {
+        overflow: hidden;
+        scrollbar-gutter: auto;
+      }
+
+      .workspace .orbit-wrap {
+        height: 100%;
+        min-height: 0;
+      }
+
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      aside { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .section + .section { margin: 0; padding: 0; border: 0; }
+      .orbit-wrap { min-height: 430px; height: 55vh; }
+    }
+
+    @media (max-width: 620px) {
+      header { gap: 10px; padding-inline: 14px; }
+      header span { display: block; }
+      aside { display: block; }
+      .section + .section { margin-top: 17px; padding-top: 16px; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img class="brand-logo" src="assets/congl-logo.png" alt="CONGL">
+    <span>Compact Object Null Geodesic Lab · Schwarzschild Black Hole</span>
+  </header>
+
+  <main>
+    <aside>
+      <section class="section">
+        <h2>中心天体模型</h2>
+
+        <div class="pair">
+          <div>
+            <label for="mass">质量 / M☉</label>
+            <input id="mass" type="number" min="0.1" max="10000000000" step="0.1" value="10.0">
+          </div>
+          <div>
+            <label for="inclination">倾角 θo / °</label>
+            <input id="inclination" type="number" min="0" max="180" step="1" value="60">
+          </div>
+        </div>
+
+        <label for="observerRadius">观测者到黑洞距离 rₒ / M</label>
+        <input id="observerRadius" type="number" min="20" max="100000" step="10" value="1000">
+
+        <div class="inline-value">
+          <span>事件视界半径 2GM/c²</span>
+          <output id="horizonRadius">—</output>
+        </div>
+        <div class="inline-value">
+          <span>光子球 / 临界冲量参数</span>
+          <output id="criticalImpact">3M / 5.19615M</output>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>观察者屏幕</h2>
+        <p class="section-hint">滚轮缩放 · Shift + 拖动平移</p>
+        <div class="screen-wrap" id="screenWrap" aria-label="观察者屏幕；点击选择像素">
+          <canvas id="screenCanvas"></canvas>
+        </div>
+
+        <div class="inline-value">
+          <span>屏幕临界半径 ρc(rₒ) / M</span>
+          <output id="screenCritical">—</output>
+        </div>
+        <div class="inline-value">
+          <span>屏幕缩放</span>
+          <output id="screenZoom">×1</output>
+        </div>
+
+        <div class="trace-modes">
+          <details class="trace-mode" data-trace-mode="whole" name="trace-mode" open>
+            <summary>整根光线</summary>
+            <div class="mode-body">
+              <label class="coordinate-system-label" for="wholeCoordinateSystem">坐标形式</label>
+              <select class="coordinate-system-select" id="wholeCoordinateSystem" data-coordinate-system data-coordinate-mode="whole">
+                <option value="cartesian" selected>直角坐标（α, β）</option>
+                <option value="polar">极坐标（ρ, φ）</option>
+              </select>
+              <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="whole">
+                <div class="pair">
+                  <div>
+                    <label for="pixelU">α / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="pixelU" data-coordinate-component="alpha" data-coordinate-mode="whole" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="pixelU" data-step-direction="1" aria-label="α 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="pixelU" data-step-direction="-1" aria-label="α 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="pixelV">β / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="pixelV" data-coordinate-component="beta" data-coordinate-mode="whole" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="pixelV" data-step-direction="1" aria-label="β 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="pixelV" data-step-direction="-1" aria-label="β 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="whole" hidden>
+                <div class="pair">
+                  <div>
+                    <label for="pixelRho">ρ / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="pixelRho" data-coordinate-component="rho" data-coordinate-mode="whole" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="pixelRho" data-step-direction="1" aria-label="ρ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="pixelRho" data-step-direction="-1" aria-label="ρ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="pixelPhi">φ / °</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="pixelPhi" data-coordinate-component="phi" data-coordinate-mode="whole" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="pixelPhi" data-step-direction="1" aria-label="φ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="pixelPhi" data-step-direction="-1" aria-label="φ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="inline-value">
+                <span>光标所在位增减单位</span>
+                <output id="digitStepDisplay" data-digit-step-display>0.01</output>
+              </div>
+
+              <div class="turn-control">
+                <label for="turnCount">旋转圈数 n（轴后方无穷远源）</label>
+                <select id="turnCount">
+                  <option value="" selected>请选择 1–5</option>
+                  <option value="1">1 圈后逃逸</option>
+                  <option value="2">2 圈后逃逸</option>
+                  <option value="3">3 圈后逃逸</option>
+                  <option value="4">4 圈后逃逸</option>
+                  <option value="5">5 圈后逃逸</option>
+                </select>
+                <div class="turn-result" id="turnResult">相对直达路径的额外绕行：—</div>
+              </div>
+
+              <button id="downloadGeodesic" type="button">下载测地线数据（CSV）</button>
+            </div>
+          </details>
+
+          <details class="trace-mode" data-trace-mode="single" name="trace-mode">
+            <summary>单根光线</summary>
+            <div class="mode-body">
+              <label class="coordinate-system-label" for="singleCoordinateSystem">坐标形式</label>
+              <select class="coordinate-system-select" id="singleCoordinateSystem" data-coordinate-system data-coordinate-mode="single">
+                <option value="cartesian" selected>直角坐标（α, β）</option>
+                <option value="polar">极坐标（ρ, φ）</option>
+              </select>
+              <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="single">
+                <div class="pair">
+                  <div>
+                    <label for="singlePixelU">α / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="singlePixelU" data-coordinate-component="alpha" data-coordinate-mode="single" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelU" data-step-direction="1" aria-label="单根光线 α 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelU" data-step-direction="-1" aria-label="单根光线 α 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="singlePixelV">β / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="singlePixelV" data-coordinate-component="beta" data-coordinate-mode="single" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelV" data-step-direction="1" aria-label="单根光线 β 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelV" data-step-direction="-1" aria-label="单根光线 β 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="single" hidden>
+                <div class="pair">
+                  <div>
+                    <label for="singlePixelRho">ρ / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="singlePixelRho" data-coordinate-component="rho" data-coordinate-mode="single" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelRho" data-step-direction="1" aria-label="单根光线 ρ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelRho" data-step-direction="-1" aria-label="单根光线 ρ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="singlePixelPhi">φ / °</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="singlePixelPhi" data-coordinate-component="phi" data-coordinate-mode="single" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelPhi" data-step-direction="1" aria-label="单根光线 φ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="singlePixelPhi" data-step-direction="-1" aria-label="单根光线 φ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="inline-value">
+                <span>光标所在位增减单位</span>
+                <output data-digit-step-display>0.01</output>
+              </div>
+              <button id="addSingleByInput" type="button">添加光线</button>
+              <div class="trail-control">
+                <label for="singleTrailLength">
+                  <span>拖尾长度</span>
+                  <output data-trail-length-display>18%</output>
+                </label>
+                <input id="singleTrailLength" data-trail-length type="range" min="4" max="45" step="1" value="18">
+              </div>
+              <div class="inline-value" aria-live="polite">
+                <span>正在运行</span>
+                <output id="singleRayCount">0 条</output>
+              </div>
+              <button class="quiet-button" id="clearSingleRays" type="button">清空单根动画</button>
+            </div>
+          </details>
+
+          <details class="trace-mode" data-trace-mode="multi" name="trace-mode">
+            <summary>多根光线</summary>
+            <div class="mode-body">
+              <label class="coordinate-system-label" for="multiCoordinateSystem">坐标形式</label>
+              <select class="coordinate-system-select" id="multiCoordinateSystem" data-coordinate-system data-coordinate-mode="multi">
+                <option value="cartesian" selected>直角坐标（α, β）</option>
+                <option value="polar">极坐标（ρ, φ）</option>
+              </select>
+              <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="multi">
+                <div class="pair">
+                  <div>
+                    <label for="multiPixelU">α / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="multiPixelU" data-coordinate-component="alpha" data-coordinate-mode="multi" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelU" data-step-direction="1" aria-label="多根光线 α 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelU" data-step-direction="-1" aria-label="多根光线 α 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="multiPixelV">β / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="multiPixelV" data-coordinate-component="beta" data-coordinate-mode="multi" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelV" data-step-direction="1" aria-label="多根光线 β 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelV" data-step-direction="-1" aria-label="多根光线 β 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="multi" hidden>
+                <div class="pair">
+                  <div>
+                    <label for="multiPixelRho">ρ / M</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="multiPixelRho" data-coordinate-component="rho" data-coordinate-mode="multi" type="text" inputmode="decimal" value="5.1940000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelRho" data-step-direction="1" aria-label="多根光线 ρ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelRho" data-step-direction="-1" aria-label="多根光线 ρ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="multiPixelPhi">φ / °</label>
+                    <div class="digit-stepper">
+                      <input class="coordinate-input" id="multiPixelPhi" data-coordinate-component="phi" data-coordinate-mode="multi" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                      <div class="digit-step-buttons">
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelPhi" data-step-direction="1" aria-label="多根光线 φ 当前数位增加 1">▲</button>
+                        <button class="digit-step-button" type="button" data-step-target="multiPixelPhi" data-step-direction="-1" aria-label="多根光线 φ 当前数位减少 1">▼</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="inline-value">
+                <span>光标所在位增减单位</span>
+                <output data-digit-step-display>0.01</output>
+              </div>
+              <button id="addMultiByInput" type="button">加入列表</button>
+              <div class="trail-control">
+                <label for="multiTrailLength">
+                  <span>拖尾长度</span>
+                  <output data-trail-length-display>18%</output>
+                </label>
+                <input id="multiTrailLength" data-trail-length type="range" min="4" max="45" step="1" value="18">
+              </div>
+              <div class="inline-value" aria-live="polite">
+                <span>已选屏幕点</span>
+                <output id="multiPointCount">0 个</output>
+              </div>
+              <ol class="point-list" id="multiPointList" aria-label="多根光线已选屏幕点"></ol>
+              <button class="quiet-button" id="clearMultiPoints" type="button">清空</button>
+              <button id="startMultiRays" type="button">开始同步反向追踪</button>
+            </div>
+          </details>
+        </div>
+      </section>
+    </aside>
+
+    <section class="workspace" aria-label="三维零测地线图像">
+      <div class="orbit-wrap" id="orbitWrap">
+        <canvas id="starCanvas" aria-hidden="true"></canvas>
+        <canvas id="rimCanvas" aria-hidden="true"></canvas>
+        <canvas id="orbitCanvas" aria-label="可旋转缩放的三维零测地线轨迹"></canvas>
+        <canvas id="orbitOverlay" aria-hidden="true"></canvas>
+        <div class="playback-control" id="playbackControl" hidden>
+          <label for="playbackDirection">动画方向</label>
+          <select id="playbackDirection">
+            <option value="reverse" selected>反向追踪</option>
+            <option value="forward">正向追踪</option>
+          </select>
+          <button id="animationPause" type="button" aria-pressed="false">暂停</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <span id="selfTest" hidden></span>
+
+  <script>
+    "use strict";
+
+    const RG_SUN_KM = 1.4766250385;
+    const METRIC_MASS = 1;
+    const HORIZON_RADIUS = 2;
+    const PHOTON_SPHERE_RADIUS = 3;
+    const CRITICAL_IMPACT = 3 * Math.sqrt(3);
+    const DEFAULT_OBSERVER_DISTANCE = 1000;
+    const SCREEN_PIXELS = 121;
+    const SCREEN_EXTENT = 8;
+    const POLAR_MAX = SCREEN_EXTENT * Math.SQRT2;
+    const DISPLAY_DECIMALS = 16;
+    const TWO_PI = 2 * Math.PI;
+    const ANIMATION_RADIUS = 32;
+
+    const ui = {
+      mass: document.getElementById("mass"),
+      inclination: document.getElementById("inclination"),
+      observerRadius: document.getElementById("observerRadius"),
+      pixelU: document.getElementById("pixelU"),
+      pixelV: document.getElementById("pixelV"),
+      coordinateInputs: Array.from(document.querySelectorAll("[data-coordinate-component]")),
+      coordinateSystemControls: Array.from(document.querySelectorAll("[data-coordinate-system]")),
+      coordinateFieldGroups: Array.from(document.querySelectorAll("[data-coordinate-fields]")),
+      digitStepDisplay: document.getElementById("digitStepDisplay"),
+      horizonRadius: document.getElementById("horizonRadius"),
+      criticalImpact: document.getElementById("criticalImpact"),
+      screenCritical: document.getElementById("screenCritical"),
+      downloadGeodesic: document.getElementById("downloadGeodesic"),
+      screenWrap: document.getElementById("screenWrap"),
+      screenCanvas: document.getElementById("screenCanvas"),
+      screenZoom: document.getElementById("screenZoom"),
+      turnCount: document.getElementById("turnCount"),
+      turnResult: document.getElementById("turnResult"),
+      traceModes: Array.from(document.querySelectorAll("[data-trace-mode]")),
+      singleRayCount: document.getElementById("singleRayCount"),
+      addSingleByInput: document.getElementById("addSingleByInput"),
+      clearSingleRays: document.getElementById("clearSingleRays"),
+      multiPointCount: document.getElementById("multiPointCount"),
+      multiPointList: document.getElementById("multiPointList"),
+      addMultiByInput: document.getElementById("addMultiByInput"),
+      clearMultiPoints: document.getElementById("clearMultiPoints"),
+      startMultiRays: document.getElementById("startMultiRays"),
+      trailLengthControls: Array.from(document.querySelectorAll("[data-trail-length]")),
+      trailLengthDisplays: Array.from(document.querySelectorAll("[data-trail-length-display]")),
+      orbitWrap: document.getElementById("orbitWrap"),
+      starCanvas: document.getElementById("starCanvas"),
+      rimCanvas: document.getElementById("rimCanvas"),
+      orbitCanvas: document.getElementById("orbitCanvas"),
+      orbitOverlay: document.getElementById("orbitOverlay"),
+      playbackControl: document.getElementById("playbackControl"),
+      playbackDirection: document.getElementById("playbackDirection"),
+      animationPause: document.getElementById("animationPause"),
+      selfTest: document.getElementById("selfTest")
+    };
+
+    let currentResult = null;
+    let dragSelecting = false;
+    let screenPanning = false;
+    let traceQueued = false;
+    let orbitRenderer = null;
+    let turnSolveTimer = null;
+    let activeTraceMode = "whole";
+    let trailFraction = 0.18;
+    let polarAngle = 0;
+    const multiSelectedPoints = [];
+    const turnPresetCache = new Map();
+    const screenView = { centerU: 0, centerV: 0, halfExtent: SCREEN_EXTENT };
+    const screenPanStart = { x: 0, y: 0, centerU: 0, centerV: 0 };
+
+    function clamp(value, low, high) {
+      return Math.min(high, Math.max(low, value));
+    }
+
+    function finiteNumber(input, fallback) {
+      const value = Number(input.value);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function addScaled(base, terms) {
+      const out = base.slice();
+      for (let i = 0; i < out.length; i += 1) {
+        for (const [factor, vector] of terms) out[i] += factor * vector[i];
+      }
+      return out;
+    }
+
+    function derivatives(y, metricMass, pT, pPhi) {
+      const r = y[0];
+      const radialVelocity = y[2];
+      return [
+        radialVelocity,
+        pPhi / (r * r),
+        pPhi * pPhi * (r - 3 * metricMass) / Math.pow(r, 4)
+      ];
+    }
+
+    function dormandPrinceStep(y, h, metricMass, pT, pPhi) {
+      const d = state => derivatives(state, metricMass, pT, pPhi);
+      const k1 = d(y);
+      const k2 = d(addScaled(y, [[h * (1 / 5), k1]]));
+      const k3 = d(addScaled(y, [[h * (3 / 40), k1], [h * (9 / 40), k2]]));
+      const k4 = d(addScaled(y, [
+        [h * (44 / 45), k1], [h * (-56 / 15), k2], [h * (32 / 9), k3]
+      ]));
+      const k5 = d(addScaled(y, [
+        [h * (19372 / 6561), k1], [h * (-25360 / 2187), k2],
+        [h * (64448 / 6561), k3], [h * (-212 / 729), k4]
+      ]));
+      const k6 = d(addScaled(y, [
+        [h * (9017 / 3168), k1], [h * (-355 / 33), k2],
+        [h * (46732 / 5247), k3], [h * (49 / 176), k4],
+        [h * (-5103 / 18656), k5]
+      ]));
+
+      const y5 = addScaled(y, [
+        [h * (35 / 384), k1], [h * (500 / 1113), k3],
+        [h * (125 / 192), k4], [h * (-2187 / 6784), k5],
+        [h * (11 / 84), k6]
+      ]);
+      const k7 = d(y5);
+      const y4 = addScaled(y, [
+        [h * (5179 / 57600), k1], [h * (7571 / 16695), k3],
+        [h * (393 / 640), k4], [h * (-92097 / 339200), k5],
+        [h * (187 / 2100), k6], [h * (1 / 40), k7]
+      ]);
+
+      return { y5, y4 };
+    }
+
+    function errorNorm(y, y5, y4, rtol = 1e-9, atol = 1e-12) {
+      let sum = 0;
+      for (let i = 0; i < y.length; i += 1) {
+        const scale = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(y5[i]));
+        const ratio = (y5[i] - y4[i]) / scale;
+        sum += ratio * ratio;
+      }
+      return Math.sqrt(sum / y.length);
+    }
+
+    function relativeNullConstraint(y, metricMass, pT, pPhi) {
+      const r = y[0];
+      const radialVelocity = y[2];
+      const f = 1 - 2 * metricMass / r;
+      const radialTerm = radialVelocity * radialVelocity;
+      const energyTerm = pT * pT;
+      const angularTerm = f * pPhi * pPhi / (r * r);
+      return Math.abs(radialTerm - energyTerm + angularTerm)
+        / Math.max(radialTerm + energyTerm + Math.abs(angularTerm), 1e-30);
+    }
+
+    function radialPotential(radius, metricMass, pT, pPhi) {
+      const f = 1 - 2 * metricMass / radius;
+      return pT * pT - f * pPhi * pPhi / (radius * radius);
+    }
+
+    function outerTurningRadius(metricMass, pT, pPhi, observerRadius) {
+      const asymptoticImpact = Math.abs(pPhi / pT);
+      if (metricMass === 0) return asymptoticImpact > 0 ? asymptoticImpact : null;
+      const critical = 3 * Math.sqrt(3) * metricMass;
+      if (!(asymptoticImpact > critical)) return null;
+
+      let low = 3 * metricMass;
+      let high = observerRadius;
+      for (let iteration = 0; iteration < 80; iteration += 1) {
+        const middle = 0.5 * (low + high);
+        if (radialPotential(middle, metricMass, pT, pPhi) < 0) low = middle;
+        else high = middle;
+      }
+      return 0.5 * (low + high);
+    }
+
+    function adaptiveSimpsonIntegral(fn, tolerance = 2e-10, maxDepth = 22) {
+      const recurse = (a, b, fa, fm, fb, whole, tol, depth) => {
+        const middle = 0.5 * (a + b);
+        const leftMiddle = 0.5 * (a + middle);
+        const rightMiddle = 0.5 * (middle + b);
+        const flm = fn(leftMiddle);
+        const frm = fn(rightMiddle);
+        const left = (middle - a) * (fa + 4 * flm + fm) / 6;
+        const right = (b - middle) * (fm + 4 * frm + fb) / 6;
+        const refined = left + right;
+        if (depth <= 0 || Math.abs(refined - whole) <= 15 * tol) {
+          return refined + (refined - whole) / 15;
+        }
+        return recurse(a, middle, fa, flm, fm, left, tol / 2, depth - 1)
+          + recurse(middle, b, fm, frm, fb, right, tol / 2, depth - 1);
+      };
+
+      const fa = fn(0);
+      const fm = fn(0.5);
+      const fb = fn(1);
+      const whole = (fa + 4 * fm + fb) / 6;
+      return recurse(0, 1, fa, fm, fb, whole, tolerance, maxDepth);
+    }
+
+    function azimuthIntegralToTurning(uLower, uTurning, metricMass) {
+      const span = uTurning - uLower;
+      if (!(span > 0)) return 0;
+      const leading = 2 * uTurning * (1 - 3 * metricMass * uTurning);
+      const quadratic = -1 + 6 * metricMass * uTurning;
+      const transformed = x => {
+        if (x === 0) return 2 * Math.sqrt(span / Math.max(leading, 1e-300));
+        const delta = span * x * x;
+        const reducedPotential = delta * (
+          leading + quadratic * delta - 2 * metricMass * delta * delta
+        );
+        return 2 * span * x / Math.sqrt(Math.max(reducedPotential, 1e-300));
+      };
+      return adaptiveSimpsonIntegral(transformed);
+    }
+
+    function asymptoticAzimuthFromObserver(distance, impact, metricMass = METRIC_MASS) {
+      const fObserver = 1 - 2 * metricMass / distance;
+      if (!(fObserver > 0) || !(impact >= 0)) return null;
+      const directionScale = Math.hypot(distance, impact);
+      const pT = Math.sqrt(fObserver);
+      const pPhi = distance * impact / directionScale;
+      const turningRadius = outerTurningRadius(metricMass, pT, pPhi, distance);
+      if (!Number.isFinite(turningRadius)) return null;
+      const uTurning = 1 / turningRadius;
+      return azimuthIntegralToTurning(1 / distance, uTurning, metricMass)
+        + azimuthIntegralToTurning(0, uTurning, metricMass);
+    }
+
+    function pointFromState(y, affine = 0) {
+      return {
+        x: y[0] * Math.cos(y[1]),
+        y: y[0] * Math.sin(y[1]),
+        r: y[0],
+        phi: y[1],
+        affine
+      };
+    }
+
+    function localDirection(y, metricMass, pT, pPhi) {
+      const r = y[0];
+      const phi = y[1];
+      const f = 1 - 2 * metricMass / r;
+      const radial = y[2] / pT;
+      const azimuthal = Math.sqrt(f) * pPhi / (r * pT);
+      const x = radial * Math.cos(phi) - azimuthal * Math.sin(phi);
+      const yy = radial * Math.sin(phi) + azimuthal * Math.cos(phi);
+      const norm = Math.hypot(x, yy);
+      return {
+        x: x / norm,
+        y: yy / norm,
+        radial,
+        azimuthal,
+        angleUnwrapped: phi + Math.atan2(azimuthal, radial)
+      };
+    }
+
+    function locateEvent(previous, step, metricMass, pT, pPhi, eventValue, increasing) {
+      let low = 0;
+      let high = step;
+      let highState = dormandPrinceStep(previous, high, metricMass, pT, pPhi).y5;
+
+      for (let iteration = 0; iteration < 55; iteration += 1) {
+        const middle = 0.5 * (low + high);
+        const middleState = dormandPrinceStep(previous, middle, metricMass, pT, pPhi).y5;
+        const value = eventValue(middleState);
+        const eventIsAfterMiddle = increasing ? value < 0 : value > 0;
+        if (eventIsAfterMiddle) {
+          low = middle;
+        } else {
+          high = middle;
+          highState = middleState;
+        }
+        if (high - low <= Math.max(1e-13, 1e-12 * step)) break;
+      }
+
+      return { state: highState, elapsed: high };
+    }
+
+    function asymptoticAzimuthTail(state, metricMass, pT, pPhi) {
+      const inverseRadius = 1 / state[0];
+      const intervals = 32;
+      const integrand = u => {
+        const radicand = pT * pT - (1 - 2 * metricMass * u) * pPhi * pPhi * u * u;
+        return pPhi / Math.sqrt(Math.max(radicand, 1e-30));
+      };
+      let weighted = integrand(0) + integrand(inverseRadius);
+      for (let index = 1; index < intervals; index += 1) {
+        weighted += (index % 2 === 0 ? 2 : 4) * integrand(index * inverseRadius / intervals);
+      }
+      return inverseRadius * weighted / (3 * intervals);
+    }
+
+    function integrateRay({
+      metricMass = METRIC_MASS,
+      distance,
+      impact,
+      rtol = 1e-10,
+      farPastRadiusOverride = null
+    }) {
+      const r0 = distance;
+      const screenScale = Math.hypot(distance, impact);
+      const horizonRadius = 2 * metricMass;
+      const f0 = 1 - horizonRadius / r0;
+
+      if (!(f0 > 0) || !(distance > horizonRadius) || !(impact >= 0)) {
+        return { status: "invalid", message: "输入参数无效", points: [] };
+      }
+
+      const localRadial = -distance / screenScale;
+      const localAzimuthal = impact / screenScale;
+      const pT = Math.sqrt(f0);
+      const pPhi = r0 * localAzimuthal;
+      const radialVelocity0 = Math.sqrt(f0) * localRadial;
+      const turningRadius = outerTurningRadius(metricMass, pT, pPhi, r0);
+      const hasFiniteTurningPoint = Number.isFinite(turningRadius) && turningRadius > horizonRadius;
+
+      let y = [r0, 0, radialVelocity0];
+      let h = Math.min(0.2, 0.01 * r0);
+      let affine = 0;
+      let accepted = 0;
+      let rejected = 0;
+      let minR = r0;
+      let closestState = y.slice();
+      let maxConstraint = relativeNullConstraint(y, metricMass, pT, pPhi);
+      let turned = false;
+      let previousDr = y[2];
+      const points = [pointFromState(y, affine)];
+      const maxAcceptedSteps = 200000;
+      const farPastRadius = Number.isFinite(farPastRadiusOverride)
+        ? Math.max(farPastRadiusOverride, 1.01 * r0)
+        : Math.max(1000 * Math.max(metricMass, 1), 10 * r0);
+      const maxAffine = 2.5 * (r0 + farPastRadius) + 1000;
+      let status = "running";
+      let message = "";
+
+      while (accepted < maxAcceptedSteps && affine < maxAffine) {
+        const stepCeiling = clamp(0.03 * y[0], 0.002, 2500.0);
+        h = Math.min(h, stepCeiling, maxAffine - affine);
+        h = Math.max(h, 1e-8);
+
+        const previous = y;
+        const trial = dormandPrinceStep(y, h, metricMass, pT, pPhi);
+        const err = errorNorm(y, trial.y5, trial.y4, rtol);
+
+        if (!trial.y5.every(Number.isFinite) || !Number.isFinite(err)) {
+          status = "failed";
+          message = "积分出现非有限数值";
+          break;
+        }
+
+        if (err <= 1) {
+          const acceptedStep = h;
+          y = trial.y5;
+          affine += h;
+          accepted += 1;
+
+          if (y[0] <= horizonRadius) {
+            const horizonEvent = locateEvent(
+              previous,
+              acceptedStep,
+              metricMass,
+              pT,
+              pPhi,
+              state => state[0] - horizonRadius,
+              false
+            );
+            y = horizonEvent.state;
+            y[0] = horizonRadius;
+            affine += horizonEvent.elapsed - acceptedStep;
+            points.push(pointFromState(y, affine));
+            minR = horizonRadius;
+            closestState = y.slice();
+            status = "captured";
+            message = "穿过事件视界";
+            break;
+          }
+
+          const rawCurrentDr = y[2];
+          const reachedTurningPoint = hasFiniteTurningPoint && !turned && (
+            y[0] <= turningRadius || (previousDr < 0 && rawCurrentDr >= 0)
+          );
+          if (reachedTurningPoint) {
+            const crossedRadius = y[0] <= turningRadius;
+            const turningEvent = locateEvent(
+              previous,
+              acceptedStep,
+              metricMass,
+              pT,
+              pPhi,
+              crossedRadius
+                ? state => state[0] - turningRadius
+                : state => state[2],
+              !crossedRadius
+            );
+            y = turningEvent.state;
+            y[0] = turningRadius;
+            y[2] = 0;
+            affine += turningEvent.elapsed - acceptedStep;
+            closestState = y.slice();
+            minR = turningRadius;
+            turned = true;
+            previousDr = 0;
+            maxConstraint = Math.max(
+              maxConstraint,
+              relativeNullConstraint(y, metricMass, pT, pPhi)
+            );
+            points.push(pointFromState(y, affine));
+            h = Math.min(h, 0.05);
+            continue;
+          }
+
+          const exactRadialSpeed = Math.sqrt(Math.max(
+            0,
+            radialPotential(y[0], metricMass, pT, pPhi)
+          ));
+          y[2] = (turned ? 1 : -1) * exactRadialSpeed;
+          previousDr = y[2];
+
+          const constraint = relativeNullConstraint(y, metricMass, pT, pPhi);
+          maxConstraint = Math.max(maxConstraint, constraint);
+          if (y[0] < minR) {
+            minR = y[0];
+            closestState = y.slice();
+          }
+          points.push(pointFromState(y, affine));
+
+          if (turned && y[0] >= farPastRadius) {
+            const escapeEvent = locateEvent(
+              previous,
+              acceptedStep,
+              metricMass,
+              pT,
+              pPhi,
+              state => state[0] - farPastRadius,
+              true
+            );
+            y = escapeEvent.state;
+            y[0] = farPastRadius;
+            y[2] = Math.sqrt(Math.max(0, radialPotential(y[0], metricMass, pT, pPhi)));
+            affine += escapeEvent.elapsed - acceptedStep;
+            points[points.length - 1] = pointFromState(y, affine);
+            status = "escape";
+            message = "到达过去无穷远数值边界";
+            break;
+          }
+
+          const factor = err === 0 ? 5 : clamp(0.9 * Math.pow(err, -0.2), 0.2, 5);
+          h *= factor;
+        } else {
+          rejected += 1;
+          h *= clamp(0.9 * Math.pow(err, -0.25), 0.1, 0.5);
+          if (h < 1e-12) {
+            status = "failed";
+            message = "步长低于允许下限";
+            break;
+          }
+        }
+      }
+
+      if (status === "running") {
+        status = "failed";
+        message = "达到积分上限";
+      }
+
+      let deflection = null;
+      let phiInfinity = null;
+      let phiInfinityNumerical = null;
+      let asymptoticTail = null;
+      const initialDirection = localDirection([r0, 0, radialVelocity0], metricMass, pT, pPhi);
+      if (status === "escape") {
+        asymptoticTail = asymptoticAzimuthTail(y, metricMass, pT, pPhi);
+        phiInfinityNumerical = y[1] + asymptoticTail;
+        phiInfinity = asymptoticAzimuthFromObserver(distance, impact, metricMass);
+        deflection = phiInfinity - initialDirection.angleUnwrapped;
+      }
+
+      return {
+        status,
+        message,
+        metricMass,
+        horizonRadius,
+        distance,
+        impact,
+        impactInfinity: pPhi / pT,
+        farPastRadius,
+        pT,
+        pPhi,
+        turningRadius,
+        initialLocalTime: -1,
+        initialCoordinateTimeDirection: -pT / f0,
+        finalState: y,
+        closestState,
+        minR,
+        deflection,
+        initialDirectionAngle: initialDirection.angleUnwrapped,
+        asymptoticTail,
+        phiInfinity,
+        phiInfinityNumerical,
+        maxConstraint,
+        accepted,
+        rejected,
+        affine,
+        points
+      };
+    }
+
+    function modelParameters() {
+      const mass = clamp(finiteNumber(ui.mass, 10), 0.1, 1e10);
+      const inclination = clamp(finiteNumber(ui.inclination, 60), 0, 180);
+      const distance = clamp(
+        finiteNumber(ui.observerRadius, DEFAULT_OBSERVER_DISTANCE),
+        20,
+        100000
+      );
+      const u = clamp(finiteNumber(ui.pixelU, 5.194), -SCREEN_EXTENT, SCREEN_EXTENT);
+      const v = clamp(finiteNumber(ui.pixelV, 0), -SCREEN_EXTENT, SCREEN_EXTENT);
+      return { mass, inclination, distance, u, v, impact: Math.hypot(u, v) };
+    }
+
+    function criticalScreenImpact(distance, metricMass = METRIC_MASS) {
+      const critical = 3 * Math.sqrt(3) * metricMass;
+      const fObserver = 1 - 2 * metricMass / distance;
+      const localSine = critical * Math.sqrt(fObserver) / distance;
+      if (!(localSine >= 0 && localSine < 1)) return Number.NaN;
+      return distance * localSine / Math.sqrt(1 - localSine * localSine);
+    }
+
+    function observerBasis(inclinationDegrees) {
+      const theta = inclinationDegrees * Math.PI / 180;
+      const radial = [Math.sin(theta), 0, Math.cos(theta)];
+      const alpha = [0, 1, 0];
+      const beta = [-Math.cos(theta), 0, Math.sin(theta)];
+      return { radial, alpha, beta };
+    }
+
+    function setCanvasSize(canvas, wrapper) {
+      const rect = wrapper.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+      const targetWidth = Math.round(width * dpr);
+      const targetHeight = Math.round(height * dpr);
+      if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+      }
+      const context = canvas.getContext("2d");
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { context, width, height };
+    }
+
+    function constrainScreenView() {
+      screenView.halfExtent = clamp(screenView.halfExtent, 1e-13, SCREEN_EXTENT);
+      const centerLimit = SCREEN_EXTENT - screenView.halfExtent;
+      screenView.centerU = clamp(screenView.centerU, -centerLimit, centerLimit);
+      screenView.centerV = clamp(screenView.centerV, -centerLimit, centerLimit);
+    }
+
+    function screenLayout(rect) {
+      const pad = 17;
+      const size = Math.min(rect.width, rect.height) - 2 * pad;
+      const left = (rect.width - size) / 2;
+      const top = (rect.height - size) / 2;
+      const scale = size / (2 * screenView.halfExtent);
+      return { pad, size, left, top, scale };
+    }
+
+    function screenCoordinatesFromPointer(event) {
+      const rect = ui.screenCanvas.getBoundingClientRect();
+      const { size, left, top } = screenLayout(rect);
+      const normalizedX = clamp((event.clientX - rect.left - left) / size, 0, 1);
+      const normalizedY = clamp((event.clientY - rect.top - top) / size, 0, 1);
+      return {
+        u: screenView.centerU + (2 * normalizedX - 1) * screenView.halfExtent,
+        v: screenView.centerV + (1 - 2 * normalizedY) * screenView.halfExtent
+      };
+    }
+
+    function formatZoom(value) {
+      if (value < 1000) return `×${value.toFixed(value < 10 ? 2 : 0)}`;
+      return `×${value.toExponential(2)}`;
+    }
+
+    function drawScreen() {
+      const { context: ctx, width, height } = setCanvasSize(ui.screenCanvas, ui.screenWrap);
+      const params = modelParameters();
+      const { size, left, top, scale } = screenLayout({ width, height });
+      const minU = screenView.centerU - screenView.halfExtent;
+      const maxV = screenView.centerV + screenView.halfExtent;
+      const toX = u => left + (u - minU) * scale;
+      const toY = v => top + (maxV - v) * scale;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(left, top, size, size);
+      ctx.clip();
+
+      ctx.strokeStyle = "#eef0f2";
+      ctx.lineWidth = 1;
+      const minor = size / 12;
+      for (let i = 0; i <= 12; i += 1) {
+        const x = left + i * minor;
+        const y = top + i * minor;
+        ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, top + size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + size, y); ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#aeb4bb";
+      if (Math.abs(screenView.centerU) <= screenView.halfExtent) {
+        const axisX = toX(0);
+        ctx.beginPath();
+        ctx.moveTo(axisX, top);
+        ctx.lineTo(axisX, top + size);
+        ctx.stroke();
+      }
+      if (Math.abs(screenView.centerV) <= screenView.halfExtent) {
+        const axisY = toY(0);
+        ctx.beginPath();
+        ctx.moveTo(left, axisY);
+        ctx.lineTo(left + size, axisY);
+        ctx.stroke();
+      }
+
+      const criticalRadius = criticalScreenImpact(params.distance);
+      ctx.fillStyle = "#000000";
+      const rows = Math.max(1, Math.ceil(size));
+      for (let row = 0; row < rows; row += 1) {
+        const v = maxV - (row + 0.5) / scale;
+        if (Math.abs(v) >= criticalRadius) continue;
+        const boundaryU = Math.sqrt(Math.max(0, criticalRadius * criticalRadius - v * v));
+        const start = Math.max(left, toX(-boundaryU));
+        const end = Math.min(left + size, toX(boundaryU));
+        if (end > start) ctx.fillRect(start, top + row, end - start, 1.15);
+      }
+
+      const px = toX(params.u);
+      const py = toY(params.v);
+      if (px >= left - 8 && px <= left + size + 8 && py >= top - 8 && py <= top + size + 8) {
+        ctx.strokeStyle = "#e43b19";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(px - 7, py); ctx.lineTo(px + 7, py);
+        ctx.moveTo(px, py - 7); ctx.lineTo(px, py + 7);
+        ctx.stroke();
+        ctx.fillStyle = "#ffd24a";
+        ctx.beginPath(); ctx.arc(px, py, 2.5, 0, TWO_PI); ctx.fill();
+      }
+      if (activeTraceMode === "multi") {
+        ctx.font = "600 9px ui-sans-serif, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (let index = 0; index < multiSelectedPoints.length; index += 1) {
+          const point = multiSelectedPoints[index];
+          const markerX = toX(point.u);
+          const markerY = toY(point.v);
+          if (markerX < left - 8 || markerX > left + size + 8
+            || markerY < top - 8 || markerY > top + size + 8) continue;
+          ctx.fillStyle = "#ffd24a";
+          ctx.strokeStyle = "#e43b19";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(markerX, markerY, 7, 0, TWO_PI);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#5a210f";
+          ctx.fillText(String(index + 1), markerX, markerY + 0.3);
+        }
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = "#c9cdd2";
+      ctx.strokeRect(left + 0.5, top + 0.5, size - 1, size - 1);
+      ctx.fillStyle = "#646a73";
+      ctx.font = "11px ui-sans-serif, sans-serif";
+      ctx.fillText("α / M", left + size - 31, clamp(toY(0) - 5, top + 12, top + size - 5));
+      ctx.fillText("β / M", clamp(toX(0) + 5, left + 5, left + size - 31), top + 12);
+      ui.screenZoom.textContent = formatZoom(SCREEN_EXTENT / screenView.halfExtent);
+    }
+
+    function vecSubtract(a, b) {
+      return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+    }
+
+    function vecAdd(a, b) {
+      return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+    }
+
+    function vecScale(vector, scale) {
+      return [vector[0] * scale, vector[1] * scale, vector[2] * scale];
+    }
+
+    function vecCross(a, b) {
+      return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+      ];
+    }
+
+    function vecDot(a, b) {
+      return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
+    function vecNormalize(vector) {
+      const length = Math.hypot(vector[0], vector[1], vector[2]);
+      if (length < 1e-14) return [0, 0, 0];
+      return [vector[0] / length, vector[1] / length, vector[2] / length];
+    }
+
+    function orthographicMatrix(left, right, bottom, top, near, far) {
+      return new Float32Array([
+        2 / (right - left), 0, 0, 0,
+        0, 2 / (top - bottom), 0, 0,
+        0, 0, -2 / (far - near), 0,
+        -(right + left) / (right - left),
+        -(top + bottom) / (top - bottom),
+        -(far + near) / (far - near),
+        1
+      ]);
+    }
+
+    function lookAtMatrix(eye, target, up) {
+      const z = vecNormalize(vecSubtract(eye, target));
+      const x = vecNormalize(vecCross(up, z));
+      const y = vecCross(z, x);
+      return new Float32Array([
+        x[0], y[0], z[0], 0,
+        x[1], y[1], z[1], 0,
+        x[2], y[2], z[2], 0,
+        -vecDot(x, eye), -vecDot(y, eye), -vecDot(z, eye), 1
+      ]);
+    }
+
+    function transformVector4(matrix, vector) {
+      const [x, y, z, w] = vector;
+      return [
+        matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12] * w,
+        matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13] * w,
+        matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14] * w,
+        matrix[3] * x + matrix[7] * y + matrix[11] * z + matrix[15] * w
+      ];
+    }
+
+    function compileShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const message = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error(`WebGL shader error: ${message}`);
+      }
+      return shader;
+    }
+
+    function createProgram(gl) {
+      const vertexShader = compileShader(gl, gl.VERTEX_SHADER, `
+        attribute vec3 aPosition;
+        uniform mat4 uProjection;
+        uniform mat4 uView;
+        varying vec3 vViewNormal;
+        void main() {
+          float normalLength = max(length(aPosition), 0.000001);
+          vViewNormal = mat3(uView) * (aPosition / normalLength);
+          gl_Position = uProjection * uView * vec4(aPosition, 1.0);
+        }
+      `);
+      const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, `
+        precision mediump float;
+        uniform vec4 uColor;
+        uniform float uLighting;
+        varying vec3 vViewNormal;
+        void main() {
+          vec3 color = uColor.rgb;
+          if (uLighting > 0.5) {
+            vec3 normal = normalize(vViewNormal);
+            vec3 lightDirection = normalize(vec3(-0.55, 0.68, 0.48));
+            float diffuse = max(dot(normal, lightDirection), 0.0);
+            float facing = clamp(normal.z, 0.0, 1.0);
+            float edgeShade = 1.0 - 0.62 * pow(1.0 - facing, 1.7);
+            float darkLight = 0.018 + 0.105 * diffuse + 0.025 * pow(diffuse, 10.0);
+            color = vec3(0.0015, 0.003, 0.008)
+              + darkLight * edgeShade * vec3(0.55, 0.62, 0.76);
+          }
+          gl_FragColor = vec4(color, uColor.a);
+        }
+      `);
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        const message = gl.getProgramInfoLog(program);
+        gl.deleteProgram(program);
+        throw new Error(`WebGL program error: ${message}`);
+      }
+      return program;
+    }
+
+    function sphereGeometry(radius = 1, latitudeBands = 48, longitudeBands = 64) {
+      const vertices = [];
+      const indices = [];
+      for (let latitude = 0; latitude <= latitudeBands; latitude += 1) {
+        const theta = latitude * Math.PI / latitudeBands;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+        for (let longitude = 0; longitude <= longitudeBands; longitude += 1) {
+          const phi = longitude * TWO_PI / longitudeBands;
+          vertices.push(
+            radius * sinTheta * Math.cos(phi),
+            radius * sinTheta * Math.sin(phi),
+            radius * cosTheta
+          );
+        }
+      }
+      for (let latitude = 0; latitude < latitudeBands; latitude += 1) {
+        for (let longitude = 0; longitude < longitudeBands; longitude += 1) {
+          const first = latitude * (longitudeBands + 1) + longitude;
+          const second = first + longitudeBands + 1;
+          indices.push(first, second, first + 1, second, second + 1, first + 1);
+        }
+      }
+      return { vertices, indices };
+    }
+
+    function tubeGeometry(points, planeNormal, radius, radialSegments = 10) {
+      const vertices = [];
+      const indices = [];
+      if (points.length < 2) return { vertices, indices };
+
+      for (let index = 0; index < points.length; index += 1) {
+        const previous = points[Math.max(0, index - 1)];
+        const next = points[Math.min(points.length - 1, index + 1)];
+        const tangent = vecNormalize(vecSubtract(next, previous));
+        let side = vecNormalize(vecCross(tangent, planeNormal));
+        if (vecDot(side, side) < 0.5) side = [0, 1, 0];
+
+        for (let segment = 0; segment < radialSegments; segment += 1) {
+          const angle = TWO_PI * segment / radialSegments;
+          const cosine = Math.cos(angle);
+          const sine = Math.sin(angle);
+          vertices.push(
+            points[index][0] + radius * (cosine * planeNormal[0] + sine * side[0]),
+            points[index][1] + radius * (cosine * planeNormal[1] + sine * side[1]),
+            points[index][2] + radius * (cosine * planeNormal[2] + sine * side[2])
+          );
+        }
+      }
+
+      for (let index = 0; index < points.length - 1; index += 1) {
+        for (let segment = 0; segment < radialSegments; segment += 1) {
+          const nextSegment = (segment + 1) % radialSegments;
+          const a = index * radialSegments + segment;
+          const b = index * radialSegments + nextSegment;
+          const c = (index + 1) * radialSegments + segment;
+          const d = (index + 1) * radialSegments + nextSegment;
+          indices.push(a, c, b, b, c, d);
+        }
+      }
+      return { vertices, indices };
+    }
+
+    class OrbitRenderer3D {
+      constructor(canvas, overlay, starCanvas, rimCanvas, wrapper) {
+        this.canvas = canvas;
+        this.overlay = overlay;
+        this.starCanvas = starCanvas;
+        this.rimCanvas = rimCanvas;
+        this.wrapper = wrapper;
+        this.overlayContext = overlay.getContext("2d");
+        this.starContext = starCanvas.getContext("2d");
+        this.rimContext = rimCanvas.getContext("2d");
+        this.gl = canvas.getContext("webgl", {
+          antialias: true,
+          alpha: true,
+          premultipliedAlpha: false
+        });
+        if (!this.gl) throw new Error("当前浏览器不支持 WebGL");
+
+        this.program = createProgram(this.gl);
+        this.positionLocation = this.gl.getAttribLocation(this.program, "aPosition");
+        this.projectionLocation = this.gl.getUniformLocation(this.program, "uProjection");
+        this.viewLocation = this.gl.getUniformLocation(this.program, "uView");
+        this.colorLocation = this.gl.getUniformLocation(this.program, "uColor");
+        this.lightingLocation = this.gl.getUniformLocation(this.program, "uLighting");
+        this.sphere = this.createMesh(sphereGeometry(HORIZON_RADIUS));
+        this.axes = {
+          x: this.createLineMesh([-12, 0, 0, 12, 0, 0]),
+          y: this.createLineMesh([0, -12, 0, 0, 12, 0]),
+          z: this.createLineMesh([0, 0, -12, 0, 0, 12])
+        };
+        this.pathMeshes = [];
+        this.pathLineMesh = null;
+        this.staticPathPoints = [];
+        this.turnMarkers = [];
+        this.radialTurnMarker = null;
+        this.staticPathHovered = false;
+        this.staticAnnotationsPinned = false;
+        this.pointerTravel = 0;
+        this.animatedRays = [];
+        this.visibleAnimationMode = "whole";
+        this.animationFrameId = null;
+        this.nextAnimationRayId = 1;
+        this.trailFraction = trailFraction;
+        this.playbackDirection = "reverse";
+        this.animationPaused = false;
+        this.pauseStartedAt = null;
+        this.onRaySetChanged = null;
+        this.reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || false;
+        this.lastProjection = null;
+        this.lastView = null;
+        this.configuration = null;
+        this.dragging = false;
+        this.lastPointer = { x: 0, y: 0 };
+        this.resetView();
+        this.installInteraction();
+      }
+
+      createMesh(geometry) {
+        const gl = this.gl;
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.vertices), gl.STATIC_DRAW);
+        const indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(geometry.indices), gl.STATIC_DRAW);
+        return { vertexBuffer, indexBuffer, count: geometry.indices.length, mode: gl.TRIANGLES };
+      }
+
+      createLineMesh(vertices) {
+        const gl = this.gl;
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        return { vertexBuffer, indexBuffer: null, count: vertices.length / 3, mode: gl.LINES };
+      }
+
+      createPolylineMesh(points) {
+        const gl = this.gl;
+        const vertexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points.flat()), gl.STATIC_DRAW);
+        return { vertexBuffer, indexBuffer: null, count: points.length, mode: gl.LINE_STRIP };
+      }
+
+      destroyMesh(mesh) {
+        if (!mesh) return;
+        this.gl.deleteBuffer(mesh.vertexBuffer);
+        if (mesh.indexBuffer) this.gl.deleteBuffer(mesh.indexBuffer);
+      }
+
+      clearStaticPath(renderAfter = true) {
+        for (const entry of this.pathMeshes) this.destroyMesh(entry.mesh);
+        this.destroyMesh(this.pathLineMesh);
+        this.pathMeshes = [];
+        this.pathLineMesh = null;
+        this.staticPathPoints = [];
+        this.turnMarkers = [];
+        this.radialTurnMarker = null;
+        this.staticPathHovered = false;
+        this.staticAnnotationsPinned = false;
+        this.targetTurnCount = 0;
+        if (renderAfter) this.render();
+      }
+
+      setAnimationMode(mode, params = null) {
+        this.visibleAnimationMode = mode;
+        if (params) {
+          const basis = observerBasis(params.inclination);
+          this.setConfiguration(params, basis);
+        }
+        if (mode !== "whole") {
+          this.clearStaticPath(false);
+          this.maxPathRadius = ANIMATION_RADIUS;
+        }
+        this.staticPathHovered = false;
+        this.staticAnnotationsPinned = false;
+        this.render();
+        this.ensureAnimationLoop();
+      }
+
+      setTrailFraction(value) {
+        this.trailFraction = clamp(value, 0.04, 0.45);
+        this.drawOverlayFrame(performance.now());
+      }
+
+      setPlaybackDirection(direction) {
+        this.playbackDirection = direction === "forward" ? "forward" : "reverse";
+        const clockNow = this.animationPaused ? this.pauseStartedAt : performance.now();
+        const restartAt = clockNow + 140;
+        for (const ray of this.animatedRays) {
+          if (ray.mode === this.visibleAnimationMode) ray.startTime = restartAt;
+        }
+        this.drawOverlayFrame(clockNow);
+        this.ensureAnimationLoop();
+      }
+
+      setAnimationPaused(paused) {
+        const nextPaused = Boolean(paused);
+        if (nextPaused === this.animationPaused) return this.animationPaused;
+        const now = performance.now();
+        if (nextPaused) {
+          this.drawOverlayFrame(now);
+          this.animationPaused = true;
+          this.pauseStartedAt = now;
+          if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+          }
+        } else {
+          const pausedDuration = Math.max(0, now - (this.pauseStartedAt ?? now));
+          for (const ray of this.animatedRays) {
+            if (Number.isFinite(ray.startTime)) ray.startTime += pausedDuration;
+          }
+          this.animationPaused = false;
+          this.pauseStartedAt = null;
+          this.drawOverlayFrame(now);
+          this.ensureAnimationLoop();
+        }
+        return this.animationPaused;
+      }
+
+      animationStartTime(requestedStartTime) {
+        if (!this.animationPaused || !Number.isFinite(requestedStartTime)) {
+          return requestedStartTime;
+        }
+        const leadTime = Math.max(0, requestedStartTime - performance.now());
+        return (this.pauseStartedAt ?? performance.now()) + leadTime;
+      }
+
+      animatedRayCount(mode) {
+        return this.animatedRays.filter(ray => ray.mode === mode).length;
+      }
+
+      clearAnimatedRays(mode) {
+        const previousLength = this.animatedRays.length;
+        this.animatedRays = this.animatedRays.filter(ray => ray.mode !== mode);
+        if (!this.animatedRays.some(ray => ray.mode === this.visibleAnimationMode)
+          && this.animationFrameId !== null) {
+          cancelAnimationFrame(this.animationFrameId);
+          this.animationFrameId = null;
+        }
+        if (this.animatedRays.length !== previousLength) this.onRaySetChanged?.();
+        this.drawOverlayFrame(performance.now());
+      }
+
+      removeAnimatedRay(rayId) {
+        const previousLength = this.animatedRays.length;
+        this.animatedRays = this.animatedRays.filter(ray => ray.id !== rayId);
+        if (!this.animatedRays.some(ray => ray.mode === this.visibleAnimationMode)
+          && this.animationFrameId !== null) {
+          cancelAnimationFrame(this.animationFrameId);
+          this.animationFrameId = null;
+        }
+        if (this.animatedRays.length !== previousLength) this.onRaySetChanged?.();
+        this.drawOverlayFrame(performance.now());
+      }
+
+      addAnimatedRay(result, params, mode, sharedStartTime = performance.now()) {
+        if (!result?.points || result.points.length < 2) return null;
+        const basis = observerBasis(params.inclination);
+        this.setConfiguration(params, basis);
+        const impact = Math.hypot(params.u, params.v);
+        const screenOffset = vecAdd(vecScale(basis.alpha, params.u), vecScale(basis.beta, params.v));
+        const transverse = impact > 1e-12 ? vecNormalize(screenOffset) : basis.alpha;
+
+        let first = 0;
+        while (first < result.points.length - 1 && result.points[first].r > ANIMATION_RADIUS) first += 1;
+        first = Math.max(0, first - 1);
+        let last = result.points.length - 1;
+        if (result.status === "escape") {
+          while (last > first && result.points[last].r > ANIMATION_RADIUS) last -= 1;
+          last = Math.min(result.points.length - 1, last + 1);
+        }
+        if (last - first < 1) return null;
+
+        const clipped = result.points.slice(first, last + 1);
+        const stride = Math.max(1, Math.ceil(clipped.length / 1800));
+        const sampled = clipped.filter((point, index) => index % stride === 0 || index === clipped.length - 1);
+        const affineStart = Number.isFinite(sampled[0].affine) ? sampled[0].affine : 0;
+        const affineEnd = Number.isFinite(sampled[sampled.length - 1].affine)
+          ? sampled[sampled.length - 1].affine
+          : sampled.length - 1;
+        const affineSpan = Math.max(1e-9, affineEnd - affineStart);
+        const animationPoints = sampled.map((point, index) => ({
+          world: vecAdd(vecScale(basis.radial, point.x), vecScale(transverse, point.y)),
+          affine: Number.isFinite(point.affine)
+            ? point.affine
+            : affineStart + affineSpan * index / Math.max(1, sampled.length - 1),
+          progress: Number.isFinite(point.affine)
+            ? (point.affine - affineStart) / affineSpan
+            : index / Math.max(1, sampled.length - 1)
+        }));
+
+        const ray = {
+          id: this.nextAnimationRayId++,
+          mode,
+          points: animationPoints,
+          startTime: this.animationStartTime(sharedStartTime),
+          affineStart,
+          affineEnd,
+          affineSpan,
+          timelineStart: affineStart,
+          timelineEnd: affineEnd,
+          duration: clamp(affineSpan * 95, 4200, 11500),
+          gap: 900,
+          loop: mode !== "single"
+        };
+        this.animatedRays.push(ray);
+        this.onRaySetChanged?.();
+        this.visibleAnimationMode = mode;
+        this.render();
+        this.ensureAnimationLoop();
+        return ray.id;
+      }
+
+      synchronizeAnimatedGroup(mode, sharedStartTime = performance.now()) {
+        const rays = this.animatedRays.filter(ray => ray.mode === mode);
+        if (!rays.length) return;
+
+        // Every ray starts at the same observer event with the same affine
+        // normalization.  Use one affine clock for the whole bundle so an
+        // incoming wavefront stays synchronized on every repeated pass.
+        const timelineStart = Math.max(...rays.map(ray => ray.affineStart));
+        const timelineEnd = Math.max(timelineStart + 1e-9, ...rays.map(ray => ray.affineEnd));
+        const affineSpan = timelineEnd - timelineStart;
+        const duration = clamp(affineSpan * 95, 4200, 11500);
+
+        const synchronizedStartTime = this.animationStartTime(sharedStartTime);
+        for (const ray of rays) {
+          ray.startTime = synchronizedStartTime;
+          ray.timelineStart = timelineStart;
+          ray.timelineEnd = timelineEnd;
+          ray.duration = duration;
+          ray.gap = 900;
+        }
+        this.drawOverlayFrame(performance.now());
+        this.ensureAnimationLoop();
+      }
+
+      setConfiguration(params, basis) {
+        const observer = vecScale(basis.radial, params.distance);
+        const screenOffset = vecAdd(vecScale(basis.alpha, params.u), vecScale(basis.beta, params.v));
+        const initialDirection = vecNormalize(vecAdd(
+          vecScale(basis.radial, -params.distance),
+          screenOffset
+        ));
+        this.configuration = {
+          basis,
+          inclination: params.inclination,
+          distance: params.distance,
+          observer,
+          initialDirection,
+          pastBoundary: null,
+          farPastRadius: null
+        };
+      }
+
+      setPath(points2D, u, v, inclination, distance, targetTurnCount = 0, status = "") {
+        this.clearStaticPath(false);
+        this.visibleAnimationMode = "whole";
+        this.targetTurnCount = targetTurnCount;
+
+        const basis = observerBasis(inclination);
+        this.setConfiguration({ u, v, inclination, distance }, basis);
+        if (!points2D || points2D.length < 2) {
+          this.render();
+          return;
+        }
+
+        const impact = Math.hypot(u, v);
+        const screenOffset = vecAdd(vecScale(basis.alpha, u), vecScale(basis.beta, v));
+        const transverse = impact > 1e-12 ? vecNormalize(screenOffset) : basis.alpha;
+        const planeNormal = vecNormalize(vecCross(basis.radial, transverse));
+        this.planeNormal = planeNormal;
+        const stride = Math.max(1, Math.ceil(points2D.length / 5000));
+        const sampledPoints = points2D.filter((point, index) => index % stride === 0 || index === points2D.length - 1);
+        const points3D = sampledPoints.map(point => vecAdd(
+          vecScale(basis.radial, point.x),
+          vecScale(transverse, point.y)
+        ));
+        this.maxPathRadius = Math.max(12, ...sampledPoints.map(point => point.r));
+        this.configuration.pastBoundary = points3D[points3D.length - 1];
+        this.configuration.farPastRadius = points2D[points2D.length - 1].r;
+        this.configuration.pathStatus = status;
+        this.staticPathPoints = points3D;
+        this.pathLineMesh = this.createPolylineMesh(points3D);
+
+        if (status === "escape") {
+          let closestIndex = 0;
+          for (let index = 1; index < points2D.length; index += 1) {
+            if (points2D[index].r < points2D[closestIndex].r) closestIndex = index;
+          }
+          const closest = points2D[closestIndex];
+          this.radialTurnMarker = vecAdd(
+            vecScale(basis.radial, closest.x),
+            vecScale(transverse, closest.y)
+          );
+        }
+
+        if (targetTurnCount > 0 && Number.isFinite(points2D[0]?.phi)) {
+          const initialPhi = points2D[0].phi;
+          let searchIndex = 1;
+          for (let turn = 1; turn <= targetTurnCount; turn += 1) {
+            const targetPhi = turn * TWO_PI;
+            while (searchIndex < points2D.length && points2D[searchIndex].phi < targetPhi) {
+              searchIndex += 1;
+            }
+            if (searchIndex >= points2D.length) break;
+            const before = points2D[Math.max(0, searchIndex - 1)];
+            const after = points2D[searchIndex];
+            const span = Math.max(1e-30, after.phi - before.phi);
+            const fraction = clamp((targetPhi - before.phi) / span, 0, 1);
+            const x = before.x + fraction * (after.x - before.x);
+            const y = before.y + fraction * (after.y - before.y);
+            this.turnMarkers.push({
+              turn,
+              point: vecAdd(vecScale(basis.radial, x), vecScale(transverse, y))
+            });
+          }
+        }
+
+        const layers = [
+          { radius: 0.060, color: [0.95, 0.18, 0.04, 0.14] },
+          { radius: 0.030, color: [1.00, 0.40, 0.03, 0.60] },
+          { radius: 0.011, color: [1.00, 0.78, 0.16, 1.00] }
+        ];
+        this.pathMeshes = layers.map(layer => ({
+          mesh: this.createMesh(tubeGeometry(points3D, planeNormal, layer.radius)),
+          color: layer.color
+        }));
+        this.render();
+      }
+
+      resetView() {
+        this.viewMode = "near";
+        if (this.planeNormal && vecDot(this.planeNormal, this.planeNormal) > 0.5) {
+          this.yaw = Math.atan2(this.planeNormal[1], this.planeNormal[0]);
+          this.pitch = Math.asin(clamp(this.planeNormal[2], -0.98, 0.98));
+        } else {
+          this.yaw = 0.80;
+          this.pitch = 0.34;
+        }
+        this.distance = 22;
+        if (this.gl) this.render();
+      }
+
+      fitFullPath() {
+        this.viewMode = "full";
+        this.distance = clamp(2.8 * (this.maxPathRadius || 12), 22, 5000000);
+        if (this.gl) this.render();
+      }
+
+      staticPathHitAt(clientX, clientY, tolerance = 10) {
+        if (this.visibleAnimationMode !== "whole"
+          || this.staticPathPoints.length < 2
+          || !this.lastProjection
+          || !this.lastView) return false;
+        const rect = this.canvas.getBoundingClientRect();
+        const targetX = clientX - rect.left;
+        const targetY = clientY - rect.top;
+        const toleranceSquared = tolerance * tolerance;
+        const stride = Math.max(1, Math.floor(this.staticPathPoints.length / 1200));
+        let previous = this.projectPoint(this.staticPathPoints[0], this.lastProjection, this.lastView);
+
+        for (let index = stride; index < this.staticPathPoints.length; index += stride) {
+          const current = this.projectPoint(
+            this.staticPathPoints[Math.min(index, this.staticPathPoints.length - 1)],
+            this.lastProjection,
+            this.lastView
+          );
+          if (previous?.visible && current?.visible) {
+            const dx = current.x - previous.x;
+            const dy = current.y - previous.y;
+            const lengthSquared = dx * dx + dy * dy;
+            const fraction = lengthSquared > 0
+              ? clamp(((targetX - previous.x) * dx + (targetY - previous.y) * dy) / lengthSquared, 0, 1)
+              : 0;
+            const nearestX = previous.x + fraction * dx;
+            const nearestY = previous.y + fraction * dy;
+            const distanceSquared = (targetX - nearestX) ** 2 + (targetY - nearestY) ** 2;
+            if (distanceSquared <= toleranceSquared) return true;
+          }
+          previous = current;
+        }
+        const lastPoint = this.staticPathPoints[this.staticPathPoints.length - 1];
+        const projectedLast = this.projectPoint(lastPoint, this.lastProjection, this.lastView);
+        return Boolean(projectedLast?.visible
+          && (targetX - projectedLast.x) ** 2 + (targetY - projectedLast.y) ** 2 <= toleranceSquared);
+      }
+
+      staticAnnotationsVisible() {
+        return this.visibleAnimationMode === "whole"
+          && (this.staticPathHovered || this.staticAnnotationsPinned);
+      }
+
+      installInteraction() {
+        this.canvas.addEventListener("pointerdown", event => {
+          if (event.button !== 0) return;
+          this.dragging = true;
+          this.pointerTravel = 0;
+          this.lastPointer = { x: event.clientX, y: event.clientY };
+          this.canvas.setPointerCapture(event.pointerId);
+        });
+        this.canvas.addEventListener("pointermove", event => {
+          if (!this.dragging) {
+            const hovered = this.staticPathHitAt(event.clientX, event.clientY);
+            if (hovered !== this.staticPathHovered) {
+              this.staticPathHovered = hovered;
+              this.canvas.style.cursor = hovered ? "pointer" : "grab";
+              this.drawOverlayFrame(performance.now());
+            }
+            return;
+          }
+          const dx = event.clientX - this.lastPointer.x;
+          const dy = event.clientY - this.lastPointer.y;
+          this.pointerTravel += Math.hypot(dx, dy);
+          this.lastPointer = { x: event.clientX, y: event.clientY };
+          this.staticPathHovered = false;
+          this.yaw -= dx * 0.007;
+          this.pitch = clamp(this.pitch + dy * 0.007, -Math.PI / 2, Math.PI / 2);
+          this.viewMode = "custom";
+          this.render();
+        });
+        const endDrag = event => {
+          const wasClick = this.dragging && this.pointerTravel < 4;
+          this.dragging = false;
+          if (wasClick) {
+            const hit = this.staticPathHitAt(event.clientX, event.clientY);
+            this.staticAnnotationsPinned = hit ? !this.staticAnnotationsPinned : false;
+            this.staticPathHovered = hit;
+          }
+          this.canvas.style.cursor = this.staticPathHovered ? "pointer" : "grab";
+          this.drawOverlayFrame(performance.now());
+        };
+        this.canvas.addEventListener("pointerup", endDrag);
+        this.canvas.addEventListener("pointercancel", () => {
+          this.dragging = false;
+          this.pointerTravel = 0;
+        });
+        this.canvas.addEventListener("pointerleave", () => {
+          if (this.dragging || !this.staticPathHovered) return;
+          this.staticPathHovered = false;
+          this.canvas.style.cursor = "grab";
+          this.drawOverlayFrame(performance.now());
+        });
+        this.canvas.addEventListener("wheel", event => {
+          event.preventDefault();
+          this.distance = clamp(this.distance * Math.exp(event.deltaY * 0.0012), 4.2, 5000000);
+          this.viewMode = "custom";
+          this.render();
+        }, { passive: false });
+        this.canvas.addEventListener("dblclick", () => this.resetView());
+      }
+
+      drawStarfield(width, height) {
+        const ctx = this.starContext;
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#02040a";
+        ctx.fillRect(0, 0, width, height);
+
+        let seed = (Math.imul(width, 73856093) ^ Math.imul(height, 19349663) ^ 0x9e3779b9) >>> 0;
+        const random = () => {
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          return seed / 4294967296;
+        };
+        const starCount = clamp(Math.round(width * height / 3000), 110, 360);
+        for (let index = 0; index < starCount; index += 1) {
+          const x = random() * width;
+          const y = random() * height;
+          const kind = random();
+          const radius = kind > 0.985 ? 1.35 : kind > 0.86 ? 0.82 : 0.48;
+          const opacity = 0.28 + 0.64 * Math.pow(random(), 1.6);
+          const tint = random();
+          const color = tint > 0.88
+            ? [208, 224, 255]
+            : tint < 0.08
+              ? [255, 232, 205]
+              : [242, 246, 255];
+          ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${opacity})`;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, TWO_PI);
+          ctx.fill();
+        }
+      }
+
+      resize() {
+        const rect = this.wrapper.getBoundingClientRect();
+        const dpr = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+        const cssWidth = Math.max(1, Math.round(rect.width));
+        const cssHeight = Math.max(1, Math.round(rect.height));
+        const width = Math.round(cssWidth * dpr);
+        const height = Math.round(cssHeight * dpr);
+        if (this.canvas.width !== width || this.canvas.height !== height) {
+          this.canvas.width = width;
+          this.canvas.height = height;
+        }
+        if (this.overlay.width !== width || this.overlay.height !== height) {
+          this.overlay.width = width;
+          this.overlay.height = height;
+        }
+        const starNeedsRedraw = this.starCanvas.width !== width
+          || this.starCanvas.height !== height
+          || this.starCssWidth !== cssWidth
+          || this.starCssHeight !== cssHeight;
+        if (this.starCanvas.width !== width || this.starCanvas.height !== height) {
+          this.starCanvas.width = width;
+          this.starCanvas.height = height;
+        }
+        if (this.rimCanvas.width !== width || this.rimCanvas.height !== height) {
+          this.rimCanvas.width = width;
+          this.rimCanvas.height = height;
+        }
+        this.overlayContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.starContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.rimContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.overlayWidth = cssWidth;
+        this.overlayHeight = cssHeight;
+        if (starNeedsRedraw) {
+          this.starCssWidth = cssWidth;
+          this.starCssHeight = cssHeight;
+          this.drawStarfield(cssWidth, cssHeight);
+        }
+      }
+
+      drawMesh(mesh, color, lighting = 0) {
+        if (!mesh) return;
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+        gl.enableVertexAttribArray(this.positionLocation);
+        gl.vertexAttribPointer(this.positionLocation, 3, gl.FLOAT, false, 0, 0);
+        gl.uniform4fv(this.colorLocation, color);
+        gl.uniform1f(this.lightingLocation, lighting);
+        if (mesh.indexBuffer) {
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+          gl.drawElements(mesh.mode, mesh.count, gl.UNSIGNED_SHORT, 0);
+        } else {
+          gl.drawArrays(mesh.mode, 0, mesh.count);
+        }
+      }
+
+      projectPoint(point, projection, view) {
+        const viewPoint = transformVector4(view, [point[0], point[1], point[2], 1]);
+        const clip = transformVector4(projection, viewPoint);
+        if (!(clip[3] > 0)) return null;
+        const x = clip[0] / clip[3];
+        const y = clip[1] / clip[3];
+        const z = clip[2] / clip[3];
+        return {
+          x: (x * 0.5 + 0.5) * this.overlayWidth,
+          y: (0.5 - y * 0.5) * this.overlayHeight,
+          viewDepth: viewPoint[2],
+          visible: z >= -1 && z <= 1 && x >= -1.08 && x <= 1.08 && y >= -1.08 && y <= 1.08
+        };
+      }
+
+      drawOverlayLabel(text, x, y, color = "#d9dee6") {
+        const ctx = this.overlayContext;
+        ctx.save();
+        ctx.font = "12px ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        const width = ctx.measureText(text).width;
+        const left = clamp(x, 4, this.overlayWidth - width - 10);
+        const top = clamp(y, 4, this.overlayHeight - 20);
+        ctx.fillStyle = "rgba(3,6,12,0.78)";
+        ctx.fillRect(left - 3, top - 2, width + 6, 18);
+        ctx.fillStyle = color;
+        ctx.fillText(text, left, top + 11);
+        ctx.restore();
+      }
+
+      drawArrow2D(start, end, color, label) {
+        const ctx = this.overlayContext;
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const length = Math.hypot(dx, dy);
+        if (length < 1) return;
+        const ux = dx / length;
+        const uy = dy / length;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(end.x, end.y);
+        ctx.lineTo(end.x - 7 * ux + 3.5 * uy, end.y - 7 * uy - 3.5 * ux);
+        ctx.lineTo(end.x - 7 * ux - 3.5 * uy, end.y - 7 * uy + 3.5 * ux);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font = "600 12px ui-sans-serif, sans-serif";
+        ctx.fillText(label, end.x + 5 * ux, end.y + 5 * uy);
+        ctx.restore();
+      }
+
+      drawConfigurationOverlay(projection, view) {
+        if (!this.configuration) return;
+        const { basis, center, selected, inclination, distance } = this.configuration;
+        const centerPoint = this.projectPoint(center, projection, view);
+        if (!centerPoint?.visible) return;
+
+        const ctx = this.overlayContext;
+        const originPoint = this.projectPoint([0, 0, 0], projection, view);
+        if (originPoint?.visible) {
+          ctx.save();
+          ctx.strokeStyle = "#757c84";
+          ctx.lineWidth = 1.15;
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.moveTo(originPoint.x, originPoint.y);
+          ctx.lineTo(centerPoint.x, centerPoint.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          const rayDx = originPoint.x - centerPoint.x;
+          const rayDy = originPoint.y - centerPoint.y;
+          const rayLength = Math.hypot(rayDx, rayDy);
+          if (rayLength > 20) {
+            const ux = rayDx / rayLength;
+            const uy = rayDy / rayLength;
+            const arrowX = centerPoint.x + 0.58 * rayDx;
+            const arrowY = centerPoint.y + 0.58 * rayDy;
+            ctx.fillStyle = "#757c84";
+            ctx.beginPath();
+            ctx.moveTo(arrowX + 6 * ux, arrowY + 6 * uy);
+            ctx.lineTo(arrowX - 3 * ux + 4 * uy, arrowY - 3 * uy - 4 * ux);
+            ctx.lineTo(arrowX - 3 * ux - 4 * uy, arrowY - 3 * uy + 4 * ux);
+            ctx.closePath();
+            ctx.fill();
+          }
+          ctx.fillStyle = "#000000";
+          ctx.beginPath();
+          ctx.arc(originPoint.x, originPoint.y, 3.2, 0, TWO_PI);
+          ctx.fill();
+          ctx.restore();
+          this.drawOverlayLabel("BH / origin", originPoint.x + 7, originPoint.y + 7, "#d9dee6");
+        }
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#33383e";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(centerPoint.x, centerPoint.y, 4, 0, TWO_PI);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        this.drawOverlayLabel(
+          `screen / observer · rₒ=${distance}M · θo=${inclination.toFixed(0)}°`,
+          centerPoint.x - 230,
+          centerPoint.y - 25
+        );
+
+        const drawBasis = (vector, label, color) => {
+          const projected = this.projectPoint(vecAdd(center, vecScale(vector, 100)), projection, view);
+          if (!projected) return;
+          const dx = projected.x - centerPoint.x;
+          const dy = projected.y - centerPoint.y;
+          const length = Math.hypot(dx, dy);
+          if (length < 2) return;
+          this.drawArrow2D(centerPoint, {
+            x: centerPoint.x + 48 * dx / length,
+            y: centerPoint.y + 48 * dy / length
+          }, color, label);
+        };
+        drawBasis(basis.alpha, "α / M", "#c7cdd5");
+        drawBasis(basis.beta, "β / M", "#9da7b3");
+
+        const selectedPoint = this.projectPoint(selected, projection, view);
+        if (selectedPoint?.visible) {
+          ctx.save();
+          ctx.fillStyle = "#ffd24a";
+          ctx.strokeStyle = "#e43b19";
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.arc(selectedPoint.x, selectedPoint.y, 3.5, 0, TWO_PI);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        const midpoint = this.projectPoint(vecScale(center, 0.54), projection, view);
+        if (midpoint?.visible) this.drawOverlayLabel("past rays ∥ −er", midpoint.x - 42, midpoint.y + 10, "#adb5bf");
+      }
+
+      drawObserverGuide(projection, view) {
+        if (!this.configuration) return;
+        const sightDirection = this.configuration.basis.radial;
+        const origin = this.projectPoint([0, 0, 0], projection, view);
+        const directionProbe = this.projectPoint(vecScale(sightDirection, 16), projection, view);
+        if (!origin || !directionProbe) return;
+        const screenDx = directionProbe.x - origin.x;
+        const screenDy = directionProbe.y - origin.y;
+        const screenLength = Math.hypot(screenDx, screenDy);
+        if (screenLength < 0.7) return;
+        const ux = screenDx / screenLength;
+        const uy = screenDy / screenLength;
+        const horizonInfo = this.horizonScreenInfo(projection, view);
+        const startDistance = (horizonInfo?.radius || 0) + 8;
+        if (screenLength <= startDistance + 2) return;
+        const ctx = this.overlayContext;
+        ctx.save();
+        ctx.strokeStyle = "rgba(190,198,208,0.34)";
+        ctx.lineWidth = 0.9;
+        ctx.setLineDash([6, 8]);
+        ctx.beginPath();
+        ctx.moveTo(origin.x + ux * startDistance, origin.y + uy * startDistance);
+        ctx.lineTo(directionProbe.x, directionProbe.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        const pastBoundary = this.staticAnnotationsVisible()
+          && this.configuration.pathStatus === "escape"
+          && this.configuration.pastBoundary
+          ? this.projectPoint(this.configuration.pastBoundary, projection, view)
+          : null;
+        if (pastBoundary?.visible) {
+          ctx.save();
+          ctx.fillStyle = "#fff5d6";
+          ctx.strokeStyle = "#e25121";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(pastBoundary.x, pastBoundary.y, 3.5, 0, TWO_PI);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+          this.drawOverlayLabel(
+            `过去无穷远数值边界 · r=${this.configuration.farPastRadius.toPrecision(5)}M`,
+            pastBoundary.x + 8,
+            pastBoundary.y - 20,
+            "#d48a7b"
+          );
+        }
+      }
+
+      drawRadialTurnMarker(projection, view) {
+        if (!this.radialTurnMarker) return;
+        const marker = this.projectPoint(this.radialTurnMarker, projection, view);
+        if (!marker?.visible) return;
+        const ctx = this.overlayContext;
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#8f2f17";
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.arc(marker.x, marker.y, 3.5, 0, TWO_PI);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        this.drawOverlayLabel("rmin · dr/dλ = 0", marker.x + 8, marker.y + 8, "#d48a7b");
+      }
+
+      drawTurnMarkers(projection, view) {
+        if (!this.turnMarkers.length) return;
+        const ctx = this.overlayContext;
+        const visible = this.turnMarkers
+          .map(marker => ({ marker, projected: this.projectPoint(marker.point, projection, view) }))
+          .filter(entry => entry.projected?.visible);
+        if (!visible.length) return;
+
+        const centerX = visible.reduce((sum, entry) => sum + entry.projected.x, 0) / visible.length;
+        const topY = Math.min(...visible.map(entry => entry.projected.y));
+        const labelSpacing = 52;
+        const totalWidth = labelSpacing * visible.length;
+        const labelStartX = clamp(centerX - totalWidth / 2, 7, this.overlayWidth - totalWidth - 7);
+        const labelY = Math.max(24, topY - 42);
+
+        for (let index = 0; index < visible.length; index += 1) {
+          const { marker, projected } = visible[index];
+          const labelX = labelStartX + index * labelSpacing;
+          ctx.save();
+          ctx.fillStyle = "#fff5d6";
+          ctx.strokeStyle = "#e25121";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(projected.x, projected.y, 3.5, 0, TWO_PI);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(226,81,33,0.55)";
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(projected.x, projected.y - 4);
+          ctx.lineTo(labelX + 18, labelY + 17);
+          ctx.stroke();
+          ctx.restore();
+          this.drawOverlayLabel(`orbit ${marker.turn}`, labelX, labelY, "#d48a7b");
+        }
+      }
+
+      pointOnAnimatedRay(ray, progress) {
+        const points = ray.points;
+        const target = clamp(progress, 0, 1);
+        let low = 0;
+        let high = points.length - 1;
+        while (high - low > 1) {
+          const middle = Math.floor((low + high) / 2);
+          if (points[middle].progress < target) low = middle; else high = middle;
+        }
+        const before = points[low];
+        const after = points[high];
+        const span = Math.max(1e-12, after.progress - before.progress);
+        const fraction = clamp((target - before.progress) / span, 0, 1);
+        return [
+          before.world[0] + fraction * (after.world[0] - before.world[0]),
+          before.world[1] + fraction * (after.world[1] - before.world[1]),
+          before.world[2] + fraction * (after.world[2] - before.world[2])
+        ];
+      }
+
+      smoothstep(edge0, edge1, value) {
+        const x = clamp((value - edge0) / Math.max(1e-12, edge1 - edge0), 0, 1);
+        return x * x * (3 - 2 * x);
+      }
+
+      horizonScreenInfo(projection, view) {
+        const center = this.projectPoint([0, 0, 0], projection, view);
+        if (!center) return null;
+        const cameraRight = [view[0], view[4], view[8]];
+        const cameraUp = [view[1], view[5], view[9]];
+        const references = [cameraRight, cameraUp]
+          .map(direction => this.projectPoint(vecScale(direction, HORIZON_RADIUS), projection, view))
+          .filter(Boolean);
+        const radius = Math.max(0, ...references.map(point => Math.hypot(
+          point.x - center.x,
+          point.y - center.y
+        )));
+        return { center, radius };
+      }
+
+      drawHorizonRim(projection, view) {
+        const ctx = this.rimContext;
+        ctx.clearRect(0, 0, this.overlayWidth, this.overlayHeight);
+        const horizonInfo = this.horizonScreenInfo(projection, view);
+        if (!horizonInfo?.center?.visible || !(horizonInfo.radius > 0)) return;
+        ctx.save();
+        ctx.strokeStyle = "rgba(142,44,38,0.98)";
+        ctx.lineWidth = 2;
+        ctx.shadowColor = "rgba(104,24,22,0.72)";
+        ctx.shadowBlur = 4;
+        ctx.beginPath();
+        ctx.arc(
+          horizonInfo.center.x,
+          horizonInfo.center.y,
+          horizonInfo.radius + 1.55,
+          0,
+          TWO_PI
+        );
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      animationPointVisible(projected, horizonInfo) {
+        if (!projected?.visible) return false;
+        if (!horizonInfo || projected.viewDepth >= horizonInfo.center.viewDepth) return true;
+        return Math.hypot(
+          projected.x - horizonInfo.center.x,
+          projected.y - horizonInfo.center.y
+        ) > horizonInfo.radius;
+      }
+
+      drawAnimatedRays(now, projection, view) {
+        if (this.visibleAnimationMode === "whole") return;
+        if (!this.reduceMotion) {
+          const previousLength = this.animatedRays.length;
+          this.animatedRays = this.animatedRays.filter(ray => (
+            ray.loop || now <= ray.startTime + ray.duration
+          ));
+          if (this.animatedRays.length !== previousLength) this.onRaySetChanged?.();
+        }
+        const rays = this.animatedRays.filter(ray => ray.mode === this.visibleAnimationMode);
+        if (!rays.length) return;
+        const ctx = this.overlayContext;
+        const horizonInfo = this.horizonScreenInfo(projection, view);
+
+        for (const ray of rays) {
+          const sinceStart = now - ray.startTime;
+          if (!this.reduceMotion && sinceStart < 0) continue;
+          const cycle = ray.duration + ray.gap;
+          const elapsed = this.reduceMotion
+            ? 0.56 * ray.duration
+            : ray.loop
+              ? ((sinceStart % cycle) + cycle) % cycle
+              : sinceStart;
+          if (elapsed > ray.duration) continue;
+          const timelineProgress = elapsed / ray.duration;
+          const timelineStart = ray.timelineStart ?? ray.affineStart;
+          const timelineEnd = ray.timelineEnd ?? ray.affineEnd;
+          const timelineSpan = Math.max(1e-9, timelineEnd - timelineStart);
+          const playbackProgress = this.playbackDirection === "forward"
+            ? 1 - timelineProgress
+            : timelineProgress;
+          const targetAffine = timelineStart + playbackProgress * timelineSpan;
+          const progress = (targetAffine - ray.affineStart) / ray.affineSpan;
+          if (progress < 0 || progress > 1) continue;
+          const fade = this.smoothstep(0, 0.08, timelineProgress)
+            * (1 - this.smoothstep(0.90, 1, timelineProgress));
+          if (fade <= 0.002) continue;
+
+          const tailAffine = targetAffine + (this.playbackDirection === "forward" ? 1 : -1)
+            * this.trailFraction * timelineSpan;
+          const tailProgress = this.playbackDirection === "forward"
+            ? clamp((tailAffine - ray.affineStart) / ray.affineSpan, progress, 1)
+            : clamp((tailAffine - ray.affineStart) / ray.affineSpan, 0, progress);
+          const segments = 64;
+          let previousWorld = this.pointOnAnimatedRay(ray, tailProgress);
+          let previousProjected = this.projectPoint(previousWorld, projection, view);
+          for (let index = 1; index <= segments; index += 1) {
+            const fraction = index / segments;
+            const sampleProgress = tailProgress + fraction * (progress - tailProgress);
+            const world = this.pointOnAnimatedRay(ray, sampleProgress);
+            const projected = this.projectPoint(world, projection, view);
+            if (this.animationPointVisible(previousProjected, horizonInfo)
+              && this.animationPointVisible(projected, horizonInfo)) {
+              const tailAlpha = fade * this.smoothstep(0.02, 1, fraction);
+              let red;
+              let green;
+              let blue;
+              if (fraction < 0.56) {
+                const colorMix = fraction / 0.56;
+                red = Math.round(224 + 25 * colorMix);
+                green = Math.round(54 + 58 * colorMix);
+                blue = Math.round(31 - 4 * colorMix);
+              } else {
+                const colorMix = (fraction - 0.56) / 0.44;
+                red = Math.round(249 + 6 * colorMix);
+                green = Math.round(112 + 84 * colorMix);
+                blue = Math.round(27 + 28 * colorMix);
+              }
+              ctx.save();
+              ctx.lineCap = "butt";
+              ctx.lineJoin = "round";
+              ctx.strokeStyle = `rgba(${red},${green},${blue},${0.96 * tailAlpha})`;
+              ctx.lineWidth = 2.25;
+              ctx.beginPath();
+              ctx.moveTo(previousProjected.x, previousProjected.y);
+              ctx.lineTo(projected.x, projected.y);
+              ctx.stroke();
+              ctx.restore();
+            }
+            previousWorld = world;
+            previousProjected = projected;
+          }
+
+        }
+      }
+
+      drawOverlayFrame(now = performance.now()) {
+        if (!this.lastProjection || !this.lastView) return;
+        const animationNow = this.animationPaused && this.pauseStartedAt !== null
+          ? this.pauseStartedAt
+          : now;
+        this.drawOverlay(this.lastProjection, this.lastView);
+        this.drawAnimatedRays(animationNow, this.lastProjection, this.lastView);
+      }
+
+      ensureAnimationLoop() {
+        if (this.animationPaused) return;
+        if (this.reduceMotion) {
+          this.drawOverlayFrame(performance.now());
+          return;
+        }
+        if (this.animationFrameId !== null
+          || !this.animatedRays.some(ray => ray.mode === this.visibleAnimationMode)) return;
+        const tick = now => {
+          this.animationFrameId = null;
+          this.drawOverlayFrame(now);
+          if (!this.animationPaused
+            && this.animatedRays.some(ray => ray.mode === this.visibleAnimationMode)) {
+            this.animationFrameId = requestAnimationFrame(tick);
+          }
+        };
+        this.animationFrameId = requestAnimationFrame(tick);
+      }
+
+      drawOverlay(projection, view) {
+        const ctx = this.overlayContext;
+        ctx.clearRect(0, 0, this.overlayWidth, this.overlayHeight);
+        this.drawHorizonRim(projection, view);
+
+        if (this.distance < 200) {
+          const axisLabels = [
+            { point: [12, 0, 0], label: "+x", color: "#c1c7cf" },
+            { point: [0, 12, 0], label: "+y", color: "#c1c7cf" },
+            { point: [0, 0, 12], label: "+z", color: "#c1c7cf" }
+          ];
+          for (const axis of axisLabels) {
+            const projected = this.projectPoint(axis.point, projection, view);
+            if (projected?.visible) this.drawOverlayLabel(axis.label, projected.x + 4, projected.y - 8, axis.color);
+          }
+        }
+        this.drawObserverGuide(projection, view);
+        if (this.staticAnnotationsVisible()) {
+          this.drawRadialTurnMarker(projection, view);
+          this.drawTurnMarkers(projection, view);
+        }
+      }
+
+      render() {
+        const gl = this.gl;
+        if (!gl) return;
+        this.resize();
+        const aspect = this.canvas.width / this.canvas.height;
+        const cosPitch = Math.cos(this.pitch);
+        const eye = [
+          this.distance * cosPitch * Math.cos(this.yaw),
+          this.distance * cosPitch * Math.sin(this.yaw),
+          this.distance * Math.sin(this.pitch)
+        ];
+        const farPlane = Math.max(10000, this.distance * 5, (this.configuration?.distance || 0) * 4);
+        const halfHeight = this.distance * Math.tan(Math.PI / 8);
+        const halfWidth = halfHeight * aspect;
+        const projection = orthographicMatrix(
+          -halfWidth,
+          halfWidth,
+          -halfHeight,
+          halfHeight,
+          0.04,
+          farPlane
+        );
+        const cameraUp = [
+          -Math.sin(this.pitch) * Math.cos(this.yaw),
+          -Math.sin(this.pitch) * Math.sin(this.yaw),
+          Math.cos(this.pitch)
+        ];
+        const view = lookAtMatrix(eye, [0, 0, 0], cameraUp);
+        this.lastProjection = projection;
+        this.lastView = view;
+
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clearDepth(1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(this.program);
+        gl.uniformMatrix4fv(this.projectionLocation, false, projection);
+        gl.uniformMatrix4fv(this.viewLocation, false, view);
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthFunc(gl.LEQUAL);
+        gl.disable(gl.CULL_FACE);
+
+        gl.disable(gl.BLEND);
+        gl.depthMask(false);
+        const axisColor = [0.72, 0.75, 0.79, 0.58];
+        this.drawMesh(this.axes.x, axisColor);
+        this.drawMesh(this.axes.y, axisColor);
+        this.drawMesh(this.axes.z, axisColor);
+
+        gl.depthMask(true);
+        this.drawMesh(this.sphere, [0, 0, 0, 1], 1);
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.depthMask(false);
+        this.drawMesh(this.pathLineMesh, [0.96, 0.22, 0.03, 0.92]);
+        for (const layer of this.pathMeshes) this.drawMesh(layer.mesh, layer.color);
+        gl.depthMask(true);
+        gl.disable(gl.BLEND);
+        this.drawOverlayFrame(performance.now());
+        this.ensureAnimationLoop();
+      }
+    }
+
+    function drawOrbit() {
+      if (!orbitRenderer) {
+        try {
+          orbitRenderer = new OrbitRenderer3D(
+            ui.orbitCanvas,
+            ui.orbitOverlay,
+            ui.starCanvas,
+            ui.rimCanvas,
+            ui.orbitWrap
+          );
+          orbitRenderer.onRaySetChanged = updateSingleRayCount;
+          orbitRenderer.playbackDirection = ui.playbackDirection.value;
+        } catch (error) {
+          ui.orbitWrap.innerHTML = `<div style="padding:48px;color:#b42318">${error.message}</div>`;
+          return;
+        }
+      }
+      const params = modelParameters();
+      if (activeTraceMode !== "whole") {
+        orbitRenderer.setAnimationMode(activeTraceMode, params);
+        return;
+      }
+      orbitRenderer.setPath(
+        currentResult?.points || [],
+        params.u,
+        params.v,
+        params.inclination,
+        params.distance,
+        Number(ui.turnCount.value) || 0,
+        currentResult?.status || ""
+      );
+      if (ui.turnCount.value) orbitRenderer.resetView();
+    }
+
+    function windingTurns(result) {
+      if (result?.status !== "escape" || !result.finalState) return null;
+      return result.deflection / TWO_PI;
+    }
+
+    function sourceAxisOrder(result) {
+      if (result?.status !== "escape" || !Number.isFinite(result.phiInfinity)) return null;
+      return (result.phiInfinity - Math.PI) / TWO_PI;
+    }
+
+    const floatNeighborBuffer = new ArrayBuffer(8);
+    const floatNeighborView = new DataView(floatNeighborBuffer);
+
+    function adjacentPositiveFloat(value, direction) {
+      floatNeighborView.setFloat64(0, value, false);
+      const bits = floatNeighborView.getBigUint64(0, false);
+      floatNeighborView.setBigUint64(0, bits + (direction > 0 ? 1n : -1n), false);
+      return floatNeighborView.getFloat64(0, false);
+    }
+
+    function solveImpactForTurns(distance, targetTurns) {
+      const cacheKey = `${distance.toPrecision(14)}:${targetTurns}`;
+      if (turnPresetCache.has(cacheKey)) return turnPresetCache.get(cacheKey);
+
+      const critical = criticalScreenImpact(distance);
+      const evaluateImpact = impact => {
+        const phiInfinity = asymptoticAzimuthFromObserver(distance, impact, METRIC_MASS);
+        const turns = Number.isFinite(phiInfinity)
+          ? (phiInfinity - Math.PI) / TWO_PI
+          : Number.POSITIVE_INFINITY;
+        return { impact, turns };
+      };
+      const evaluateDelta = delta => evaluateImpact(critical * (1 + delta));
+
+      const strongDeflectionConstant = Math.log(216 * (7 - 4 * Math.sqrt(3))) - Math.PI;
+      const estimatedDelta = Math.exp(strongDeflectionConstant - TWO_PI * targetTurns);
+      let lowerDelta = Math.max(4 * Number.EPSILON, estimatedDelta / 20);
+      let upperDelta = Math.min(0.5, estimatedDelta * 20);
+      let lowerEvaluation = evaluateDelta(lowerDelta);
+      let upperEvaluation = evaluateDelta(upperDelta);
+      for (let expansion = 0; expansion < 8 && lowerEvaluation.turns < targetTurns; expansion += 1) {
+        lowerDelta = Math.max(4 * Number.EPSILON, lowerDelta / 4);
+        lowerEvaluation = evaluateDelta(lowerDelta);
+      }
+      for (let expansion = 0; expansion < 8 && upperEvaluation.turns >= targetTurns; expansion += 1) {
+        upperDelta = Math.min(1, upperDelta * 4);
+        upperEvaluation = evaluateDelta(upperDelta);
+      }
+
+      let best = [lowerEvaluation, upperEvaluation]
+        .filter(evaluation => Number.isFinite(evaluation.turns))
+        .sort((a, b) => Math.abs(a.turns - targetTurns) - Math.abs(b.turns - targetTurns))[0] || null;
+      const bisectionIterations = targetTurns >= 4 ? 24 : 20;
+      for (let iteration = 0; iteration < bisectionIterations; iteration += 1) {
+        const middleDelta = Math.sqrt(lowerDelta * upperDelta);
+        const evaluation = evaluateDelta(middleDelta);
+        if (Number.isFinite(evaluation.turns)
+          && (!best || Math.abs(evaluation.turns - targetTurns) < Math.abs(best.turns - targetTurns))) {
+          best = evaluation;
+        }
+        if (evaluation.turns >= targetTurns) {
+          lowerDelta = middleDelta;
+        } else {
+          upperDelta = middleDelta;
+        }
+      }
+
+      if (best) {
+        let below = best.impact;
+        let above = best.impact;
+        const neighborRadius = targetTurns >= 5 ? 6 : targetTurns === 4 ? 3 : 1;
+        for (let offset = 0; offset < neighborRadius; offset += 1) {
+          below = adjacentPositiveFloat(below, -1);
+          above = adjacentPositiveFloat(above, 1);
+          for (const candidateImpact of [below, above]) {
+            if (!(candidateImpact > critical)) continue;
+            const evaluation = evaluateImpact(candidateImpact);
+            if (Number.isFinite(evaluation.turns)
+              && Math.abs(evaluation.turns - targetTurns) < Math.abs(best.turns - targetTurns)) {
+              best = evaluation;
+            }
+          }
+        }
+      }
+
+      const solved = best || upperEvaluation;
+      turnPresetCache.set(cacheKey, solved);
+      return solved;
+    }
+
+    function scheduleTurnPreset(delay = 0) {
+      if (turnSolveTimer !== null) clearTimeout(turnSolveTimer);
+      const targetTurns = Number(ui.turnCount.value);
+      if (!(targetTurns >= 1 && targetTurns <= 5)) return;
+      ui.turnResult.textContent = `正在求解轴后方无穷远源的 n=${targetTurns} 光线…`;
+      turnSolveTimer = setTimeout(() => {
+        turnSolveTimer = null;
+        const distance = clamp(
+          finiteNumber(ui.observerRadius, DEFAULT_OBSERVER_DISTANCE),
+          20,
+          100000
+        );
+        const solved = solveImpactForTurns(distance, targetTurns);
+        syncCoordinateInputs(solved.impact, 0);
+        runTrace();
+        focusScreenOnSelected();
+      }, delay);
+    }
+
+    const digitCaretPositions = new Map();
+
+    function rememberDigitCaret(input) {
+      if (Number.isInteger(input.selectionStart)) digitCaretPositions.set(input, input.selectionStart);
+    }
+
+    function digitStepAtCaret(input) {
+      const text = input.value;
+      let caret = digitCaretPositions.get(input);
+      if (!Number.isInteger(caret)) {
+        const decimal = text.indexOf(".");
+        caret = decimal >= 0 ? decimal + 3 : text.length;
+      }
+      caret = clamp(caret, 0, text.length);
+
+      let digitIndex = caret > 0 && /\d/.test(text[caret - 1]) ? caret - 1 : caret;
+      while (digitIndex < text.length && !/\d/.test(text[digitIndex])) digitIndex += 1;
+      if (digitIndex >= text.length) {
+        digitIndex = Math.max(0, caret - 1);
+        while (digitIndex > 0 && !/\d/.test(text[digitIndex])) digitIndex -= 1;
+      }
+
+      const decimalIndex = text.indexOf(".") >= 0 ? text.indexOf(".") : text.length;
+      const exponent = digitIndex < decimalIndex
+        ? decimalIndex - digitIndex - 1
+        : decimalIndex - digitIndex;
+      return Math.pow(10, exponent);
+    }
+
+    function formatDigitStep(step) {
+      if (step >= 1) return step.toFixed(0);
+      const decimals = Math.max(0, Math.round(-Math.log10(step)));
+      return step.toFixed(decimals);
+    }
+
+    function updateDigitStepDisplay(input) {
+      const display = input.closest(".mode-body")?.querySelector("[data-digit-step-display]")
+        || ui.digitStepDisplay;
+      display.textContent = formatDigitStep(digitStepAtCaret(input));
+    }
+
+    function markPixelCustom() {
+      ui.turnCount.value = "";
+    }
+
+    function normalizePolarDegrees(value) {
+      if (!Number.isFinite(value)) return 0;
+      const normalized = value >= -180 && value < 180
+        ? value
+        : ((value + 180) % 360 + 360) % 360 - 180;
+      return Math.abs(normalized) < Number.EPSILON ? 0 : normalized;
+    }
+
+    function polarRadiusLimit(phi) {
+      const largestComponent = Math.max(
+        Math.abs(Math.cos(phi)),
+        Math.abs(Math.sin(phi)),
+        1e-15
+      );
+      return Math.min(POLAR_MAX, SCREEN_EXTENT / largestComponent);
+    }
+
+    function coordinateInput(mode, component) {
+      return ui.coordinateInputs.find(input => (
+        input.dataset.coordinateMode === mode
+        && input.dataset.coordinateComponent === component
+      ));
+    }
+
+    function coordinateSystemForMode(mode) {
+      return ui.coordinateSystemControls.find(control => (
+        control.dataset.coordinateMode === mode
+      ))?.value || "cartesian";
+    }
+
+    function fixedTextFromInput(rawText, normalizedValue) {
+      const value = Object.is(normalizedValue, -0) ? 0 : normalizedValue;
+      const text = String(rawText ?? "").trim();
+      const match = text.match(/^([+-]?)(\d*)(?:\.(\d*))?$/);
+      if (match && (match[2] || match[3]) && Number(text) === value) {
+        const sign = value < 0 ? "-" : "";
+        const integer = (match[2] || "0").replace(/^0+(?=\d)/, "") || "0";
+        const fraction = match[3] || "";
+        if (fraction.length <= DISPLAY_DECIMALS) {
+          return `${sign}${integer}.${fraction.padEnd(DISPLAY_DECIMALS, "0")}`;
+        }
+      }
+      return value.toFixed(DISPLAY_DECIMALS);
+    }
+
+    function decimalTextToScaledInteger(text) {
+      const match = String(text).trim().match(/^([+-]?)(\d*)(?:\.(\d*))?$/);
+      if (!match || (!match[2] && !match[3])) return null;
+      const fraction = match[3] || "";
+      if (fraction.length > DISPLAY_DECIMALS) return null;
+      const scale = 10n ** BigInt(DISPLAY_DECIMALS);
+      const integerPart = BigInt(match[2] || "0") * scale;
+      const fractionPart = BigInt((fraction || "0").padEnd(DISPLAY_DECIMALS, "0"));
+      const magnitude = integerPart + fractionPart;
+      return match[1] === "-" ? -magnitude : magnitude;
+    }
+
+    function scaledIntegerToFixedText(value) {
+      const scale = 10n ** BigInt(DISPLAY_DECIMALS);
+      const sign = value < 0n ? "-" : "";
+      const magnitude = value < 0n ? -value : value;
+      const integer = magnitude / scale;
+      const fraction = String(magnitude % scale).padStart(DISPLAY_DECIMALS, "0");
+      return `${sign}${integer}.${fraction}`;
+    }
+
+    function exactDigitStep(text, step, direction) {
+      const scaledValue = decimalTextToScaledInteger(text);
+      if (scaledValue === null) return null;
+      const exponent = Math.round(Math.log10(step));
+      const scaledExponent = DISPLAY_DECIMALS + exponent;
+      if (scaledExponent < 0) return null;
+      const scaledStep = 10n ** BigInt(scaledExponent);
+      return scaledIntegerToFixedText(scaledValue + BigInt(direction) * scaledStep);
+    }
+
+    function coordinatesFromMode(mode) {
+      const current = modelParameters();
+      if (coordinateSystemForMode(mode) === "polar") {
+        const rhoInput = coordinateInput(mode, "rho");
+        const phiInput = coordinateInput(mode, "phi");
+        const phiDegrees = finiteNumber(
+          phiInput,
+          Math.atan2(current.v, current.u) * 180 / Math.PI
+        );
+        const phi = phiDegrees * Math.PI / 180;
+        const rho = clamp(
+          finiteNumber(rhoInput, Math.hypot(current.u, current.v)),
+          0,
+          polarRadiusLimit(phi)
+        );
+        polarAngle = phiDegrees;
+        return {
+          u: rho * Math.cos(phi),
+          v: rho * Math.sin(phi),
+          textOverride: {
+            rho: fixedTextFromInput(rhoInput?.value, rho),
+            phi: fixedTextFromInput(phiInput?.value, phiDegrees)
+          }
+        };
+      }
+      const alphaInput = coordinateInput(mode, "alpha");
+      const betaInput = coordinateInput(mode, "beta");
+      const u = clamp(finiteNumber(alphaInput, current.u), -SCREEN_EXTENT, SCREEN_EXTENT);
+      const v = clamp(finiteNumber(betaInput, current.v), -SCREEN_EXTENT, SCREEN_EXTENT);
+      return {
+        u,
+        v,
+        textOverride: {
+          alpha: fixedTextFromInput(alphaInput?.value, u),
+          beta: fixedTextFromInput(betaInput?.value, v)
+        }
+      };
+    }
+
+    function syncCoordinateInputs(u, v, textOverride = {}) {
+      const safeU = clamp(u, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const safeV = clamp(v, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const rho = Math.hypot(safeU, safeV);
+      if (textOverride.phi !== undefined && Number.isFinite(Number(textOverride.phi))) {
+        polarAngle = Number(textOverride.phi);
+      } else if (rho > 1e-15) {
+        polarAngle = normalizePolarDegrees(Math.atan2(safeV, safeU) * 180 / Math.PI);
+      }
+      const values = {
+        alpha: safeU,
+        beta: safeV,
+        rho,
+        phi: polarAngle
+      };
+      for (const input of ui.coordinateInputs) {
+        const component = input.dataset.coordinateComponent;
+        input.value = textOverride[component]
+          ?? values[component].toFixed(DISPLAY_DECIMALS);
+      }
+    }
+
+    function setCoordinatesFromMode(mode) {
+      const { u, v, textOverride } = coordinatesFromMode(mode);
+      syncCoordinateInputs(u, v, textOverride);
+      markPixelCustom();
+      return { u, v };
+    }
+
+    function commitCoordinateInput(input) {
+      const mode = input.dataset.coordinateMode;
+      const { u, v, textOverride } = coordinatesFromMode(mode);
+      syncCoordinateInputs(u, v, textOverride);
+      markPixelCustom();
+      queueTrace();
+    }
+
+    function applyDigitStep(input, direction) {
+      rememberDigitCaret(input);
+      const caret = digitCaretPositions.get(input) ?? input.value.length;
+      const step = digitStepAtCaret(input);
+      const exactNext = exactDigitStep(input.value, step, direction);
+      if (exactNext !== null) {
+        input.value = exactNext;
+      } else {
+        input.value = (finiteNumber(input, 0) + direction * step).toFixed(DISPLAY_DECIMALS);
+      }
+      commitCoordinateInput(input);
+      input.focus({ preventScroll: true });
+      const restored = clamp(caret, 0, input.value.length);
+      input.setSelectionRange(restored, restored);
+      digitCaretPositions.set(input, restored);
+      updateDigitStepDisplay(input);
+    }
+
+    function updateCoordinateSystem(mode) {
+      const system = coordinateSystemForMode(mode);
+      for (const group of ui.coordinateFieldGroups) {
+        if (group.dataset.coordinateMode === mode) {
+          group.hidden = group.dataset.coordinateFields !== system;
+        }
+      }
+      const firstVisibleInput = coordinateInput(
+        mode,
+        system === "polar" ? "rho" : "alpha"
+      );
+      if (firstVisibleInput) updateDigitStepDisplay(firstVisibleInput);
+    }
+
+    function setTrailLength(percent) {
+      const normalizedPercent = clamp(Number(percent) || 18, 4, 45);
+      trailFraction = normalizedPercent / 100;
+      for (const control of ui.trailLengthControls) control.value = String(normalizedPercent);
+      for (const display of ui.trailLengthDisplays) display.textContent = `${normalizedPercent.toFixed(0)}%`;
+      orbitRenderer?.setTrailFraction(trailFraction);
+    }
+
+    function updatePlaybackDirection() {
+      const direction = ui.playbackDirection.value === "forward" ? "forward" : "reverse";
+      ui.startMultiRays.textContent = direction === "forward"
+        ? "开始同步正向追踪"
+        : "开始同步反向追踪";
+      orbitRenderer?.setPlaybackDirection(direction);
+    }
+
+    function updateAnimationPauseButton() {
+      const paused = orbitRenderer?.animationPaused || false;
+      ui.animationPause.textContent = paused ? "继续" : "暂停";
+      ui.animationPause.setAttribute("aria-pressed", String(paused));
+      ui.animationPause.setAttribute("aria-label", paused ? "继续所有动画" : "暂停所有动画");
+    }
+
+    function toggleAnimationPause() {
+      if (!orbitRenderer) return;
+      orbitRenderer.setAnimationPaused(!orbitRenderer.animationPaused);
+      updateAnimationPauseButton();
+    }
+
+    function updateDiagnostics(result, params) {
+      const horizonKm = 2 * RG_SUN_KM * params.mass;
+      ui.horizonRadius.textContent = horizonKm < 1e6
+        ? `${horizonKm.toLocaleString("zh-CN", { maximumFractionDigits: 3 })} km`
+        : `${horizonKm.toExponential(4)} km`;
+      ui.criticalImpact.textContent = `${PHOTON_SPHERE_RADIUS}M / ${CRITICAL_IMPACT.toFixed(5)}M`;
+      ui.screenCritical.textContent = criticalScreenImpact(params.distance).toFixed(DISPLAY_DECIMALS);
+
+      const actualTurns = windingTurns(result);
+      const axisOrder = sourceAxisOrder(result);
+      const targetTurns = Number(ui.turnCount.value);
+      ui.turnResult.textContent = Number.isFinite(actualTurns)
+        ? targetTurns && Number.isFinite(axisOrder)
+          ? `总偏折 / 2π：${actualTurns.toFixed(8)} · 轴后方源阶数：${axisOrder.toFixed(8)}（目标 ${targetTurns}）`
+          : `总偏折 / 2π：${actualTurns.toFixed(8)}`
+        : "总偏折 / 2π：—";
+    }
+
+    function runTrace() {
+      traceQueued = false;
+      const params = modelParameters();
+      ui.mass.value = String(params.mass);
+      ui.inclination.value = String(params.inclination);
+      ui.observerRadius.value = String(params.distance);
+
+      currentResult = integrateRay({
+        metricMass: METRIC_MASS,
+        distance: params.distance,
+        impact: params.impact,
+        rtol: ui.turnCount.value ? 3e-12 : 1e-10
+      });
+
+      updateDiagnostics(currentResult, params);
+      drawScreen();
+      drawOrbit();
+    }
+
+    function csvNumber(value) {
+      return Number.isFinite(value) ? Number(value).toPrecision(17) : "";
+    }
+
+    function downloadGeodesicData() {
+      runTrace();
+      if (!currentResult?.points?.length) return;
+
+      const params = modelParameters();
+      const basis = observerBasis(params.inclination);
+      const screenOffset = vecAdd(
+        vecScale(basis.alpha, params.u),
+        vecScale(basis.beta, params.v)
+      );
+      const transverse = params.impact > 1e-12 ? vecNormalize(screenOffset) : basis.alpha;
+      const rows = [
+        "# CONGL Schwarzschild null geodesic",
+        "# units,G=c=M=1",
+        `# status,${currentResult.status}`,
+        `# mass_solar,${csvNumber(params.mass)}`,
+        `# observer_inclination_deg,${csvNumber(params.inclination)}`,
+        `# observer_radius_over_M,${csvNumber(params.distance)}`,
+        `# alpha_over_M,${csvNumber(params.u)}`,
+        `# beta_over_M,${csvNumber(params.v)}`,
+        `# impact_screen_over_M,${csvNumber(params.impact)}`,
+        `# conserved_abs_E,${csvNumber(currentResult.pT)}`,
+        `# conserved_L_over_M,${csvNumber(currentResult.pPhi)}`,
+        `# minimum_radius_over_M,${csvNumber(currentResult.minR)}`,
+        `# far_past_radius_over_M,${csvNumber(currentResult.farPastRadius)}`,
+        "index,lambda_over_M,r_over_M,phi_deg,orbital_x_over_M,orbital_y_over_M,x_over_M,y_over_M,z_over_M"
+      ];
+
+      currentResult.points.forEach((point, index) => {
+        const world = vecAdd(
+          vecScale(basis.radial, point.x),
+          vecScale(transverse, point.y)
+        );
+        rows.push([
+          index,
+          csvNumber(point.affine),
+          csvNumber(point.r),
+          csvNumber(point.phi * 180 / Math.PI),
+          csvNumber(point.x),
+          csvNumber(point.y),
+          csvNumber(world[0]),
+          csvNumber(world[1]),
+          csvNumber(world[2])
+        ].join(","));
+      });
+
+      const blob = new Blob(["\ufeff", rows.join("\n"), "\n"], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const token = value => value.toFixed(6).replace("-", "m").replace(".", "p");
+      link.href = url;
+      link.download = `congl-schwarzschild-alpha-${token(params.u)}-beta-${token(params.v)}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function updateSingleRayCount() {
+      const count = orbitRenderer?.animatedRayCount("single") || 0;
+      ui.singleRayCount.textContent = `${count} 条`;
+    }
+
+    function removeMultiSelectedPoint(index) {
+      if (index < 0 || index >= multiSelectedPoints.length) return;
+      const [removed] = multiSelectedPoints.splice(index, 1);
+      if (removed?.animationRayId) {
+        orbitRenderer?.removeAnimatedRay(removed.animationRayId);
+        if (orbitRenderer?.animatedRayCount("multi")) {
+          orbitRenderer.synchronizeAnimatedGroup("multi", performance.now() + 140);
+        }
+      }
+      renderMultiPointList();
+      drawScreen();
+    }
+
+    function renderMultiPointList() {
+      ui.multiPointCount.textContent = `${multiSelectedPoints.length} 个`;
+      const fragment = document.createDocumentFragment();
+      multiSelectedPoints.forEach((point, index) => {
+        const item = document.createElement("li");
+        const number = document.createElement("span");
+        number.textContent = `#${index + 1}`;
+        const coordinates = document.createElement("span");
+        coordinates.className = "point-list-coordinates";
+        coordinates.textContent = `α=${point.u.toFixed(8)}  β=${point.v.toFixed(8)}`;
+        const removeButton = document.createElement("button");
+        removeButton.className = "point-delete-button";
+        removeButton.type = "button";
+        removeButton.textContent = "删除";
+        removeButton.setAttribute("aria-label", `删除第 ${index + 1} 根光线`);
+        removeButton.addEventListener("click", () => removeMultiSelectedPoint(index));
+        item.append(number, coordinates, removeButton);
+        fragment.append(item);
+      });
+      ui.multiPointList.replaceChildren(fragment);
+      ui.startMultiRays.disabled = multiSelectedPoints.length === 0;
+      ui.clearMultiPoints.disabled = multiSelectedPoints.length === 0;
+    }
+
+    function setActiveTraceMode(mode) {
+      activeTraceMode = mode;
+      ui.playbackControl.hidden = mode === "whole";
+      const params = modelParameters();
+      if (orbitRenderer) {
+        if (mode === "whole") drawOrbit();
+        else orbitRenderer.setAnimationMode(mode, params);
+      } else {
+        drawOrbit();
+      }
+      drawScreen();
+      updateSingleRayCount();
+      renderMultiPointList();
+      updateAnimationPauseButton();
+    }
+
+    function traceForParams(params, rtol = 1e-10) {
+      return integrateRay({
+        metricMass: METRIC_MASS,
+        distance: params.distance,
+        impact: params.impact,
+        rtol
+      });
+    }
+
+    function addSingleAnimatedRay() {
+      const params = modelParameters();
+      currentResult = traceForParams(params);
+      updateDiagnostics(currentResult, params);
+      drawScreen();
+      drawOrbit();
+      orbitRenderer?.addAnimatedRay(currentResult, params, "single", performance.now());
+      updateSingleRayCount();
+    }
+
+    function addMultiSelectedPoint() {
+      const params = modelParameters();
+      multiSelectedPoints.push({ u: params.u, v: params.v, animationRayId: null });
+      renderMultiPointList();
+      drawScreen();
+    }
+
+    function startMultiAnimatedRays() {
+      if (!multiSelectedPoints.length) return;
+      const base = modelParameters();
+      drawOrbit();
+      orbitRenderer?.clearAnimatedRays("multi");
+      for (const point of multiSelectedPoints) point.animationRayId = null;
+      let latest = null;
+      let latestParams = null;
+      for (const point of multiSelectedPoints) {
+        const params = {
+          ...base,
+          u: point.u,
+          v: point.v,
+          impact: Math.hypot(point.u, point.v)
+        };
+        const result = traceForParams(params);
+        // Defer playback until every selected geodesic has been integrated.
+        point.animationRayId = orbitRenderer?.addAnimatedRay(
+          result,
+          params,
+          "multi",
+          Number.POSITIVE_INFINITY
+        ) ?? null;
+        latest = result;
+        latestParams = params;
+      }
+      orbitRenderer?.synchronizeAnimatedGroup("multi", performance.now() + 140);
+      if (latest && latestParams) {
+        currentResult = latest;
+        updateDiagnostics(latest, latestParams);
+      }
+      orbitRenderer?.resetView();
+    }
+
+    function queueTrace() {
+      if (traceQueued) return;
+      traceQueued = true;
+      requestAnimationFrame(runTrace);
+    }
+
+    function setPixelFromPointer(event, shouldTrace = true) {
+      const raw = screenCoordinatesFromPointer(event);
+      const pixelWidth = 2 * screenView.halfExtent / SCREEN_PIXELS;
+      const minU = screenView.centerU - screenView.halfExtent;
+      const maxV = screenView.centerV + screenView.halfExtent;
+      const i = clamp(Math.floor((raw.u - minU) / pixelWidth), 0, SCREEN_PIXELS - 1);
+      const j = clamp(Math.floor((maxV - raw.v) / pixelWidth), 0, SCREEN_PIXELS - 1);
+      const u = minU + (i + 0.5) * pixelWidth;
+      const v = maxV - (j + 0.5) * pixelWidth;
+      syncCoordinateInputs(u, v);
+      markPixelCustom();
+      if (shouldTrace) queueTrace();
+      else drawScreen();
+      return { u, v };
+    }
+
+    function refreshScreenOnly() {
+      drawScreen();
+      if (currentResult) updateDiagnostics(currentResult, modelParameters());
+    }
+
+    function focusScreenOnSelected() {
+      const params = modelParameters();
+      const critical = criticalScreenImpact(params.distance);
+      const radialGap = Math.abs(params.impact - critical);
+      screenView.centerU = params.u;
+      screenView.centerV = params.v;
+      screenView.halfExtent = clamp(Math.max(12 * radialGap, 1e-12), 1e-13, SCREEN_EXTENT);
+      constrainScreenView();
+      refreshScreenOnly();
+    }
+
+    function runSelfTests() {
+      const tests = [];
+
+      const flatEscape = integrateRay({ metricMass: 0, distance: 30, impact: 1.5, rtol: 2e-10 });
+      const flatExpectedMin = 30 * 1.5 / Math.hypot(30, 1.5);
+      tests.push(flatEscape.status === "escape"
+        && Math.abs(flatEscape.minR - flatExpectedMin) < 2e-7
+        && Math.abs(flatEscape.deflection) < 2e-8
+        && Math.abs(flatEscape.phiInfinity - flatEscape.initialDirectionAngle) < 2e-8);
+
+      const radialCapture = integrateRay({ metricMass: 1, distance: 50, impact: 0, rtol: 2e-10 });
+      tests.push(radialCapture.status === "captured"
+        && Math.abs(radialCapture.minR - 2) < 1e-12
+        && radialCapture.initialCoordinateTimeDirection < 0
+        && radialCapture.maxConstraint < 2e-8);
+
+      const weak = integrateRay({ metricMass: 1, distance: 1000, impact: 100, rtol: 2e-10 });
+      const inverseImpact = 1 / weak.impactInfinity;
+      const weakPrediction = 4 * inverseImpact + 15 * Math.PI * inverseImpact * inverseImpact / 4;
+      const weakRelativeError = Math.abs(Math.abs(weak.deflection) - weakPrediction) / weakPrediction;
+      tests.push(weak.status === "escape"
+        && weakRelativeError < 0.03
+        && weak.maxConstraint < 2e-8
+        && weak.minR > 3
+        && Math.abs(weak.phiInfinity - weak.phiInfinityNumerical) < 2e-6);
+
+      tests.push(weak.points.length > 2
+        && weak.points[0].affine === 0
+        && weak.points[weak.points.length - 1].affine > 0
+        && weak.points.every((point, index, points) => index === 0 || point.affine >= points[index - 1].affine));
+
+      const criticalDistance = 100;
+      const screenCritical = criticalScreenImpact(criticalDistance);
+      const inside = integrateRay({
+        metricMass: 1,
+        distance: criticalDistance,
+        impact: screenCritical * (1 - 5e-5)
+      });
+      const outside = integrateRay({
+        metricMass: 1,
+        distance: criticalDistance,
+        impact: screenCritical * (1 + 5e-5)
+      });
+      tests.push(inside.status === "captured"
+        && outside.status === "escape"
+        && inside.minR === 2
+        && outside.minR > 3);
+
+      const geometryBasis = observerBasis(37);
+      const handedness = vecCross(geometryBasis.alpha, geometryBasis.beta);
+      const geometryU = 4.2;
+      const geometryV = -1.7;
+      const directionScale = Math.hypot(DEFAULT_OBSERVER_DISTANCE, geometryU, geometryV);
+      const pixelDirection = vecNormalize(vecAdd(
+        vecScale(geometryBasis.radial, -DEFAULT_OBSERVER_DISTANCE),
+        vecAdd(
+          vecScale(geometryBasis.alpha, geometryU),
+          vecScale(geometryBasis.beta, geometryV)
+        )
+      ));
+      const commonOriginA = integrateRay({ metricMass: 1, distance: 80, impact: 7 }).points[0];
+      const commonOriginB = integrateRay({ metricMass: 1, distance: 80, impact: 9 }).points[0];
+      tests.push(
+        Math.hypot(...vecSubtract(handedness, geometryBasis.radial)) < 1e-13
+        && Math.abs(vecDot(geometryBasis.alpha, geometryBasis.beta)) < 1e-13
+        && Math.abs(vecDot(geometryBasis.alpha, geometryBasis.radial)) < 1e-13
+        && Math.abs(vecDot(pixelDirection, geometryBasis.radial) + DEFAULT_OBSERVER_DISTANCE / directionScale) < 1e-13
+        && Math.abs(vecDot(pixelDirection, geometryBasis.alpha) - geometryU / directionScale) < 1e-13
+        && Math.abs(vecDot(pixelDirection, geometryBasis.beta) - geometryV / directionScale) < 1e-13
+        && Math.abs(commonOriginA.x - 80) < 1e-13
+        && Math.abs(commonOriginA.y) < 1e-13
+        && Math.abs(commonOriginB.x - commonOriginA.x) < 1e-13
+        && Math.abs(commonOriginB.y - commonOriginA.y) < 1e-13
+      );
+
+      tests.push(outside.finalState[0] === outside.farPastRadius
+        && outside.farPastRadius > criticalDistance
+        && Math.hypot(
+          outside.points[outside.points.length - 1].x - outside.points[0].x,
+          outside.points[outside.points.length - 1].y - outside.points[0].y
+        ) > 0.5 * outside.farPastRadius);
+
+      const alignedOne = solveImpactForTurns(100, 1);
+      tests.push(Number.isFinite(alignedOne.turns)
+        && Math.abs(alignedOne.turns - 1) < 5e-6);
+
+      const passed = tests.filter(Boolean).length;
+      ui.selfTest.textContent = `数值自检：${passed}/${tests.length} ${passed === tests.length ? "通过" : "失败"}`;
+      ui.selfTest.style.color = passed === tests.length ? "#16794a" : "#b42318";
+      return {
+        passed,
+        total: tests.length,
+        flatEscape,
+        radialCapture,
+        weak,
+        weakRelativeError,
+        inside,
+        outside,
+        geometryBasis,
+        handedness,
+        commonOriginA,
+        commonOriginB,
+        alignedOne
+      };
+    }
+
+    ui.downloadGeodesic.addEventListener("click", downloadGeodesicData);
+    ui.turnCount.addEventListener("change", () => scheduleTurnPreset(0));
+    ui.addSingleByInput.addEventListener("click", () => {
+      setCoordinatesFromMode("single");
+      addSingleAnimatedRay();
+    });
+    ui.clearSingleRays.addEventListener("click", () => {
+      orbitRenderer?.clearAnimatedRays("single");
+      updateSingleRayCount();
+    });
+    ui.addMultiByInput.addEventListener("click", () => {
+      setCoordinatesFromMode("multi");
+      addMultiSelectedPoint();
+    });
+    ui.clearMultiPoints.addEventListener("click", () => {
+      multiSelectedPoints.length = 0;
+      orbitRenderer?.clearAnimatedRays("multi");
+      renderMultiPointList();
+      drawScreen();
+    });
+    ui.startMultiRays.addEventListener("click", startMultiAnimatedRays);
+    ui.playbackDirection.addEventListener("change", updatePlaybackDirection);
+    ui.animationPause.addEventListener("click", toggleAnimationPause);
+
+    for (const control of ui.coordinateSystemControls) {
+      control.addEventListener("change", () => updateCoordinateSystem(control.dataset.coordinateMode));
+    }
+
+    for (const control of ui.trailLengthControls) {
+      control.addEventListener("input", () => setTrailLength(control.value));
+    }
+
+    let modeToggleInProgress = false;
+    for (const panel of ui.traceModes) {
+      panel.addEventListener("toggle", () => {
+        if (modeToggleInProgress || !panel.open) return;
+        modeToggleInProgress = true;
+        for (const other of ui.traceModes) {
+          if (other !== panel) other.open = false;
+        }
+        modeToggleInProgress = false;
+        setActiveTraceMode(panel.dataset.traceMode);
+      });
+    }
+
+    ui.observerRadius.addEventListener("input", () => {
+      orbitRenderer?.clearAnimatedRays("single");
+      orbitRenderer?.clearAnimatedRays("multi");
+      updateSingleRayCount();
+      if (ui.turnCount.value) {
+        scheduleTurnPreset(180);
+        return;
+      }
+      queueTrace();
+    });
+
+    for (const input of [ui.mass, ui.inclination]) {
+      input.addEventListener("change", () => {
+        if (input === ui.inclination) {
+          orbitRenderer?.clearAnimatedRays("single");
+          orbitRenderer?.clearAnimatedRays("multi");
+          updateSingleRayCount();
+        }
+        queueTrace();
+      });
+    }
+
+    for (const input of ui.coordinateInputs) {
+      input.addEventListener("change", () => commitCoordinateInput(input));
+      const remember = () => {
+        rememberDigitCaret(input);
+        updateDigitStepDisplay(input);
+      };
+      input.addEventListener("click", remember);
+      input.addEventListener("keyup", remember);
+      input.addEventListener("select", remember);
+      input.addEventListener("input", remember);
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commitCoordinateInput(input);
+          const mode = input.dataset.coordinateMode;
+          if (mode === "single") addSingleAnimatedRay();
+          else if (mode === "multi") addMultiSelectedPoint();
+          return;
+        }
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+        event.preventDefault();
+        applyDigitStep(input, event.key === "ArrowUp" ? 1 : -1);
+      });
+    }
+
+    for (const button of document.querySelectorAll("[data-step-target]")) {
+      button.addEventListener("pointerdown", event => event.preventDefault());
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.stepTarget);
+        applyDigitStep(input, Number(button.dataset.stepDirection));
+      });
+    }
+
+    ui.screenCanvas.addEventListener("pointerdown", event => {
+      if (event.shiftKey || event.button === 1 || event.button === 2) {
+        screenPanning = true;
+        screenPanStart.x = event.clientX;
+        screenPanStart.y = event.clientY;
+        screenPanStart.centerU = screenView.centerU;
+        screenPanStart.centerV = screenView.centerV;
+      } else {
+        if (activeTraceMode === "whole") {
+          dragSelecting = true;
+          setPixelFromPointer(event, true);
+        } else {
+          dragSelecting = false;
+          setPixelFromPointer(event, false);
+          if (activeTraceMode === "single") addSingleAnimatedRay();
+          else if (activeTraceMode === "multi") addMultiSelectedPoint();
+        }
+      }
+      ui.screenCanvas.setPointerCapture(event.pointerId);
+    });
+    ui.screenCanvas.addEventListener("pointermove", event => {
+      if (screenPanning) {
+        const rect = ui.screenCanvas.getBoundingClientRect();
+        const { scale } = screenLayout(rect);
+        screenView.centerU = screenPanStart.centerU - (event.clientX - screenPanStart.x) / scale;
+        screenView.centerV = screenPanStart.centerV + (event.clientY - screenPanStart.y) / scale;
+        constrainScreenView();
+        refreshScreenOnly();
+      } else if (dragSelecting) {
+        setPixelFromPointer(event, true);
+      }
+    });
+    const finishScreenInteraction = () => {
+      dragSelecting = false;
+      screenPanning = false;
+    };
+    ui.screenCanvas.addEventListener("pointerup", finishScreenInteraction);
+    ui.screenCanvas.addEventListener("pointercancel", finishScreenInteraction);
+    ui.screenCanvas.addEventListener("contextmenu", event => event.preventDefault());
+    ui.screenCanvas.addEventListener("wheel", event => {
+      event.preventDefault();
+      const anchor = screenCoordinatesFromPointer(event);
+      const oldHalfExtent = screenView.halfExtent;
+      const newHalfExtent = clamp(
+        oldHalfExtent * Math.exp(event.deltaY * 0.0014),
+        1e-13,
+        SCREEN_EXTENT
+      );
+      const ratio = newHalfExtent / oldHalfExtent;
+      screenView.centerU = anchor.u + (screenView.centerU - anchor.u) * ratio;
+      screenView.centerV = anchor.v + (screenView.centerV - anchor.v) * ratio;
+      screenView.halfExtent = newHalfExtent;
+      constrainScreenView();
+      refreshScreenOnly();
+    }, { passive: false });
+
+    const resizeObserver = new ResizeObserver(() => {
+      drawScreen();
+      if (orbitRenderer) orbitRenderer.render(); else drawOrbit();
+    });
+    resizeObserver.observe(ui.screenWrap);
+    resizeObserver.observe(ui.orbitWrap);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      for (const control of ui.coordinateSystemControls) {
+        updateCoordinateSystem(control.dataset.coordinateMode);
+      }
+      updatePlaybackDirection();
+      updateAnimationPauseButton();
+      window.CONGL = Object.freeze({
+        integrateRay,
+        asymptoticAzimuthFromObserver,
+        observerBasis,
+        windingTurns,
+        sourceAxisOrder,
+        solveImpactForTurns,
+        runSelfTests
+      });
+      runTrace();
+      renderMultiPointList();
+      updateSingleRayCount();
+      const report = runSelfTests();
+      console.info("CONGL self-test", report);
+    });
+  </script>
+</body>
+</html>

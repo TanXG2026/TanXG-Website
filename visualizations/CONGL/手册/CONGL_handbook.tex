@@ -1,0 +1,588 @@
+\documentclass[UTF8,11pt,a4paper,fontset=fandol]{ctexart}
+
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\geometry{left=2.35cm,right=2.35cm,top=2.30cm,bottom=2.40cm}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setlength{\emergencystretch}{3em}
+
+\definecolor{conglred}{RGB}{126,38,34}
+\definecolor{conglblue}{RGB}{26,53,82}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=conglblue,
+  citecolor=conglblue,
+  urlcolor=conglred,
+  pdftitle={CONGL Schwarzschild and Kerr Null-Geodesic Physics Engine Handbook},
+  pdfauthor={Compact Object Null Geodesic Lab}
+}
+
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\Order}{\mathcal O}
+\newcommand{\Rpot}{\mathcal R}
+\newcommand{\Tpot}{\Theta}
+\newcommand{\Ham}{\mathcal H}
+\newcommand{\er}{\bm{e}_{(r)}}
+\newcommand{\ealpha}{\bm{e}_{(\alpha)}}
+\newcommand{\ebeta}{\bm{e}_{(\beta)}}
+\newcommand{\et}{\bm{e}_{(t)}}
+
+\title{\bfseries CONGL 手册\\[0.35em]}
+\author{Compact Object Null Geodesic Lab, TanXG}
+\date{2026 年 8 月}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本文说明 CONGL 的 \texttt{swc.html} 与 \texttt{kerr.html} 所实现的物理模型。核心问题是：给定有限距离观测者及其屏幕上的一点，如何构造同一观测者事件上的过去指向零四动量，把它映射为守恒量，并沿正向增长的仿射参数追踪至过去无穷远或事件视界。本文先回顾 Schwarzschild 与 Kerr 几何，再建立两种时空共用的局域标架和屏幕映射；随后分别讨论 Schwarzschild 平面化零测地线和 Kerr 可分离理论、球形光子轨道及临界曲线；最后给出与两个 HTML 实际代码一致的数值系统。理论推导采用 Boyer--Lindquist 守恒结构，Kerr 数值积分采用 outgoing Cartesian Kerr--Schild 坐标，两者用途严格区分。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+本文只讨论真空、无电荷、定常黑洞外部的几何光学。度规号差为 \((-,+,+,+)\)，除恢复物理尺度时外取 \(G=c=1\)。两个 HTML 的动力学均令度规质量 \(M=1\)，所有坐标长度都以 \(M\) 为单位；固定局域归一化 \(\bm{p}_o^{(t)}=-1\) 后，代码中的仿射参数也以 \(M\) 计。界面中的太阳质量只换算显示尺度，不进入无量纲轨道方程。
+
+希腊指标 \(\mu,\nu\) 表示坐标分量，带括号的指标 \((a),(b)\) 表示观测者局域正交标架。本文用粗体表示四矢量或四协矢量，用箭头表示三矢量；单个分量仍用普通斜体。光线写成 \(\bm{p}^\mu=\dd x^\mu/\dd\sigma\)，其中 \(\sigma\) 为仿射参数。CONGL 始终使用正步长 \(\Delta\sigma>0\)，反向追踪由初始四动量取过去指向实现。带符号 Killing 能量定义为 \(E=-p_t\)；对过去指向光线，当前约定下通常有 \(E<0\)。Schwarzschild 降维引擎只需要其幅值 \(E=|E|\)，Kerr 引擎则保留并输出带符号的 \(E\)。
+
+\section{基本知识回顾}
+
+\subsection{几何光学、零测地线与 Hamilton 形式}
+
+真空 Einstein 方程为 \(G_{\mu\nu}=0\)。给定解 \(g_{\mu\nu}\) 后，高频电磁场的相位 \(S\) 满足 eikonal 方程 \(g^{\mu\nu}\nabla_\mu S\nabla_\nu S=0\)。令 \(\bm{p}_\mu=\nabla_\mu S\)，则 \(\bm{p}^\nu\nabla_\nu\bm{p}^\mu=0\)，所以光线是仿射参数化的零测地线，并满足 \(g_{\mu\nu}\bm{p}^\mu\bm{p}^\nu=0\)。CONGL 只求这一级的光线路径，不求振幅、偏振或辐射转移。
+
+采用四协变动量 \(\bm{p}_\mu\) 时，测地线 Hamiltonian 为 \(\Ham=\tfrac12g^{\mu\nu}\bm{p}_\mu\bm{p}_\nu\)，光子满足 \(\Ham=0\)。Hamilton 方程是 \(\dot x^\mu=\partial\Ham/\partial\bm{p}_\mu\) 与 \(\dot{\bm{p}}_\mu=-\partial\Ham/\partial x^\mu\)。若 \(\bm{\xi}^\mu\) 是 Killing 向量，则 \(\bm{p}_\mu\bm{\xi}^\mu\) 守恒；定常性给出 \(E=-p_t\) 守恒，轴对称性给出 \(L_z=p_\phi\) 守恒。Kerr 还具有二阶 Killing 张量，由此得到 Carter 常数 \(Q\) 并使 Hamilton--Jacobi 方程可分离\cite{Carter1968a,Carter1968b}。
+
+\subsection{Schwarzschild 解}
+
+史瓦西坐标\((t,r,\theta,\phi)\)下 ，质量为 \(M\) 的静态球对称真空解为
+\begin{align}
+ \dd s^2&=-f(r)\dd t^2+f(r)^{-1}\dd r^2
+ +r^2\bigl(\dd\theta^2+\sin^2\theta\,\dd\phi^2\bigr),
+ &f(r)&=1-\frac{2M}{r}. \label{eq:schwarzschild-metric}
+\end{align}
+外事件视界位于 \(r_+=2M\)。球对称性保证总角动量三向量守恒，任意非径向测地线都严格位于一个穿过原点的固定平面；因此 Schwarzschild 引擎可以为每条光线单独选择轨道平面，而不损失三维物理信息。其不稳定圆形零轨道位于 \(r_{\rm ph}=3M\)。
+
+\subsection{Kerr 解}
+
+Kerr 解描述质量 \(M\)、角动量 \(J=Ma\) 的定常轴对称真空黑洞\cite{Kerr1963}。在 Boyer--Lindquist 坐标 \((t,r,\theta,\phi)\) 中定义 \(\Sigma=r^2+a^2\cos^2\theta\)，\(\Delta=r^2-2Mr+a^2\) 以及 \(A=(r^2+a^2)^2-a^2\Delta\sin^2\theta\)，则线元为
+\begin{align}
+ \dd s^2={}&-\left(1-\frac{2Mr}{\Sigma}\right)\dd t^2
+ -\frac{4Mar\sin^2\theta}{\Sigma}\dd t\,\dd\phi
+ +\frac{\Sigma}{\Delta}\dd r^2+\Sigma\dd\theta^2
+ +\frac{A\sin^2\theta}{\Sigma}\dd\phi^2. \label{eq:kerr-bl}
+\end{align}
+曲面\(r_\pm=M\pm\sqrt{M^2-a^2}\) 为 Killing 视界，其中 \(r_+\) 是外事件视界，\(r_-\) 是内 Cauchy 视界；外静止极限为 \(r_{\rm ergo}=M+\sqrt{M^2-a^2\cos^2\theta}\)。当 \(a\to0\) 时式~\eqref{eq:kerr-bl} 退化为 Schwarzschild 解。Kerr 解只有轴对称性，普通光线一般不位于固定平面；框架拖曳使临界曲线的顺行侧与逆行侧不对称。
+
+
+\subsection{Outgoing Cartesian Kerr--Schild 坐标}
+
+Boyer--Lindquist 坐标在 \(\Delta=0\) 处有坐标奇性。为了用正仿射参数 \(\sigma\) 积分过去指向的光线并稳定逼近过去视界，我们采用 outgoing Cartesian Kerr--Schild 坐标\((t,x,y,z)\)\cite{Chan2018,Bozzola2023}。椭球径向坐标 \(r\) 由
+\begin{equation}
+\frac{x^2+y^2}{r^2+a^2}+\frac{z^2}{r^2}=1
+\end{equation}
+隐式定义，它与 Boyer--Lindquist 径向坐标$r$相同，不等于欧氏空间径向坐标 \(\sqrt{x^2+y^2+z^2}\)；记$\mathcal{H}=\frac{Mr^3}{r^4+a^2z^2}$，
+$\bm{\ell}_\mu\dd x^\mu=-\dd t+\frac{rx-ay}{r^2+a^2}\dd x
++\frac{ry+ax}{r^2+a^2}\dd y+\frac{z}{r}\dd z,\nonumber$，则 OCKS 度规和逆度规为：
+\begin{equation}
+g_{\mu\nu}=\eta_{\mu\nu}+2\mathcal{H}\bm{\ell}_\mu\bm{\ell}_\nu,\qquad
+g^{\mu\nu}=\eta^{\mu\nu}-2\mathcal{H}\bm{\ell}^\mu\bm{\ell}^\nu.\label{eq:outgoing-ks}
+\end{equation}
+不同文献对 ingoing/outgoing、\(a\) 和方位正向的符号约定可能不同；式~\eqref{eq:outgoing-ks} 同时固定了 \(+z\) 正自旋和 \((x,y,z)\) 方位约定。若只替换 \(\ell_t\) 或空间扭转项而不核对 \(g_{t\phi}\)，会把临界曲线的左右方向反转。常 \(r=r_+\) 的视界在这些绘图坐标中是赤道半轴 \(\sqrt{r_+^2+a^2}\)、极半轴 \(r_+\) 的坐标椭球；这不是关于视界内禀几何“形状”的陈述。
+
+\subsection{Kerr 守恒量}
+
+\subsubsection*{能量与z 方向角动量}
+设 $x^\mu(\sigma)$ 是时空流形上的一条以仿射参数 $\sigma$ 参数化的零测地线，其切向量（光子的四动量）及其协变分量分别为
+\begin{equation}
+    p^\mu\equiv\frac{\mathrm d x^\mu}{\mathrm d\sigma},\qquad
+    p_\mu\equiv g_{\mu\nu}p^\nu,\qquad
+    p^\mu p_\mu=0.
+\end{equation}
+假设 $\xi^\mu$ 是时空中的 Killing 矢量场，即
+$\nabla_{(\mu}\xi_{\nu)}=0.$
+则它与四动量的缩并
+$\mathcal C_\xi\equiv p_\mu\xi^\mu$
+沿测地线守恒。事实上，由测地线方程 $p^\nu\nabla_\nu p_\mu=0$ 可以快速证明
+\begin{align}
+    \frac{\mathrm d\mathcal C_\xi}{\mathrm d\sigma}
+    &=p^\nu\nabla_\nu(p_\mu\xi^\mu)
+      =p^\mu p^\nu\nabla_\nu\xi_\mu \nonumber =\frac12p^\mu p^\nu
+      \left(\nabla_\mu\xi_\nu+\nabla_\nu\xi_\mu\right)=0.
+\end{align}
+
+Kerr 时空具有 Killing 矢量场 $\xi_{(t)}^\mu$ 和 $\xi_{(\phi)}^\mu$。相应的守恒量分别为能量和轴向角动量，定义为
+\begin{equation}
+    E\equiv-p_\mu\xi_{(t)}^\mu,\qquad
+    L_z\equiv p_\mu\xi_{(\phi)}^\mu.
+    \label{eq:ELz-killing}
+\end{equation}
+在OCKS坐标 $(t,x,y,z)$ 中，这两个 Killing 矢量场具体分别为
+\begin{equation}
+    \xi_{(t)}^\mu=(1,0,0,0),\qquad
+    \xi_{(\phi)}^\mu=(0,-y,x,0).
+\end{equation}
+因此式~\eqref{eq:ELz-killing} 可以具体写成
+\begin{equation}
+    E=-p_t,\qquad L_z=xp_y-yp_x,
+    \label{eq:ELz-ocks}
+\end{equation}
+其中 $p_t,p_x,p_y$ 均为 OCKS 坐标中的协变动量分量。
+
+\subsubsection*{Carter 常数}
+除上述两个 Killing 矢量外，Kerr 时空还具有满足
+\begin{equation}
+    \nabla_{(\rho}K_{\mu\nu)}=0
+\end{equation}
+的二阶 Killing 张量 $K_{\mu\nu}$，因此
+$\mathcal K\equiv K_{\mu\nu}p^\mu p^\nu$
+同样沿测地线守恒。本文采用的守恒量 Carter 常数定义为
+\begin{equation}
+    Q\equiv\mathcal K-(L_z-aE)^2.
+    \label{eq:Q-definition}
+\end{equation}
+对于零测地线，Carter 常数可写成
+\begin{equation}
+    Q=p_\theta^2+\cos^2\theta
+    \left(\frac{L_z^2}{\sin^2\theta}-a^2E^2\right),
+    \label{eq:Q-explicit}
+\end{equation}
+其中
+$
+    p_\theta\equiv p_\mu
+    \left(\dfrac{\partial}{\partial\theta}\right)^\mu
+$
+是四动量在与 Boyer--Lindquist 极角坐标$\theta$方向上的投影。由于 OCKS 坐标与 Boyer--Lindquist 坐标采用相同的 $r$ 和 $\theta$，该分量可以直接用 OCKS 坐标中的动量计算：
+OCKS 空间坐标$(x,y,z)$ 可以写成
+\begin{equation}
+    x=\sqrt{r^2+a^2}\sin\theta\cos\varphi,\qquad
+    y=\sqrt{r^2+a^2}\sin\theta\sin\varphi,\qquad
+    z=r\cos\theta.
+\end{equation}
+因此极角方向的坐标切向量为
+\begin{equation}
+    \left(\frac{\partial}{\partial\theta}\right)^\mu
+    =
+    \left(0,\sqrt{r^2+a^2}\cos\theta\cos\varphi,
+    \sqrt{r^2+a^2}\cos\theta\sin\varphi,-r\sin\theta\right),
+\end{equation}
+从而
+\begin{align}
+    p_\theta
+    &=\sqrt{r^2+a^2}\cos\theta
+      \left(p_x\cos\varphi+p_y\sin\varphi\right)
+      -r\sin\theta\,p_z \nonumber\\
+    &=\cot\theta\left(xp_x+yp_y\right)-r\sin\theta\,p_z.
+    \label{eq:ptheta-ocks}
+\end{align}
+
+我们选取的观测者位于 $y_o=0$ 平面，坐标为$x_o^\mu=\left(0,\sqrt{r_o^2+a^2}\sin\theta_o,0,r_o\cos\theta_o\right).$首先将局域标架中构造的初始零四动量 $p_o^\mu$ 降低指标：$p_{o\mu}=g_{\mu\nu}(x_o)p_o^\nu.$ 由于此时 $y_o=0$ 且 $\varphi_o=0$，因此守恒量为
+\begin{equation}
+    E=-p_{ot},\qquad
+    L_z=\sqrt{r_o^2+a^2}\sin\theta_o\,p_{oy},
+    \label{eq:observer-constants}
+\end{equation}
+\begin{equation}
+    Q=p_{o\theta}^{\,2}
+    +\cos^2\theta_o
+    \left(\frac{L_z^2}{\sin^2\theta_o}-a^2E^2\right).
+    \label{eq:observer-Q}
+\end{equation}
+其中$p_{o\theta}=\sqrt{r_o^2+a^2}\cos\theta_o\,p_{ox}-r_o\sin\theta_o\,p_{oz}$。
+
+\subsubsection*{无量纲约化守恒量}
+最后定义无量纲的约化守恒量
+\begin{equation}
+    \lambda\equiv\frac{L_z}{E},\qquad
+    \eta\equiv\frac{Q}{E^2}.
+    \label{eq:impact-parameters}
+\end{equation}
+用这两个量就可以完备地描述 Kerr零测地线了。
+
+因此，观测者屏幕坐标到 Kerr 守恒量的局域映射为
+$
+    (\alpha,\beta)\longmapsto p_o^\mu
+    \longmapsto p_{o\mu}
+    \longmapsto(E,L_z,Q)
+    \longmapsto(\lambda,\eta)
+$；请注意，该映射在任意有限观测半径 $r_o$ 处均为精确的局域映射，不需要采用无穷远观测者近似。此外，式~\eqref{eq:Q-explicit} 含有 $\sin\theta$ 分母，因而只适合直接用于 $0<\theta<\pi$ 的非轴向观测者。在旋转轴上，$\theta$ 坐标本身存在坐标奇性，应采用相应的正则极限；但在现实宇宙中，并不存在数学严格的轴向观测者。
+
+若反转零四动量的时间定向，即 $p^\mu\mapsto-p^\mu$，则 $E$、$L_z$ 和 $p_\theta$ 同时反号，而 $Q$ 保持不变，因此 $(\lambda,\eta)$ 与光线的时间定向无关。上述量只有在精确 Kerr 时空中才沿测地线严格守恒；在存在时空微扰的情形下，它们仍可用于标记观测者处的初始光线，但一般不再是整条零测地线上的守恒量。
+
+\section{观测者}
+
+\subsection{局域正交标架}
+
+我们在 outgoing Cartesian Kerr--Schild 坐标中设置初值 。以全局 \(+z\) 轴为自旋轴，利用轴对称性不妨把观测者置于 \(xOz\) 平面（即 \(y_o=0\)），并定义观测者事件为：
+\begin{align}
+ x_o^\mu&=\left(0,\sqrt{r_o^2+a^2}\sin\theta_o,0,r_o\cos\theta_o\right). \label{eq:kerr-observer-event}
+\end{align}
+这里 \(r_o\) 是观测者的 BL 径向坐标，\(\theta_o\) 是观测者倾角。我们采用“坐标静止观测者"，其未来指向的单位四速度为 \(\et=(-g_{tt})^{-1/2}\bm{\partial}_t\)，因此要求度规的 00 分量 \(g_{tt}(x_o)<0\)，即观测者应位于静止极限之外。
+
+为在有限 \(r_o\) 处定义观测者屏幕，先取三个空间候选四矢量
+\begin{equation}
+\begin{cases}
+ \bm{c}_r^\mu=\left(0,\dfrac{r_o\sin\theta_o}{\sqrt{r_o^2+a^2}},0,\cos\theta_o\right),\\[6pt]
+ \bm{c}_\beta^\mu=\left(0,-\sqrt{r_o^2+a^2}\cos\theta_o,0,r_o\sin\theta_o\right), \nonumber\\[6pt]
+ \bm{c}_\alpha^\mu=(0,0,1,0). \label{eq:kerr-screen-candidates}
+\end{cases}
+\end{equation}
+按 \(\bm{c}_r,\bm{c}_\beta,\bm{c}_\alpha\) 的顺序，用完整 Kerr--Schild 度规对它们和 \(\et\) 做 （Lorentzian） Gram--Schmidt 正交化并归一化，最终得到正交归一空间基 \(\er,\ebeta,\ealpha\)，使得 \(g(\bm{e}_{(a)},\bm{e}_{(b)})=\eta_{(a)(b)}=\operatorname{diag}(-1,1,1,1)\)，其中注意选择 \(\ealpha\) 的空间 \(y\) 分量为正，并令 \(\ebeta\) 与 \(\bm{c}_\beta\) 同向，这固定了屏幕手性。由于 Kerr--Schild 度规含 \(g_{ti}\) 项，正交化后的空间基\(\er,\ebeta,\ealpha\)在有限距离内一般带有时间分量，不能用平直空间中的三个单位矢量代替。\(e_{(t)},\er,\ebeta,\ealpha\) 构成了观测者的完整局域正交标架，该局域标架构造与任意有限距离观测者的天球定义一致\cite{Grenzebach2014,PerlickTsupko2022}。
+
+观测者屏幕上的点可用直角坐标 \((\alpha,\beta)\) 或极坐标 \((\rho,\varphi)\) 表示，其中 \(\rho=\sqrt{\alpha^2+\beta^2}\)，\(\alpha=\rho\cos\varphi\)，\(\beta=\rho\sin\varphi\)。请注意，\((\alpha,\beta)\) 改变的是那些到达观测者光线的入射方向（或者说是回溯方向），而不同屏幕坐标对应的回溯起始点都是观测者所在点。
+  
+令 \(s=\sqrt{r_o^2+\alpha^2+\beta^2}\) 为屏幕点到观测者的距离，屏幕方向对应的过去指向零四动量为
+\begin{align}
+ \bm{p}_o^\mu&=-\et^\mu-\frac{r_o}{s}\er^\mu
+ +\frac{\alpha}{s}\ealpha^\mu+\frac{\beta}{s}\ebeta^\mu. \label{eq:screen-ray}
+\end{align}
+显然在正交标架中，式~\eqref{eq:screen-ray} 满足 \(\eta_{(a)(b)}k_o^{(a)}k_o^{(b)}=-1+(r_o^2+\alpha^2+\beta^2)/s^2=0\)，且 \(k_o^{(t)}=-1\)，故其既严格为零四矢量，又指向过去。观测者在回溯对应屏幕坐标$(\alpha,\beta)$的那条光线时，初始回溯四动量就应是上述零四动量。
+
+\subsection{Bardeen 远场坐标}
+
+Bardeen 坐标$(\alpha_B,\beta_B)$是无穷远静止观测者天球上的像平面坐标，不是有限距离屏幕坐标。在本文的 \(Q\) 与屏幕手性约定下，在观测者距离 \(r_o\to\infty\) 时有\cite{Bardeen1973,PerlickTsupko2022}
+\begin{equation}
+ \alpha_{\rm B}=-\frac{\lambda}{\sin\theta_o},
+ \qquad\beta_{\rm B}=\pm\sqrt{\eta+a^2\cos^2\theta_o-\lambda^2\cot^2\theta_o}. \label{eq:bardeen}
+\end{equation}
+该式对 \(0<\theta_o<\pi\) 直接成立，轴上应取相应的正则极限。
+
+
+\subsection{Schwarzschild 极限 \texorpdfstring{\(a\to0\)}{a to 0}}
+
+令 \(a\to0\)，则此时 Kerr 时空退化为 Schwarzschild 时空，式~\eqref{eq:kerr-observer-event} 给出观测者的位置
+\(
+\vec{x}_o=r_o(\sin\theta_o,0,\cos\theta_o),
+\)
+而 outgoing Kerr--Schild 度规相应退化为 outgoing Schwarzschild Kerr--Schild 度规。观测者局域空间标架的三个方向变为
+\begin{align}
+ \vec{e}_r&=(\sin\theta_o,0,\cos\theta_o),&
+ \vec{e}_\alpha&=(0,1,0),&
+ \vec{e}_\beta&=(-\cos\theta_o,0,\sin\theta_o).
+ \label{eq:schwarzschild-screen-basis}
+\end{align}
+其中 \(\vec e_\alpha\) 沿 \(+\phi\) 方向，而 \(\vec e_\beta\) 沿 \(-\theta\) 方向。因此屏幕的两个方向正好构成观测者处 \(r=r_o\) 二球面的两个正交切向方向。
+
+下面直接从统一的屏幕初值式~\eqref{eq:screen-ray} 推导 Schwarzschild 时空的守恒量。易知观测者测得的光子四动量为
+\begin{equation}
+ \bm{p}_o=\et+\frac{r_o}{s}\er
+ +\frac{\alpha}{s}\ealpha+\frac{\beta}{s}\ebeta. \label{eq:screen-ray}
+\end{equation}
+首先考虑能量。令
+\(
+f_o\equiv f(r_o)=1-\dfrac{2M}{r_o}
+\)
+，Schwarzschild 时空中的坐标静止观测者的时间标架为
+\(
+\et=\frac{1}{\sqrt{f_o}}\bm{\partial}_t\)，从而对应事件平移对称性的 Killing 矢量为\(\bm{\xi_{(t)}}=\bm{\partial}_t=\sqrt{f_o}\,\et.\)
+又因为空间标架均与 \(\et\) 正交，所以观测者测得的光子能量为
+\(
+p_{ot}
+=g(\bm{\xi_{(t)}},\bm p_o)
+=g(\bm{\xi_{(t)}},\et)
+=-\sqrt{f_o}.
+\)
+由于 \(E=-p_t\)，因此光子的能量为
+\begin{equation}
+E=\sqrt{f_o}.
+\end{equation}
+
+再考虑角动量。Schwarzschild 时空具有完整的球对称性，因此除 \(L_z\) 外还可以定义总角动量大小
+\begin{equation}
+L^2=L_z^2+Q.
+\end{equation}
+这一关系也可以直接由 Kerr 守恒量在 \(a\to0\) 时得到。由式~\eqref{eq:Q-explicit}，
+\(
+Q
+=p_\theta^2+L_z^2\cot^2\theta,
+\)
+于是
+\(
+L^2\equiv L_z^2+Q
+=p_\theta^2+\frac{L_z^2}{\sin^2\theta}
+.
+\)
+在观测者处，\(\ealpha\) 沿 \(+\phi\) 方向而 \(\ebeta\) 沿 \(-\theta\) 方向，因此屏幕初值给出的局域角向动量分量为
+\(
+p_o^{\phi}=\frac{\alpha}{s}
+\)，\(
+p_o^{\theta}=-\frac{\beta}{s}.
+\)
+相应的协变分量为
+\(
+L_z=p_\phi
+   =r_o\sin\theta_o\,\frac{\alpha}{s}
+\)，\(
+p_\theta
+   =-r_o\,\frac{\beta}{s}.
+\)
+代入总角动量的定义可得
+\[
+\begin{aligned}
+L^2
+&=p_\theta^2+\frac{L_z^2}{\sin^2\theta_o}=\frac{r_o^2\rho^2}{r_o^2+\rho^2}.
+\end{aligned}
+\]
+因此有
+\begin{align}
+ b\equiv\frac{L}{E}
+ &=\frac{r_o\rho}
+ {\sqrt{f_o}\sqrt{r_o^2+\rho^2}}.
+ \label{eq:schwarzschild-screen-limit}
+\end{align}
+这就是对于有限距离观测者而言，屏幕坐标 \(\rho\) 到冲击参数 \(b\) 的精确映射。可以看到，\(\rho\) 本身并不严格是冲击参数；只有在 \(r_o\to\infty\) 且 \(\rho/r_o\to0\) 的远场极限下才近似有 \(b\simeq\rho\)。
+
+这一结果同时说明 Kerr 与 Schwarzschild 两套临界曲线构造是连续连接的。在 \(a\to0\) 时，Bardeen 远场坐标满足
+\[
+\alpha_{\rm B}^2+\beta_{\rm B}^2
+=\lambda^2+\eta
+=\frac{L_z^2+Q}{E^2}
+=\frac{L^2}{E^2}
+=b^2.
+\]
+
+
+\section{Schwarzschild 零测地线}
+
+\subsection{运动方程}
+
+Schwarzschild 时空中，零测地线在一个平面内运动，以 \(\Phi\) 表示该平面内的方位角。
+
+
+对于能量 \(E=f(r)\dot t\) 和总角动量 \(L=r^2\dot\Phi\)，零条件给出 \(\dot r^2=E^2-fL^2/r^2\)。引擎使用 \(E=|E|\)、\(v=\dot r\) 和状态 \(y=(r,\Phi,v)\)，实际积分系统为
+\begin{align}
+ \dot r&=v,&\dot\Phi&=\frac{L}{r^2},
+ &\dot v&=\frac{L^2(r-3M)}{r^4},
+ &v^2&=E^2-\frac{fL^2}{r^2}. \label{eq:swc-engine}
+\end{align}
+最后一个式子是零约束，不是额外演化方程。采用二阶形式而不是直接积分平方根，可在径向转向点保持正则；每个接受步后，代码用约束重建 \(|v|\) 并保留入射或出射符号，以抑制长期强偏折轨道的漂移。
+
+由统一屏幕初值可得 \(f_o=1-2M/r_o\)、\(E=\sqrt{f_o}\)、\(L=r_o\rho/\sqrt{r_o^2+\rho^2}\) 以及 \(v_o=-\sqrt{f_o}\,r_o/\sqrt{r_o^2+\rho^2}\)。因此界面中的屏幕半径 \(\rho\) 不是无穷远冲量参数；后者为 \(b=L/E=r_o\rho/[\sqrt{r_o^2+\rho^2}\sqrt{f_o}]\)。屏幕方位角只决定轨道平面在三维空间中的朝向，不改变 \(b\)、最近距离或捕获分类。
+
+\subsection{光子球、临界半径与轨道分类}
+Schwarzschild 零测地线的径向方程可以写成
+\[
+\dot r^{\,2}
+=E^2-\frac{f(r)L^2}{r^2}
+=E^2
+ \left[1-b^2\frac{f(r)}{r^2}\right].
+\]
+临界光线要求径向势具有二重根，即
+\[
+1-b^2\frac{f(r)}{r^2}=0,
+\qquad
+\frac{\dd}{\dd r}\left(\frac{f(r)}{r^2}\right)=0.
+\]
+由此得到 Schwarzschild 光子球
+\[
+r_{\rm ph}=3M,
+\qquad
+b_c=3\sqrt{3}\,M.
+\]
+因此 Kerr 的临界曲线在 \(a\to0\) 时自然退化为 Bardeen 像平面上半径为 \(b_c\) 的圆。
+
+最后，将 \(b=b_c\) 代入有限距离映射式~\eqref{eq:schwarzschild-screen-limit}，
+\[
+b_c^2
+=\frac{r_o^2\rho_c^2}
+       {f_o(r_o^2+\rho_c^2)},
+\]
+并对 \(\rho_c\) 求解，得到有限距离观测者屏幕上的临界半径
+\begin{align}
+ \rho_c
+ =\frac{b_c r_o\sqrt{f_o}}
+ {\sqrt{r_o^2-b_c^2f_o}}.
+ \label{eq:schwarzschild-critical-screen-limit}
+\end{align}
+这与 \texttt{swc.html} 中使用的临界圆完全相同。因此，Schwarzschild 引擎中的屏幕映射并不是另一套独立规定，而是本文 Kerr 局域标架、屏幕初值、守恒量以及临界曲线构造在 \(a\to0\) 时的连续极限。
+
+
+圆形零轨道要求径向势及其导数同时为零，由此得到 \(r_{\rm ph}=3M\) 与 \(b_c=3\sqrt3M\)。有限屏幕上的捕获区是圆，其半径为 \(\rho_c(r_o)=b_c r_o\sqrt{f_o}/\sqrt{r_o^2-b_c^2f_o}\)。
+当 \(\rho<\rho_c\) 时，过去指向光线没有外部径向转向点并到达 \(r=2M\)；当 \(\rho>\rho_c\) 时，光线在 \(r_{\min}>3M\) 转向并逃向过去远方；临界光线渐近缠绕 \(r=3M\)。散射分支的外转向点满足 \(b^2=r_{\min}^3/(r_{\min}-2M)\)，代码先以该径向势求根，再在数值步内精确定位 \(v=0\)。
+
+\subsection{偏折与多圈轨道}
+
+对完整的无穷远到无穷远散射轨道，方位变化为 \(\Delta\Phi=2\int_{r_{\min}}^\infty b\,[r^2\sqrt{1-b^2f/r^2}]^{-1}\dd r\)，偏折角为 \(\hat\alpha=\Delta\Phi-\pi\)。弱场展开是 \(\hat\alpha=4M/b+(15\pi/4)(M/b)^2+\Order((M/b)^3)\)。当 \(b\to b_c^+\) 时偏折呈对数发散，领先项为 \(\hat\alpha=-\ln(b/b_c-1)+\ln[216(7-4\sqrt3)]-\pi+\cdots\)\cite{Darwin1959,Bozza2002}。因此多一圈所需的 \(b-b_c\) 会指数缩小，这正是圈数预设和高精度屏幕输入的理论依据。
+
+当前引擎的观测者位于有限 \(r_o\)，所以实际方位量由“观测者到转向点”与“过去无穷远到转向点”两段积分组成。数值轨迹只积分到有限外边界，剩余无穷远方位尾项另行积分补偿；外边界本身不被解释成物理无穷远。
+
+\section{Kerr 零测地线与 \texttt{kerr.html}}
+
+\subsection{Hamilton--Jacobi 分离与 Carter 势}
+
+在 Boyer--Lindquist 坐标中令作用量 \(S=-Et+L_z\phi+S_r(r)+S_\theta(\theta)\)，定义 \(P(r)=E(r^2+a^2)-aL_z\)。零测地线的一阶分离方程为\cite{Carter1968a,Chandrasekhar1983,GrallaLupsasca2020}
+\begin{align}
+ \Sigma\dot r&=\varepsilon_r\sqrt{\Rpot(r)},
+ &\Rpot(r)&=P(r)^2-\Delta\bigl[(L_z-aE)^2+Q\bigr],\nonumber\\
+ \Sigma\dot\theta&=\varepsilon_\theta\sqrt{\Tpot(\theta)},
+ &\Tpot(\theta)&=Q+a^2E^2\cos^2\theta-L_z^2\cot^2\theta,\nonumber\\
+ \Sigma\dot t&=\frac{r^2+a^2}{\Delta}P(r)+a(L_z-aE\sin^2\theta),
+ &\Sigma\dot\phi&=\frac{a}{\Delta}P(r)+\frac{L_z}{\sin^2\theta}-aE. \label{eq:carter-system}
+\end{align}
+符号 \(\varepsilon_r,\varepsilon_\theta\) 在相应转向点改变。式~\eqref{eq:carter-system} 给出 Kerr 零测地线的守恒结构、可达区域和临界条件，但 \texttt{kerr.html} 不直接积分这些带平方根的一阶方程；实际积分使用在相关过去视界处正则的 Cartesian Kerr--Schild Hamilton 系统。
+
+\subsection{球形光子轨道与临界曲线}
+
+Kerr 的临界集合不是单一光子球，而是一族常 Boyer--Lindquist 半径的球形光子轨道。令其半径为 \(r_p\)，临界条件为 \(\Rpot(r_p)=0\) 与 \(\Rpot'(r_p)=0\)，并要求极向势允许到达观测者。以 \(\xi=L_z/E\)、\(\eta=Q/E^2\) 表示，CONGL 使用\cite{Teo2003}
+\begin{align}
+ \xi(r_p)&=\frac{r_p^2(r_p-3M)+a^2(r_p+M)}{a(M-r_p)},
+ &\eta(r_p)&=\frac{r_p^3\,[4a^2M-r_p(r_p-3M)^2]}
+ {a^2(M-r_p)^2}. \label{eq:spherical-constants}
+\end{align}
+外部顺行和逆行赤道光子轨道给出球形光子轨道的径向区间外界：
+\begin{align}
+ r_{\rm ph}^{\mp}=2M\left\{1+\cos\left[\frac{2}{3}
+ \arccos\left(\mp\frac{|a|}{M}\right)\right]\right\}. \label{eq:kerr-equatorial-photon-radii}
+\end{align}
+一般倾角下还必须满足 \(\Tpot(\theta_o)\geq0\)，所以可见临界曲线的屏幕端点通常不对应式~\eqref{eq:kerr-equatorial-photon-radii} 的赤道轨道。把允许的式~\eqref{eq:spherical-constants} 代入式~\eqref{eq:bardeen} 得到无穷远临界曲线；有限 \(r_o\) 时，代码再用式~\eqref{eq:screen-ray}--\eqref{eq:constants-map} 的精确映射反解屏幕点。\(a=0\) 使用 Schwarzschild 圆形边界，轴上观测则直接按捕获/逃逸分类求圆形边界，避免 \(\sin\theta_o=0\) 的坐标奇性。
+
+\subsection{Cartesian Hamilton 系统}
+
+令 \(p_t\) 为常数、\(\vec{p}=(p_x,p_y,p_z)\)、\(\vec{\ell}=(\ell_x,\ell_y,\ell_z)\) 且 \(q=\bm{\ell}^\mu\bm{p}_\mu=p_t+\vec{\ell}\cdot\vec{p}\)。由式~\eqref{eq:outgoing-ks} 得到代码实际使用的 Hamiltonian 和演化方程
+\begin{align}
+ \Ham&=\frac12(-p_t^2+\vec{p}^{\,2})-\mathcal{H} q^2=0,\nonumber\\
+ \dot t&=-p_t-2\mathcal{H} q,
+ &\dot x^i&=p_i-2\mathcal{H} q\ell_i,\nonumber\\
+ \dot p_i&=(\partial_i\mathcal{H})q^2
+ +2\mathcal{H} q(\partial_i\ell_j)p_j. \label{eq:ks-hamilton}
+\end{align}
+初始 \(\bm{p}_\mu\) 由统一局域标架映射得到，状态取 \((t,x,y,z,p_x,p_y,p_z)\)，\(p_t\) 单独保存。轨迹本身直接给出 Kerr--Schild \((x,y,z)\)，显示层不再假定固定轨道平面。
+
+\subsection{捕获、逃逸与守恒诊断}
+
+捕获分支到达外视界附近，散射分支在离开近场并满足 \(\dot r>0\) 后到达外边界；具体终止面列于附录。数学上的径向转向点由 \(\dot r=0\) 定义，不能由三维投影中的曲线交点代替。
+
+沿数值轨迹，代码监测相对零约束 \(|2\Ham|/(p_t^2+\vec{p}^{\,2})\) 和 Carter 常数相对漂移。\(E=-p_t\)、\(L_z=xp_y-yp_x\)、\(Q\) 不参与式~\eqref{eq:ks-hamilton} 的约束投影；它们是对 Cartesian Hamilton 积分的独立物理诊断。临界曲线两侧还要分别得到捕获和逃逸，这是仅检查 \(\Ham\approx0\) 无法替代的分类检验。
+
+\section{数值实现}
+
+\subsection{积分与事件}
+
+两个引擎都先按式~\eqref{eq:screen-ray} 构造初值，再用嵌入式 Dormand--Prince RK5(4) 和正步长自适应积分\cite{DormandPrince1980}。Schwarzschild 模块积分 \((r,\Phi,\dot r)\) 并用径向零约束重建 \(\dot r\)；Kerr 模块积分七维 Cartesian Hamilton 状态，不作守恒量投影。视界、转向点和外边界等事件在接受步内定位，有限外边界只是数值终止面。显示时，Schwarzschild 轨道由守恒轨道平面精确嵌入三维，Kerr 则直接使用积分得到的 Kerr--Schild \((x,y,z)\)。
+
+\subsection{验证原则}
+
+数值结果需同时通过步长与容差收敛、零约束和守恒量漂移、临界曲线两侧捕获/逃逸分类三类检查。Schwarzschild 模块还可对照弱场偏折和 \(b_c=3\sqrt3M\)；Kerr 模块应检验局域标架正交性、\(a\to0\) 极限、Carter 常数守恒及自旋反射对称。图像平滑不能替代这些检验。
+
+\section{适用范围}
+
+当前物理引擎描述真空中的几何光学零测地线，不包含等离子体色散、吸收和发射、偏振平行移动、辐射转移、有限尺寸发射体或黑洞内部辐射。星空、黑洞颜色、红色边缘、光线羽化和拖尾只属于视觉编码。若用于合成可观测强度图，还必须沿同一零测地线加入协变辐射转移方程和发射体四速度。
+
+\appendix
+
+\section{符号与引擎对应}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.35\textwidth}>{\raggedright\arraybackslash}p{0.35\textwidth}}
+\toprule
+项目 & Schwarzschild 模块 & Kerr 模块\\
+\midrule
+\endfirsthead
+\toprule
+项目 & Schwarzschild 模块 & Kerr 模块\\
+\midrule
+\endhead
+实际积分坐标 & 单条轨道平面中的 \((r,\Phi)\) & outgoing Cartesian Kerr--Schild \((t,x,y,z)\)\\
+状态变量 & \((r,\Phi,\dot r)\) & \((t,x,y,z,p_x,p_y,p_z)\)，\(p_t\) 另存\\
+守恒量 & \(E=|E|\)、总角动量 \(L\) & 带符号 \(E\)、\(L_z\)、\(Q\)\\
+屏幕半径 & \(\rho=\sqrt{\alpha^2+\beta^2}\)；径向物理只依赖 \(\rho\) & \(\alpha\)、\(\beta\) 分别影响 \(L_z\) 与 \(Q\)\\
+临界集合 & \(r=3M\)、\(b_c=3\sqrt3M\) & \(\Rpot=\Rpot'=0\) 的球形光子轨道族\\
+捕获面 & \(r=2M\) & \(r=r_+(1+2\times10^{-10})\)\\
+远方边界 & \(\max(1000M,10r_o)\) & 进入近场后到 \(\max(500M,1.5r_o)\) 且 \(\dot r>0\)\\
+三维显示 & 由守恒轨道平面重建 & 直接使用积分得到的 \((x,y,z)\)\\
+\bottomrule
+\end{longtable}
+
+\section{主要符号}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.70\textwidth}}
+\toprule
+符号 & 含义\\
+\midrule
+\endfirsthead
+\toprule
+符号 & 含义\\
+\midrule
+\endhead
+\(M,a\) & 度规质量和 Kerr 自旋参数，\(J=Ma\)。\\
+\(r_o,\theta_o\) & 观测者的径向坐标和相对 \(+z\) 轴的倾角。\\
+\(\alpha,\beta\) & CONGL 有限距离局域屏幕坐标。\\
+\(\rho,\varphi\) & 同一屏幕点的极坐标。\\
+\(E,L_z,Q\) & Killing 能量、轴向角动量和 Carter 常数。\\
+\(\xi,\eta\) & 缩放不变量 \(\xi=L_z/E\)、\(\eta=Q/E^2\)。\\
+\(E,L,b\) & Schwarzschild 降维引擎的正能量幅值、总角动量和无穷远冲量参数。\\
+\(\Rpot,\Tpot\) & Kerr 的径向势和极向势。\\
+\(r_p,r_+\) & Kerr 球形光子轨道半径和外事件视界半径。\\
+\(\mathcal{H},\Ham\) & Kerr--Schild 度规标量和测地线 Hamiltonian。\\
+\bottomrule
+\end{longtable}
+
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{参考文献}
+\begin{thebibliography}{99}
+
+\item[]\textbf{论文、综述与数值方法}
+
+\bibitem{Kerr1963}
+R. P. Kerr, ``Gravitational Field of a Spinning Mass as an Example of Algebraically Special Metrics,'' \emph{Physical Review Letters}, vol.~11, pp.~237--238, 1963. DOI: \href{https://doi.org/10.1103/PhysRevLett.11.237}{10.1103/PhysRevLett.11.237}.
+
+\bibitem{Carter1968a}
+B. Carter, ``Global Structure of the Kerr Family of Gravitational Fields,'' \emph{Physical Review}, vol.~174, pp.~1559--1571, 1968. DOI: \href{https://doi.org/10.1103/PhysRev.174.1559}{10.1103/PhysRev.174.1559}.
+
+\bibitem{Carter1968b}
+B. Carter, ``Hamilton--Jacobi and Schrödinger Separable Solutions of Einstein's Equations,'' \emph{Communications in Mathematical Physics}, vol.~10, pp.~280--310, 1968. DOI: \href{https://doi.org/10.1007/BF03399503}{10.1007/BF03399503}.
+
+\bibitem{Bardeen1973}
+J. M. Bardeen, ``Timelike and Null Geodesics in the Kerr Metric,'' in C. DeWitt and B. S. DeWitt (eds.), \emph{Black Holes---Les Astres Occlus}, Gordon and Breach, New York, pp.~215--240, 1973.
+
+\bibitem{Synge1966}
+J. L. Synge, ``The Escape of Photons from Gravitationally Intense Stars,'' \emph{Monthly Notices of the Royal Astronomical Society}, vol.~131, pp.~463--466, 1966. DOI: \href{https://doi.org/10.1093/mnras/131.3.463}{10.1093/mnras/131.3.463}.
+
+\bibitem{Darwin1959}
+C. Darwin, ``The Gravity Field of a Particle,'' \emph{Proceedings of the Royal Society A}, vol.~249, pp.~180--194, 1959. DOI: \href{https://doi.org/10.1098/rspa.1959.0015}{10.1098/rspa.1959.0015}.
+
+\bibitem{Bozza2002}
+V. Bozza, ``Gravitational Lensing in the Strong Field Limit,'' \emph{Physical Review D}, vol.~66, 103001, 2002. DOI: \href{https://doi.org/10.1103/PhysRevD.66.103001}{10.1103/PhysRevD.66.103001}.
+
+\bibitem{Teo2003}
+E. Teo, ``Spherical Photon Orbits Around a Kerr Black Hole,'' \emph{General Relativity and Gravitation}, vol.~35, pp.~1909--1926, 2003. DOI: \href{https://doi.org/10.1023/A:1026286607562}{10.1023/A:1026286607562}.
+
+\bibitem{Grenzebach2014}
+A. Grenzebach, V. Perlick, and C. L\"ammerzahl, ``Photon Regions and Shadows of Kerr--Newman--NUT Black Holes with a Cosmological Constant,'' \emph{Physical Review D}, vol.~89, 124004, 2014. DOI: \href{https://doi.org/10.1103/PhysRevD.89.124004}{10.1103/PhysRevD.89.124004}.
+
+\bibitem{PerlickTsupko2022}
+V. Perlick and O. Y. Tsupko, ``Calculating Black Hole Shadows: Review of Analytical Studies,'' \emph{Physics Reports}, vol.~947, pp.~1--39, 2022. DOI: \href{https://doi.org/10.1016/j.physrep.2021.10.004}{10.1016/j.physrep.2021.10.004}.
+
+\bibitem{Chan2018}
+C.-k. Chan, L. Medeiros, F. \"Ozel, and D. Psaltis, ``GRay2: A General Purpose Geodesic Integrator for Kerr Spacetimes,'' \emph{The Astrophysical Journal}, vol.~867, 59, 2018. DOI: \href{https://doi.org/10.3847/1538-4357/aadfe5}{10.3847/1538-4357/aadfe5}.
+
+\bibitem{GrallaLupsasca2020}
+S. E. Gralla and A. Lupsasca, ``The Null Geodesics of the Kerr Exterior,'' \emph{Physical Review D}, vol.~101, 044032, 2020. DOI: \href{https://doi.org/10.1103/PhysRevD.101.044032}{10.1103/PhysRevD.101.044032}.
+
+\bibitem{Bozzola2023}
+G. Bozzola, C.-k. Chan, and V. Paschalidis, ``Not All Spacetime Coordinates for General-Relativistic Ray Tracing Are Created Equal,'' \emph{Physical Review D}, vol.~108, 084004, 2023. DOI: \href{https://doi.org/10.1103/PhysRevD.108.084004}{10.1103/PhysRevD.108.084004}.
+
+\bibitem{DormandPrince1980}
+J. R. Dormand and P. J. Prince, ``A Family of Embedded Runge--Kutta Formulae,'' \emph{Journal of Computational and Applied Mathematics}, vol.~6, pp.~19--26, 1980. DOI: \href{https://doi.org/10.1016/0771-050X(80)90013-3}{10.1016/0771-050X(80)90013-3}.
+
+\item[]\textbf{教材与专著}
+
+\bibitem{Wald1984}
+R. M. Wald, \emph{General Relativity}, University of Chicago Press, Chicago, 1984.
+
+\bibitem{Chandrasekhar1983}
+S. Chandrasekhar, \emph{The Mathematical Theory of Black Holes}, Clarendon Press, Oxford, 1983. DOI: \href{https://doi.org/10.1093/oso/9780198503705.001.0001}{10.1093/oso/9780198503705.001.0001}.
+
+\bibitem{Poisson2004}
+E. Poisson, \emph{A Relativist's Toolkit: The Mathematics of Black-Hole Mechanics}, Cambridge University Press, Cambridge, 2004. DOI: \href{https://doi.org/10.1017/CBO9780511606601}{10.1017/CBO9780511606601}.
+
+\end{thebibliography}
+
+\end{document}

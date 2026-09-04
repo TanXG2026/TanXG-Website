@@ -1,0 +1,2907 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="assets/congl-logo.png">
+  <link rel="apple-touch-icon" href="assets/congl-logo.png">
+  <title>CONGL · Kerr Black Hole</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f5f6;
+      --panel: #ffffff;
+      --ink: #17191c;
+      --muted: #646a73;
+      --line: #d7dbe0;
+      --grid: #eceff2;
+      --blue: #1769aa;
+      --red: #b42318;
+      --green: #16794a;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 58px;
+      padding: 8px 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    header .brand-logo {
+      display: block;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      object-fit: contain;
+    }
+
+    header span { color: var(--muted); }
+
+    main {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 14px;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    aside, .workspace {
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    aside { padding: 15px; }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+    }
+
+    .section + .section {
+      margin-top: 17px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-hint {
+      margin: -5px 0 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input, select, button {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid #bfc5cc;
+      border-radius: 3px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input, select { padding: 6px 8px; }
+    button {
+      margin-top: 12px;
+      cursor: pointer;
+      background: #1d2024;
+      color: #fff;
+      border-color: #1d2024;
+      font-weight: 600;
+    }
+
+    button:hover { background: #34383e; }
+    button:disabled { cursor: not-allowed; opacity: 0.45; }
+
+    input:focus, select:focus, button:focus-visible {
+      outline: 2px solid rgba(23, 105, 170, 0.25);
+      outline-offset: 1px;
+      border-color: var(--blue);
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .inline-value {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .inline-value output {
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .screen-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .screen-caption {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    canvas { display: block; }
+    #screenCanvas { width: 100%; height: 100%; }
+
+    .trace-modes { margin-top: 10px; }
+    .trace-mode { border-top: 1px solid var(--line); }
+    .trace-mode:last-child { border-bottom: 1px solid var(--line); }
+
+    .trace-mode summary {
+      padding: 9px 2px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .mode-body { padding: 0 2px 11px; }
+    .coordinate-system-label { margin-top: 0; }
+    .coordinate-system-select { margin-bottom: 7px; }
+    .coordinate-fields[hidden] { display: none; }
+
+    .trail-control { margin-top: 10px; }
+    .trail-control label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 3px;
+    }
+    .trail-control output { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .trail-control input[type="range"] {
+      min-height: 24px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      accent-color: #e25525;
+      cursor: ew-resize;
+    }
+
+    .quiet-button {
+      background: #fff;
+      color: #34383e;
+      border-color: #bfc5cc;
+      font-weight: 500;
+    }
+    .quiet-button:hover { background: #f0f2f4; }
+
+    .point-list {
+      max-height: 118px;
+      overflow-y: auto;
+      margin: 7px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .point-list li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 0;
+      border-bottom: 1px solid #eef0f2;
+    }
+    .point-list-coordinates {
+      overflow: hidden;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .point-delete-button {
+      width: auto;
+      min-height: 22px;
+      margin: 0;
+      padding: 1px 7px;
+      border-color: #d3d7dc;
+      background: #fff;
+      color: #8f3428;
+      font: 11px/1.2 system-ui, sans-serif;
+      font-weight: 500;
+    }
+    .point-delete-button:hover { border-color: #bd776d; background: #fff6f4; }
+
+    .coordinate-input {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .digit-stepper {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 22px;
+    }
+
+    .digit-stepper input {
+      min-width: 0;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .digit-step-buttons {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .digit-step-button {
+      width: 22px;
+      min-height: 0;
+      height: 17px;
+      margin: 0;
+      padding: 0;
+      border-left: 0;
+      border-color: #bfc5cc;
+      border-radius: 0;
+      background: #f6f7f8;
+      color: #34383e;
+      font-size: 9px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .digit-step-button:first-child { border-radius: 0 3px 0 0; }
+    .digit-step-button:last-child { border-top: 0; border-radius: 0 0 3px 0; }
+    .digit-step-button:hover { background: #e8eaed; }
+
+    .workspace { overflow: hidden; }
+
+    .orbit-wrap {
+      position: relative;
+      min-height: 650px;
+      height: calc(100vh - 88px);
+      background: #02050b;
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    #orbitCanvas {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #orbitCanvas:active { cursor: grabbing; }
+
+    .calculation-state {
+      position: absolute;
+      top: 52px;
+      right: 13px;
+      z-index: 2;
+      color: rgba(226, 232, 240, 0.7);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .playback-control {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 6px 5px 8px;
+      border: 1px solid rgba(190, 198, 208, 0.28);
+      border-radius: 3px;
+      background: rgba(3, 6, 12, 0.78);
+    }
+    .playback-control[hidden] { display: none; }
+    .playback-control label {
+      margin: 0;
+      color: rgba(222, 227, 234, 0.78);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .playback-control select {
+      width: auto;
+      min-height: 27px;
+      padding: 3px 24px 3px 7px;
+      border-color: rgba(190, 198, 208, 0.38);
+      background: #0a0e16;
+      color: #eef1f5;
+      font-size: 11px;
+    }
+    .playback-control button {
+      width: auto;
+      min-height: 27px;
+      margin: 0;
+      padding: 3px 10px;
+      border-color: rgba(190, 198, 208, 0.38);
+      background: #171c25;
+      color: #eef1f5;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .playback-control button:hover { background: #252c38; }
+
+    @media (min-width: 901px) {
+      html, body { height: 100%; overflow: hidden; }
+      body { display: flex; flex-direction: column; }
+      header { flex: 0 0 auto; }
+      main {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: min(100%, 1380px);
+        grid-template-rows: minmax(0, 1fr);
+      }
+      aside { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+      .workspace, .orbit-wrap { min-height: 0; height: 100%; }
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      aside { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .section + .section { margin: 0; padding: 0; border: 0; }
+      .orbit-wrap { min-height: 470px; height: 58vh; }
+    }
+
+    @media (max-width: 620px) {
+      header { gap: 10px; padding-inline: 14px; }
+      header span { display: block; }
+      aside { display: block; }
+      .section + .section { margin-top: 17px; padding-top: 16px; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img class="brand-logo" src="assets/congl-logo.png" alt="CONGL">
+    <span>Compact Object Null Geodesic Lab · Kerr Black Hole</span>
+  </header>
+
+  <main>
+    <aside>
+      <section class="section">
+        <h2>中心天体模型</h2>
+        <div class="pair">
+          <div>
+            <label for="mass">质量 / M☉</label>
+            <input id="mass" type="number" min="0.1" max="10000000000" step="0.1" value="10.0">
+          </div>
+          <div>
+            <label for="spin">自旋 a / M</label>
+            <input id="spin" type="number" min="-0.999" max="0.999" step="0.01" value="0.90">
+          </div>
+        </div>
+        <div class="pair">
+          <div>
+            <label for="inclination">倾角 θo / °</label>
+            <input id="inclination" type="number" min="0" max="180" step="1" value="60">
+          </div>
+          <div>
+            <label for="observerRadius">观测者距离 rₒ / M</label>
+            <input id="observerRadius" type="number" min="20" max="100000" step="10" value="1000">
+          </div>
+        </div>
+        <div class="inline-value">
+          <span>外事件视界 r₊ / M</span>
+          <output id="horizonRadius">—</output>
+        </div>
+        <div class="inline-value">
+          <span>视界赤道半轴 / 极半轴</span>
+          <output id="horizonAxes">—</output>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>观察者屏幕</h2>
+        <p class="section-hint">滚轮缩放 · Shift + 拖动平移</p>
+        <div class="screen-wrap" id="screenWrap" aria-label="观察者屏幕；点击选择像素">
+          <canvas id="screenCanvas"></canvas>
+        </div>
+        <p class="screen-caption">黑色区域为当前观测者距离下的捕获区</p>
+        <div class="inline-value">
+          <span>屏幕缩放</span>
+          <output id="screenZoom">×1</output>
+        </div>
+
+        <div class="trace-modes">
+        <details class="trace-mode" data-trace-mode="whole" name="trace-mode" open>
+          <summary>整根光线</summary>
+          <div class="mode-body">
+            <label class="coordinate-system-label" for="wholeCoordinateSystem">坐标形式</label>
+            <select class="coordinate-system-select" id="wholeCoordinateSystem" data-coordinate-system data-coordinate-mode="whole">
+              <option value="cartesian" selected>直角坐标（α, β）</option>
+              <option value="polar">极坐标（ρ, φ）</option>
+            </select>
+
+            <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="whole">
+              <div class="pair">
+                <div>
+                  <label for="pixelU">α / M</label>
+                  <div class="digit-stepper">
+                    <input class="coordinate-input" id="pixelU" data-coordinate-component="alpha" data-coordinate-mode="whole" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                    <div class="digit-step-buttons">
+                      <button class="digit-step-button" type="button" data-step-target="pixelU" data-step-direction="1" aria-label="α 当前数位增加 1">▲</button>
+                      <button class="digit-step-button" type="button" data-step-target="pixelU" data-step-direction="-1" aria-label="α 当前数位减少 1">▼</button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label for="pixelV">β / M</label>
+                  <div class="digit-stepper">
+                    <input class="coordinate-input" id="pixelV" data-coordinate-component="beta" data-coordinate-mode="whole" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                    <div class="digit-step-buttons">
+                      <button class="digit-step-button" type="button" data-step-target="pixelV" data-step-direction="1" aria-label="β 当前数位增加 1">▲</button>
+                      <button class="digit-step-button" type="button" data-step-target="pixelV" data-step-direction="-1" aria-label="β 当前数位减少 1">▼</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="whole" hidden>
+              <div class="pair">
+                <div>
+                  <label for="pixelRho">ρ / M</label>
+                  <div class="digit-stepper">
+                    <input class="coordinate-input" id="pixelRho" data-coordinate-component="rho" data-coordinate-mode="whole" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                    <div class="digit-step-buttons">
+                      <button class="digit-step-button" type="button" data-step-target="pixelRho" data-step-direction="1" aria-label="ρ 当前数位增加 1">▲</button>
+                      <button class="digit-step-button" type="button" data-step-target="pixelRho" data-step-direction="-1" aria-label="ρ 当前数位减少 1">▼</button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label for="pixelPhi">φ / °</label>
+                  <div class="digit-stepper">
+                    <input class="coordinate-input" id="pixelPhi" data-coordinate-component="phi" data-coordinate-mode="whole" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                    <div class="digit-step-buttons">
+                      <button class="digit-step-button" type="button" data-step-target="pixelPhi" data-step-direction="1" aria-label="φ 当前数位增加 1">▲</button>
+                      <button class="digit-step-button" type="button" data-step-target="pixelPhi" data-step-direction="-1" aria-label="φ 当前数位减少 1">▼</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="inline-value">
+              <span>光标所在位增减单位</span>
+              <output id="digitStepDisplay" data-digit-step-display>0.01</output>
+            </div>
+
+            <button id="downloadGeodesic" type="button">下载测地线数据（CSV）</button>
+          </div>
+        </details>
+
+        <details class="trace-mode" data-trace-mode="single" name="trace-mode">
+          <summary>单根光线</summary>
+          <div class="mode-body">
+            <label class="coordinate-system-label" for="singleCoordinateSystem">坐标形式</label>
+            <select class="coordinate-system-select" id="singleCoordinateSystem" data-coordinate-system data-coordinate-mode="single">
+              <option value="cartesian" selected>直角坐标（α, β）</option>
+              <option value="polar">极坐标（ρ, φ）</option>
+            </select>
+            <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="single">
+              <div class="pair">
+                <div><label for="singlePixelU">α / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="singlePixelU" data-coordinate-component="alpha" data-coordinate-mode="single" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="singlePixelU" data-step-direction="1" aria-label="α 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="singlePixelU" data-step-direction="-1" aria-label="α 当前数位减少 1">▼</button></div>
+                </div></div>
+                <div><label for="singlePixelV">β / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="singlePixelV" data-coordinate-component="beta" data-coordinate-mode="single" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="singlePixelV" data-step-direction="1" aria-label="β 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="singlePixelV" data-step-direction="-1" aria-label="β 当前数位减少 1">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+            <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="single" hidden>
+              <div class="pair">
+                <div><label for="singlePixelRho">ρ / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="singlePixelRho" data-coordinate-component="rho" data-coordinate-mode="single" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="singlePixelRho" data-step-direction="1" aria-label="ρ 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="singlePixelRho" data-step-direction="-1" aria-label="ρ 当前数位减少 1">▼</button></div>
+                </div></div>
+                <div><label for="singlePixelPhi">φ / °</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="singlePixelPhi" data-coordinate-component="phi" data-coordinate-mode="single" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="singlePixelPhi" data-step-direction="1" aria-label="φ 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="singlePixelPhi" data-step-direction="-1" aria-label="φ 当前数位减少 1">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+            <div class="inline-value"><span>光标所在位增减单位</span><output data-digit-step-display>0.01</output></div>
+            <button id="addSingleByInput" type="button">添加光线</button>
+            <div class="trail-control"><label for="singleTrailLength"><span>拖尾长度</span><output data-trail-length-display>18%</output></label><input id="singleTrailLength" data-trail-length type="range" min="4" max="45" step="1" value="18"></div>
+            <div class="inline-value" aria-live="polite"><span>正在运行</span><output id="singleRayCount">0 条</output></div>
+            <button class="quiet-button" id="clearSingleRays" type="button">清空单根动画</button>
+          </div>
+        </details>
+
+        <details class="trace-mode" data-trace-mode="multi" name="trace-mode">
+          <summary>多根光线</summary>
+          <div class="mode-body">
+            <label class="coordinate-system-label" for="multiCoordinateSystem">坐标形式</label>
+            <select class="coordinate-system-select" id="multiCoordinateSystem" data-coordinate-system data-coordinate-mode="multi">
+              <option value="cartesian" selected>直角坐标（α, β）</option>
+              <option value="polar">极坐标（ρ, φ）</option>
+            </select>
+            <div class="coordinate-fields" data-coordinate-fields="cartesian" data-coordinate-mode="multi">
+              <div class="pair">
+                <div><label for="multiPixelU">α / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="multiPixelU" data-coordinate-component="alpha" data-coordinate-mode="multi" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="multiPixelU" data-step-direction="1" aria-label="α 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="multiPixelU" data-step-direction="-1" aria-label="α 当前数位减少 1">▼</button></div>
+                </div></div>
+                <div><label for="multiPixelV">β / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="multiPixelV" data-coordinate-component="beta" data-coordinate-mode="multi" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="multiPixelV" data-step-direction="1" aria-label="β 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="multiPixelV" data-step-direction="-1" aria-label="β 当前数位减少 1">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+            <div class="coordinate-fields" data-coordinate-fields="polar" data-coordinate-mode="multi" hidden>
+              <div class="pair">
+                <div><label for="multiPixelRho">ρ / M</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="multiPixelRho" data-coordinate-component="rho" data-coordinate-mode="multi" type="text" inputmode="decimal" value="4.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="multiPixelRho" data-step-direction="1" aria-label="ρ 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="multiPixelRho" data-step-direction="-1" aria-label="ρ 当前数位减少 1">▼</button></div>
+                </div></div>
+                <div><label for="multiPixelPhi">φ / °</label><div class="digit-stepper">
+                  <input class="coordinate-input" id="multiPixelPhi" data-coordinate-component="phi" data-coordinate-mode="multi" type="text" inputmode="decimal" value="0.0000000000000000" autocomplete="off">
+                  <div class="digit-step-buttons"><button class="digit-step-button" type="button" data-step-target="multiPixelPhi" data-step-direction="1" aria-label="φ 当前数位增加 1">▲</button><button class="digit-step-button" type="button" data-step-target="multiPixelPhi" data-step-direction="-1" aria-label="φ 当前数位减少 1">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+            <div class="inline-value"><span>光标所在位增减单位</span><output data-digit-step-display>0.01</output></div>
+            <button id="addMultiByInput" type="button">加入列表</button>
+            <div class="trail-control"><label for="multiTrailLength"><span>拖尾长度</span><output data-trail-length-display>18%</output></label><input id="multiTrailLength" data-trail-length type="range" min="4" max="45" step="1" value="18"></div>
+            <div class="inline-value" aria-live="polite"><span>已选屏幕点</span><output id="multiPointCount">0 个</output></div>
+            <ol class="point-list" id="multiPointList" aria-label="多根光线已选屏幕点"></ol>
+            <button class="quiet-button" id="clearMultiPoints" type="button">清空</button>
+            <button id="startMultiRays" type="button">开始同步反向追踪</button>
+          </div>
+        </details>
+        </div>
+      </section>
+    </aside>
+
+    <section class="workspace" aria-label="三维 Kerr 零测地线图像">
+      <div class="orbit-wrap" id="orbitWrap">
+        <canvas id="orbitCanvas" aria-label="可拖动旋转和滚轮缩放的三维 Kerr 零测地线"></canvas>
+        <div class="playback-control" id="playbackControl" hidden>
+          <label for="playbackDirection">动画方向</label>
+          <select id="playbackDirection"><option value="reverse" selected>反向追踪</option><option value="forward">正向追踪</option></select>
+          <button id="animationPause" type="button" aria-pressed="false">暂停</button>
+        </div>
+        <div class="calculation-state" id="calculationState" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <span id="selfTest" hidden></span>
+
+  <script>
+    "use strict";
+
+    const METRIC_MASS = 1;
+    // Outgoing Kerr--Schild is regular on the past horizon reached by
+    // positive-affine, past-directed rays launched from the camera.
+    const KS_TIME_SIGN = -1;
+    const RG_SUN_KM = 1.4766250385;
+    const DISPLAY_DECIMALS = 16;
+    const SCREEN_EXTENT = 10;
+    const DEFAULT_OBSERVER_DISTANCE = 1000;
+    const MAX_POINTS = 7000;
+    const ANIMATION_RADIUS = 32;
+    const TWO_PI = 2 * Math.PI;
+
+    const ui = {
+      mass: document.getElementById("mass"),
+      spin: document.getElementById("spin"),
+      inclination: document.getElementById("inclination"),
+      observerRadius: document.getElementById("observerRadius"),
+      horizonRadius: document.getElementById("horizonRadius"),
+      horizonAxes: document.getElementById("horizonAxes"),
+      screenWrap: document.getElementById("screenWrap"),
+      screenCanvas: document.getElementById("screenCanvas"),
+      screenZoom: document.getElementById("screenZoom"),
+      coordinateSystemControls: Array.from(document.querySelectorAll("[data-coordinate-system]")),
+      coordinateFields: Array.from(document.querySelectorAll("[data-coordinate-fields]")),
+      coordinateInputs: Array.from(document.querySelectorAll(".coordinate-input")),
+      digitStepDisplays: Array.from(document.querySelectorAll("[data-digit-step-display]")),
+      downloadGeodesic: document.getElementById("downloadGeodesic"),
+      traceModes: Array.from(document.querySelectorAll("[data-trace-mode]")),
+      addSingleByInput: document.getElementById("addSingleByInput"),
+      singleRayCount: document.getElementById("singleRayCount"),
+      clearSingleRays: document.getElementById("clearSingleRays"),
+      addMultiByInput: document.getElementById("addMultiByInput"),
+      multiPointCount: document.getElementById("multiPointCount"),
+      multiPointList: document.getElementById("multiPointList"),
+      clearMultiPoints: document.getElementById("clearMultiPoints"),
+      startMultiRays: document.getElementById("startMultiRays"),
+      trailLengthControls: Array.from(document.querySelectorAll("[data-trail-length]")),
+      trailLengthDisplays: Array.from(document.querySelectorAll("[data-trail-length-display]")),
+      orbitWrap: document.getElementById("orbitWrap"),
+      orbitCanvas: document.getElementById("orbitCanvas"),
+      playbackControl: document.getElementById("playbackControl"),
+      playbackDirection: document.getElementById("playbackDirection"),
+      animationPause: document.getElementById("animationPause"),
+      calculationState: document.getElementById("calculationState"),
+      selfTest: document.getElementById("selfTest")
+    };
+
+    let currentResult = null;
+    let traceTimer = null;
+    let activeTraceMode = "whole";
+    let trailFraction = 0.18;
+    const multiSelectedPoints = [];
+    const polarAngles = { whole: 0, single: 0, multi: 0 };
+    const digitCaretPositions = new Map();
+    const screenView = { centerU: 0, centerV: 0, halfExtent: SCREEN_EXTENT };
+    const screenPanStart = { x: 0, y: 0, centerU: 0, centerV: 0 };
+    let screenPanning = false;
+
+    function clamp(value, low, high) { return Math.min(high, Math.max(low, value)); }
+    function finiteNumber(input, fallback) {
+      const value = Number(input?.value ?? input);
+      return Number.isFinite(value) ? value : fallback;
+    }
+    function add(a, b) { return a.map((value, i) => value + b[i]); }
+    function sub(a, b) { return a.map((value, i) => value - b[i]); }
+    function scale(a, factor) { return a.map(value => value * factor); }
+    function dot(a, b) { return a.reduce((sum, value, i) => sum + value * b[i], 0); }
+    function cross(a, b) {
+      return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+      ];
+    }
+    function norm(a) { return Math.hypot(...a); }
+    function normalize(a, fallback = [1, 0, 0]) {
+      const length = norm(a);
+      return length > 1e-15 ? scale(a, 1 / length) : fallback.slice();
+    }
+
+    // Cartesian outgoing Kerr--Schild geometry.  With signature (-,+,+,+),
+    // g_{mu nu}=eta_{mu nu}+2 H l_mu l_nu and
+    // g^{mu nu}=eta^{mu nu}-2 H l^mu l^nu.  The outgoing branch has
+    // l_t=-1; its spatial principal-null covector is returned below.
+    function kerrFields(position, spin, mass = METRIC_MASS) {
+      const [x, y, z] = position;
+      const a2 = spin * spin;
+      const euclidean2 = x * x + y * y + z * z;
+      const A = euclidean2 - a2;
+      const discriminant = Math.sqrt(Math.max(A * A + 4 * a2 * z * z, 1e-30));
+      const r2 = Math.max(0.5 * (A + discriminant), 1e-24);
+      const r = Math.sqrt(r2);
+      const dA = [2 * x, 2 * y, 2 * z];
+      const dDiscriminant = dA.map((value, i) => (
+        A * value + (i === 2 ? 4 * a2 * z : 0)
+      ) / discriminant);
+      const dR2 = dA.map((value, i) => 0.5 * (value + dDiscriminant[i]));
+      const dR = dR2.map(value => value / (2 * r));
+
+      const hDenominator = r2 * r2 + a2 * z * z;
+      const H = mass * r * r2 / hDenominator;
+      const dHDenominator = dR2.map((value, i) => (
+        2 * r2 * value + (i === 2 ? 2 * a2 * z : 0)
+      ));
+      const dH = dR.map((value, i) => H * (
+        3 * value / r - dHDenominator[i] / hDenominator
+      ));
+
+      const lDenominator = r2 + a2;
+      // Keep the physical +z spin direction fixed when switching between the
+      // ingoing and outgoing Cartesian Kerr-Schild charts.  The two charts'
+      // azimuthal coordinates have opposite twist, so the spatial a-terms
+      // change sign together with the time component of the principal null
+      // one-form.
+      const chartSpin = KS_TIME_SIGN * spin;
+      const lNumerators = [r * x + chartSpin * y, r * y - chartSpin * x, z * lDenominator / r];
+      const l = [
+        lNumerators[0] / lDenominator,
+        lNumerators[1] / lDenominator,
+        z / r
+      ];
+      const dLDenominator = dR2;
+      const dNumerators = [
+        [dR[0] * x + r, dR[1] * x + chartSpin, dR[2] * x],
+        [dR[0] * y - chartSpin, dR[1] * y + r, dR[2] * y],
+        [-z * dR[0] / (r * r), -z * dR[1] / (r * r), 1 / r - z * dR[2] / (r * r)]
+      ];
+      const dL = [
+        dNumerators[0].map((value, i) => (
+          value * lDenominator - lNumerators[0] * dLDenominator[i]
+        ) / (lDenominator * lDenominator)),
+        dNumerators[1].map((value, i) => (
+          value * lDenominator - lNumerators[1] * dLDenominator[i]
+        ) / (lDenominator * lDenominator)),
+        dNumerators[2]
+      ];
+
+      return { r, r2, dR, H, dH, l, dL };
+    }
+
+    function covariantMetric(position, spin, mass = METRIC_MASS) {
+      const { H, l } = kerrFields(position, spin, mass);
+      const lc = [KS_TIME_SIGN, ...l];
+      const metric = Array.from({ length: 4 }, (_, mu) => (
+        Array.from({ length: 4 }, (_, nu) => (
+          (mu === nu ? (mu === 0 ? -1 : 1) : 0) + 2 * H * lc[mu] * lc[nu]
+        ))
+      ));
+      return metric;
+    }
+
+    function matrixVector(matrix, vector) {
+      return matrix.map(row => dot(row, vector));
+    }
+
+    function metricDot(metric, a, b) {
+      return dot(a, matrixVector(metric, b));
+    }
+
+    function orthonormalize(candidate, basis, metric) {
+      let vector = candidate.slice();
+      for (const base of basis) {
+        const denominator = metricDot(metric, base, base);
+        vector = sub(vector, scale(base, metricDot(metric, vector, base) / denominator));
+      }
+      const squaredNorm = metricDot(metric, vector, vector);
+      if (!(squaredNorm > 1e-20)) throw new Error("观测者局域标架退化；请增大 rₒ。 ");
+      return scale(vector, 1 / Math.sqrt(squaredNorm));
+    }
+
+    function observerSetup(distance, inclinationDegrees, spin) {
+      const theta = inclinationDegrees * Math.PI / 180;
+      const sinTheta = Math.sin(theta);
+      const cosTheta = Math.cos(theta);
+      const equatorialRadius = Math.sqrt(distance * distance + spin * spin);
+      const position = [equatorialRadius * sinTheta, 0, distance * cosTheta];
+      const metric = covariantMetric(position, spin);
+      if (!(metric[0][0] < 0)) throw new Error("静止观测者位于能层内；请增大 rₒ。 ");
+
+      const time = [1 / Math.sqrt(-metric[0][0]), 0, 0, 0];
+      const radialCandidate = [
+        0,
+        distance * sinTheta / equatorialRadius,
+        0,
+        cosTheta
+      ];
+      const betaCandidate = [0, -equatorialRadius * cosTheta, 0, distance * sinTheta];
+      const alphaCandidate = [0, 0, 1, 0];
+      const radial = orthonormalize(radialCandidate, [time], metric);
+      let beta = orthonormalize(betaCandidate, [time, radial], metric);
+      let alpha = orthonormalize(alphaCandidate, [time, radial, beta], metric);
+      if (alpha[2] < 0) alpha = scale(alpha, -1);
+      const betaSpatial = beta.slice(1);
+      const desiredBeta = betaCandidate.slice(1);
+      if (dot(betaSpatial, desiredBeta) < 0) beta = scale(beta, -1);
+      return { theta, position, metric, time, radial, alpha, beta };
+    }
+
+    function initialRay(params, preparedSetup = null) {
+      const setup = preparedSetup || observerSetup(params.distance, params.inclination, params.spin);
+      const rho = Math.hypot(params.u, params.v);
+      const screenScale = Math.hypot(params.distance, rho);
+      const local = {
+        time: -1,
+        radial: -params.distance / screenScale,
+        alpha: params.u / screenScale,
+        beta: params.v / screenScale
+      };
+      let waveVector = scale(setup.time, local.time);
+      waveVector = add(waveVector, scale(setup.radial, local.radial));
+      waveVector = add(waveVector, scale(setup.alpha, local.alpha));
+      waveVector = add(waveVector, scale(setup.beta, local.beta));
+      const momentum = matrixVector(setup.metric, waveVector);
+      const pT = momentum[0];
+      const state = [0, ...setup.position, momentum[1], momentum[2], momentum[3]];
+      const energy = -pT;
+      const angularMomentum = setup.position[0] * momentum[2] - setup.position[1] * momentum[1];
+      const sinTheta = Math.sin(setup.theta);
+      let carter = Number.NaN;
+      if (Math.abs(sinTheta) > 1e-8) {
+        const qTheta = [
+          Math.sqrt(params.distance * params.distance + params.spin * params.spin) * Math.cos(setup.theta),
+          0,
+          -params.distance * sinTheta
+        ];
+        const pTheta = dot(momentum.slice(1), qTheta);
+        const cos2 = Math.cos(setup.theta) ** 2;
+        carter = pTheta * pTheta + cos2 * (
+          angularMomentum * angularMomentum / (sinTheta * sinTheta)
+          - params.spin * params.spin * energy * energy
+        );
+      }
+      return { state, pT, energy, angularMomentum, carter, setup, local };
+    }
+
+    function hamiltonianAndDerivative(state, pT, spin) {
+      const position = state.slice(1, 4);
+      const momentum = state.slice(4, 7);
+      const fields = kerrFields(position, spin);
+      const q = -KS_TIME_SIGN * pT + dot(fields.l, momentum);
+      const flat = 0.5 * (-pT * pT + dot(momentum, momentum));
+      const hamiltonian = flat - fields.H * q * q;
+      const velocity = sub(momentum, scale(fields.l, 2 * fields.H * q));
+      const timeVelocity = -pT + 2 * KS_TIME_SIGN * fields.H * q;
+      const momentumDerivative = fields.dH.map((dHValue, coordinate) => {
+        let dQ = 0;
+        for (let component = 0; component < 3; component += 1) {
+          dQ += fields.dL[component][coordinate] * momentum[component];
+        }
+        return dHValue * q * q + 2 * fields.H * q * dQ;
+      });
+      return {
+        derivative: [timeVelocity, ...velocity, ...momentumDerivative],
+        hamiltonian,
+        radius: fields.r,
+        radialVelocity: dot(fields.dR, velocity)
+      };
+    }
+
+    function derivatives(state, pT, spin) {
+      return hamiltonianAndDerivative(state, pT, spin).derivative;
+    }
+
+    function addScaled(base, terms) {
+      return base.map((value, i) => (
+        value + terms.reduce((sum, [factor, vector]) => sum + factor * vector[i], 0)
+      ));
+    }
+
+    function dormandPrinceStep(state, step, pT, spin) {
+      const k1 = derivatives(state, pT, spin);
+      const k2 = derivatives(addScaled(state, [[step * (1 / 5), k1]]), pT, spin);
+      const k3 = derivatives(addScaled(state, [
+        [step * (3 / 40), k1], [step * (9 / 40), k2]
+      ]), pT, spin);
+      const k4 = derivatives(addScaled(state, [
+        [step * (44 / 45), k1], [step * (-56 / 15), k2], [step * (32 / 9), k3]
+      ]), pT, spin);
+      const k5 = derivatives(addScaled(state, [
+        [step * (19372 / 6561), k1], [step * (-25360 / 2187), k2],
+        [step * (64448 / 6561), k3], [step * (-212 / 729), k4]
+      ]), pT, spin);
+      const k6 = derivatives(addScaled(state, [
+        [step * (9017 / 3168), k1], [step * (-355 / 33), k2],
+        [step * (46732 / 5247), k3], [step * (49 / 176), k4],
+        [step * (-5103 / 18656), k5]
+      ]), pT, spin);
+      const fifth = addScaled(state, [
+        [step * (35 / 384), k1], [step * (500 / 1113), k3],
+        [step * (125 / 192), k4], [step * (-2187 / 6784), k5],
+        [step * (11 / 84), k6]
+      ]);
+      const k7 = derivatives(fifth, pT, spin);
+      const fourth = addScaled(state, [
+        [step * (5179 / 57600), k1], [step * (7571 / 16695), k3],
+        [step * (393 / 640), k4], [step * (-92097 / 339200), k5],
+        [step * (187 / 2100), k6], [step * (1 / 40), k7]
+      ]);
+      return { fifth, fourth };
+    }
+
+    function integrationError(previous, fifth, fourth, rtol, atol) {
+      let maximum = 0;
+      for (let i = 0; i < previous.length; i += 1) {
+        const reference = atol + rtol * Math.max(Math.abs(previous[i]), Math.abs(fifth[i]));
+        maximum = Math.max(maximum, Math.abs(fifth[i] - fourth[i]) / reference);
+      }
+      return maximum;
+    }
+
+    function relativeNullError(state, pT, spin) {
+      const info = hamiltonianAndDerivative(state, pT, spin);
+      const momentum = state.slice(4, 7);
+      const scaleValue = pT * pT + dot(momentum, momentum) + 1e-30;
+      return Math.abs(2 * info.hamiltonian) / scaleValue;
+    }
+
+    function carterConstantFromState(state, pT, spin) {
+      const [x, y, z, px, py, pz] = state.slice(1);
+      const fields = kerrFields([x, y, z], spin);
+      const cosTheta = clamp(z / fields.r, -1, 1);
+      const sin2 = Math.max(0, 1 - cosTheta * cosTheta);
+      if (sin2 < 1e-14) return Number.NaN;
+      const sinTheta = Math.sqrt(sin2);
+      const cotTheta = cosTheta / sinTheta;
+      const pTheta = (px * x + py * y) * cotTheta - pz * fields.r * sinTheta;
+      const energy = -pT;
+      const angularMomentum = x * py - y * px;
+      return pTheta * pTheta + cosTheta * cosTheta * (
+        angularMomentum * angularMomentum / sin2 - spin * spin * energy * energy
+      );
+    }
+
+    function locateRadiusEvent(startState, endState, fullStep, pT, spin, targetRadius) {
+      let lowFraction = 0;
+      let highFraction = 1;
+      let lowState = startState;
+      let highState = endState;
+      let lowRadius = hamiltonianAndDerivative(lowState, pT, spin).radius;
+      let highRadius = hamiltonianAndDerivative(highState, pT, spin).radius;
+      if (!(lowRadius > targetRadius && highRadius <= targetRadius)) {
+        return { state: endState, fraction: 1 };
+      }
+      for (let iteration = 0; iteration < 48; iteration += 1) {
+        const middleFraction = 0.5 * (lowFraction + highFraction);
+        const middleState = dormandPrinceStep(startState, fullStep * middleFraction, pT, spin).fifth;
+        const middleRadius = hamiltonianAndDerivative(middleState, pT, spin).radius;
+        if (middleRadius > targetRadius) {
+          lowFraction = middleFraction;
+          lowState = middleState;
+          lowRadius = middleRadius;
+        } else {
+          highFraction = middleFraction;
+          highState = middleState;
+          highRadius = middleRadius;
+        }
+      }
+      if (Math.abs(lowRadius - targetRadius) <= Math.abs(highRadius - targetRadius)) {
+        return { state: lowState, fraction: lowFraction };
+      }
+      return { state: highState, fraction: highFraction };
+    }
+
+    function pointFromState(state, affine, pT, spin) {
+      const info = hamiltonianAndDerivative(state, pT, spin);
+      return {
+        affine,
+        time: state[0],
+        x: state[1],
+        y: state[2],
+        z: state[3],
+        px: state[4],
+        py: state[5],
+        pz: state[6],
+        r: info.radius,
+        radialVelocity: info.radialVelocity,
+        nullError: relativeNullError(state, pT, spin)
+      };
+    }
+
+    function integrateKerrRay(params, options = {}) {
+      const rtol = options.rtol ?? 2e-9;
+      const atol = options.atol ?? 2e-11;
+      const initial = initialRay(params);
+      const horizon = METRIC_MASS + Math.sqrt(METRIC_MASS * METRIC_MASS - params.spin * params.spin);
+      // Stop on an exterior guard only two parts in 10^10 above r_+.  Outgoing
+      // Kerr-Schild coordinates remain regular here; the tiny offset prevents
+      // roundoff from classifying a point on the horizon as lying inside it.
+      const horizonStop = horizon * (1 + 2e-10);
+      const farRadius = Math.max(1.5 * params.distance, 500);
+      let state = initial.state.slice();
+      let affine = 0;
+      let step = 0.5;
+      let accepted = 0;
+      let rejected = 0;
+      let minR = params.distance;
+      let minIndex = 0;
+      let maxNullError = relativeNullError(state, initial.pT, params.spin);
+      let maxCarterError = 0;
+      let passedNearField = false;
+      let status = "limit";
+      const points = [pointFromState(state, affine, initial.pT, params.spin)];
+
+      while (accepted < 180000) {
+        const currentInfo = hamiltonianAndDerivative(state, initial.pT, params.spin);
+        const localStepMax = clamp(0.18 * Math.max(currentInfo.radius - horizon, 0.03), 0.003, 8);
+        step = Math.min(step, localStepMax);
+        const trial = dormandPrinceStep(state, step, initial.pT, params.spin);
+        const error = integrationError(state, trial.fifth, trial.fourth, rtol, atol);
+        if (!Number.isFinite(error)) {
+          status = "error";
+          break;
+        }
+        if (error > 1) {
+          step *= clamp(0.9 * Math.pow(error, -0.2), 0.1, 0.5);
+          rejected += 1;
+          if (step < 1e-10 || rejected > 100000) {
+            status = "error";
+            break;
+          }
+          continue;
+        }
+
+        const previousState = state;
+        state = trial.fifth;
+        affine += step;
+        accepted += 1;
+        const info = hamiltonianAndDerivative(state, initial.pT, params.spin);
+        if (![...state, info.radius, info.radialVelocity].every(Number.isFinite)) {
+          status = "error";
+          break;
+        }
+
+        if (info.radius < minR) {
+          minR = info.radius;
+          minIndex = points.length;
+        }
+        if (info.radius < 0.8 * params.distance) passedNearField = true;
+        maxNullError = Math.max(maxNullError, relativeNullError(state, initial.pT, params.spin));
+        const currentCarter = carterConstantFromState(state, initial.pT, params.spin);
+        if (Number.isFinite(initial.carter) && Number.isFinite(currentCarter)) {
+          maxCarterError = Math.max(
+            maxCarterError,
+            Math.abs(currentCarter - initial.carter) / Math.max(1, Math.abs(initial.carter))
+          );
+        }
+        points.push(pointFromState(state, affine, initial.pT, params.spin));
+
+        if (info.radius <= horizonStop) {
+          const event = locateRadiusEvent(
+            previousState, state, step, initial.pT, params.spin, horizonStop
+          );
+          state = event.state;
+          affine -= step * (1 - event.fraction);
+          const eventPoint = pointFromState(state, affine, initial.pT, params.spin);
+          points[points.length - 1] = eventPoint;
+          minR = eventPoint.r;
+          minIndex = points.length - 1;
+          status = "capture";
+          break;
+        }
+
+        if (passedNearField && info.radius >= farRadius && info.radialVelocity > 0) {
+          status = "escape";
+          break;
+        }
+
+        if (affine > 5e6) {
+          status = "limit";
+          break;
+        }
+        step *= clamp(0.9 * Math.pow(Math.max(error, 1e-14), -0.2), 0.5, 4.0);
+      }
+
+      if (points.length > MAX_POINTS) {
+        const stride = Math.ceil(points.length / MAX_POINTS);
+        const reduced = points.filter((_, index) => index % stride === 0);
+        if (reduced[reduced.length - 1] !== points[points.length - 1]) reduced.push(points[points.length - 1]);
+        const closest = reduced.reduce((best, point, index) => (
+          point.r < best.r ? { r: point.r, index } : best
+        ), { r: Number.POSITIVE_INFINITY, index: 0 });
+        return {
+          ...initial,
+          points: reduced,
+          status,
+          horizon,
+          farRadius,
+          minR,
+          minIndex: closest.index,
+          maxNullError,
+          maxCarterError,
+          accepted,
+          rejected
+        };
+      }
+      return {
+        ...initial,
+        points,
+        status,
+        horizon,
+        farRadius,
+        minR,
+        minIndex,
+        maxNullError,
+        maxCarterError,
+        accepted,
+        rejected
+      };
+    }
+
+    function setCanvasSize(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(rect.width * ratio));
+      const height = Math.max(1, Math.round(rect.height * ratio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      const context = canvas.getContext("2d");
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      return { context, width: rect.width, height: rect.height, ratio };
+    }
+
+    function screenLayout(width, height) {
+      const size = Math.min(width, height) - 22;
+      return {
+        size,
+        left: (width - size) / 2,
+        top: (height - size) / 2,
+        scale: size / (2 * screenView.halfExtent)
+      };
+    }
+
+    function kerrPhotonRadii(spin) {
+      const magnitude = Math.abs(spin);
+      if (magnitude < 1e-10) return { low: 3, high: 3 };
+      return {
+        low: 2 * (1 + Math.cos((2 / 3) * Math.acos(-magnitude))),
+        high: 2 * (1 + Math.cos((2 / 3) * Math.acos(magnitude)))
+      };
+    }
+
+    function sphericalPhotonConstants(radius, spin) {
+      const numeratorXi = radius * radius * (radius - 3)
+        + spin * spin * (radius + 1);
+      const xi = numeratorXi / (spin * (1 - radius));
+      const eta = radius ** 3 * (
+        4 * spin * spin - radius * (radius - 3) ** 2
+      ) / (spin * spin * (1 - radius) ** 2);
+      return { xi, eta };
+    }
+
+    function polarCriticalRadius(spin) {
+      if (Math.abs(spin) < 1e-9) return 3 * Math.sqrt(3);
+      const horizon = 1 + Math.sqrt(1 - spin * spin);
+      const equation = radius => (
+        radius * radius * (radius - 3) + spin * spin * (radius + 1)
+      );
+      let low = horizon + 1e-8;
+      let high = 4;
+      let previous = low;
+      let previousValue = equation(previous);
+      for (let i = 1; i <= 400; i += 1) {
+        const candidate = low + (high - low) * i / 400;
+        const value = equation(candidate);
+        if (previousValue * value <= 0) {
+          low = previous;
+          high = candidate;
+          break;
+        }
+        previous = candidate;
+        previousValue = value;
+      }
+      for (let i = 0; i < 80; i += 1) {
+        const middle = 0.5 * (low + high);
+        if (equation(low) * equation(middle) <= 0) high = middle;
+        else low = middle;
+      }
+      const radius = 0.5 * (low + high);
+      const { eta } = sphericalPhotonConstants(radius, spin);
+      return Math.sqrt(Math.max(eta + spin * spin, 0));
+    }
+
+    function asymptoticCriticalRadialInterval(spin, theta) {
+      const { low, high } = kerrPhotonRadii(spin);
+      const betaSquared = radius => {
+        const { xi, eta } = sphericalPhotonConstants(radius, spin);
+        const sinTheta = Math.sin(theta);
+        const cosineTheta = Math.cos(theta);
+        return eta + spin * spin * cosineTheta * cosineTheta
+          - xi * xi * (cosineTheta / sinTheta) ** 2;
+      };
+      const samples = 4096;
+      let firstAllowed = -1;
+      let lastAllowed = -1;
+      for (let index = 0; index <= samples; index += 1) {
+        const radius = low + (high - low) * index / samples;
+        if (betaSquared(radius) >= -1e-12) {
+          if (firstAllowed < 0) firstAllowed = index;
+          lastAllowed = index;
+        }
+      }
+      if (firstAllowed < 0) return null;
+
+      const refineBoundary = (outsideRadius, insideRadius) => {
+        let outside = outsideRadius;
+        let inside = insideRadius;
+        for (let iteration = 0; iteration < 80; iteration += 1) {
+          const middle = 0.5 * (outside + inside);
+          if (betaSquared(middle) >= 0) inside = middle;
+          else outside = middle;
+        }
+        return inside;
+      };
+      const firstRadius = low + (high - low) * firstAllowed / samples;
+      const lastRadius = low + (high - low) * lastAllowed / samples;
+      const start = firstAllowed === 0
+        ? low
+        : refineBoundary(low + (high - low) * (firstAllowed - 1) / samples, firstRadius);
+      const end = lastAllowed === samples
+        ? high
+        : refineBoundary(low + (high - low) * (lastAllowed + 1) / samples, lastRadius);
+      return { start, end, betaSquared };
+    }
+
+    function prepareScreenConstantMap(params, setup) {
+      const covariantTime = matrixVector(setup.metric, setup.time);
+      const covariantRadial = matrixVector(setup.metric, setup.radial);
+      const covariantAlpha = matrixVector(setup.metric, setup.alpha);
+      const covariantBeta = matrixVector(setup.metric, setup.beta);
+      const sinTheta = Math.sin(setup.theta);
+      const cos2 = Math.cos(setup.theta) ** 2;
+      const qTheta = [
+        Math.sqrt(params.distance * params.distance + params.spin * params.spin) * Math.cos(setup.theta),
+        0,
+        -params.distance * sinTheta
+      ];
+      return (u, v) => {
+        const screenScale = Math.hypot(params.distance, u, v);
+        const radialCoefficient = -params.distance / screenScale;
+        const alphaCoefficient = u / screenScale;
+        const betaCoefficient = v / screenScale;
+        const momentum = covariantTime.map((timeValue, index) => (
+          -timeValue
+          + radialCoefficient * covariantRadial[index]
+          + alphaCoefficient * covariantAlpha[index]
+          + betaCoefficient * covariantBeta[index]
+        ));
+        const energy = -momentum[0];
+        const angularMomentum = setup.position[0] * momentum[2] - setup.position[1] * momentum[1];
+        const pTheta = dot(momentum.slice(1), qTheta);
+        const carter = pTheta * pTheta + cos2 * (
+          angularMomentum * angularMomentum / (sinTheta * sinTheta)
+          - params.spin * params.spin * energy * energy
+        );
+        return {
+          xi: angularMomentum / energy,
+          eta: carter / (energy * energy)
+        };
+      };
+    }
+
+    function solveFiniteScreenPoint(constantMap, targetXi, targetEta, seedU, seedV) {
+      let u = seedU;
+      let v = Math.max(0, seedV);
+      if (v < 1e-8) {
+        v = 0;
+        for (let iteration = 0; iteration < 12; iteration += 1) {
+          const value = constantMap(u, 0).xi - targetXi;
+          if (Math.abs(value) < 2e-13) break;
+          const step = 2e-5 * Math.max(1, Math.abs(u));
+          const derivative = (
+            constantMap(u + step, 0).xi
+            - constantMap(u - step, 0).xi
+          ) / (2 * step);
+          if (!Number.isFinite(derivative) || Math.abs(derivative) < 1e-12) break;
+          u -= value / derivative;
+        }
+        return [u, 0];
+      }
+
+      const residual = (trialU, trialV) => {
+        const constants = constantMap(trialU, trialV);
+        const first = constants.xi - targetXi;
+        const second = constants.eta - targetEta;
+        return {
+          first,
+          second,
+          norm: Math.hypot(first, second / Math.max(1, Math.abs(targetEta)))
+        };
+      };
+
+      for (let iteration = 0; iteration < 10; iteration += 1) {
+        const current = residual(u, v);
+        if (current.norm < 2e-12) break;
+        const stepU = 2e-5 * Math.max(1, Math.abs(u));
+        const stepV = 2e-5 * Math.max(1, Math.abs(v));
+        const plusU = constantMap(u + stepU, v);
+        const minusU = constantMap(u - stepU, v);
+        const plusV = constantMap(u, v + stepV);
+        const minusV = constantMap(u, Math.max(0, v - stepV));
+        const actualVSpan = (v + stepV) - Math.max(0, v - stepV);
+        const xiU = (plusU.xi - minusU.xi) / (2 * stepU);
+        const etaU = (plusU.eta - minusU.eta) / (2 * stepU);
+        const xiV = (plusV.xi - minusV.xi) / actualVSpan;
+        const etaV = (plusV.eta - minusV.eta) / actualVSpan;
+        const determinant = xiU * etaV - xiV * etaU;
+        if (!Number.isFinite(determinant) || Math.abs(determinant) < 1e-13) break;
+        let deltaU = (-current.first * etaV + xiV * current.second) / determinant;
+        let deltaV = (etaU * current.first - xiU * current.second) / determinant;
+        const deltaLength = Math.hypot(deltaU, deltaV);
+        const limit = 0.4 * Math.max(1, Math.hypot(u, v));
+        if (deltaLength > limit) {
+          deltaU *= limit / deltaLength;
+          deltaV *= limit / deltaLength;
+        }
+        let damping = 1;
+        let accepted = false;
+        while (damping >= 1 / 32) {
+          const trialU = u + damping * deltaU;
+          const trialV = Math.max(0, v + damping * deltaV);
+          if (residual(trialU, trialV).norm < current.norm) {
+            u = trialU;
+            v = trialV;
+            accepted = true;
+            break;
+          }
+          damping *= 0.5;
+        }
+        if (!accepted) break;
+      }
+      return [u, v];
+    }
+
+    function schwarzschildFiniteCriticalRadius(distance) {
+      const impact = 3 * Math.sqrt(3);
+      const lapseSquared = 1 - 2 / distance;
+      return impact * distance * Math.sqrt(
+        lapseSquared / (distance * distance - impact * impact * lapseSquared)
+      );
+    }
+
+    function axisFiniteCriticalRadius(params) {
+      let captured = 0;
+      let escaped = 8;
+      while (escaped < SCREEN_EXTENT) {
+        const result = integrateKerrRay({ ...params, u: escaped, v: 0 }, { rtol: 2e-7, atol: 2e-9 });
+        if (result.status === "escape") break;
+        escaped *= 1.5;
+      }
+      for (let iteration = 0; iteration < 28; iteration += 1) {
+        const middle = 0.5 * (captured + escaped);
+        const result = integrateKerrRay({ ...params, u: middle, v: 0 }, { rtol: 2e-7, atol: 2e-9 });
+        if (result.status === "escape") escaped = middle;
+        else captured = middle;
+      }
+      return 0.5 * (captured + escaped);
+    }
+
+    let criticalCurveCache = { key: "", points: [] };
+
+    function criticalCurve(params) {
+      const { spin, inclination: inclinationDegrees, distance } = params;
+      const cacheKey = [spin, inclinationDegrees, distance].map(value => Number(value).toPrecision(14)).join("|");
+      if (criticalCurveCache.key === cacheKey) return criticalCurveCache.points;
+      const theta = inclinationDegrees * Math.PI / 180;
+      const sinTheta = Math.sin(theta);
+      if (Math.abs(spin) < 1e-8) {
+        const radius = schwarzschildFiniteCriticalRadius(distance);
+        const points = Array.from({ length: 361 }, (_, index) => {
+          const angle = TWO_PI * index / 360;
+          return [radius * Math.cos(angle), radius * Math.sin(angle)];
+        });
+        criticalCurveCache = { key: cacheKey, points };
+        return points;
+      }
+      if (Math.abs(sinTheta) < 1e-5) {
+        const radius = axisFiniteCriticalRadius(params);
+        const points = Array.from({ length: 361 }, (_, index) => {
+          const angle = TWO_PI * index / 360;
+          return [radius * Math.cos(angle), radius * Math.sin(angle)];
+        });
+        criticalCurveCache = { key: cacheKey, points };
+        return points;
+      }
+
+      const interval = asymptoticCriticalRadialInterval(spin, theta);
+      if (!interval) {
+        const radius = polarCriticalRadius(spin);
+        const points = Array.from({ length: 361 }, (_, index) => {
+          const angle = TWO_PI * index / 360;
+          return [radius * Math.cos(angle), radius * Math.sin(angle)];
+        });
+        criticalCurveCache = { key: cacheKey, points };
+        return points;
+      }
+      const setup = observerSetup(distance, inclinationDegrees, spin);
+      const constantMap = prepareScreenConstantMap(params, setup);
+      const upper = [];
+      const samples = 900;
+      for (let index = 0; index <= samples; index += 1) {
+        const phase = Math.PI * index / samples;
+        const radius = 0.5 * (interval.start + interval.end)
+          - 0.5 * (interval.end - interval.start) * Math.cos(phase);
+        const { xi, eta } = sphericalPhotonConstants(radius, spin);
+        const alpha = -xi / sinTheta;
+        const beta = (index === 0 || index === samples)
+          ? 0
+          : Math.sqrt(Math.max(interval.betaSquared(radius), 0));
+        upper.push(solveFiniteScreenPoint(constantMap, xi, eta, alpha, beta));
+      }
+      const lower = [];
+      for (let index = upper.length - 2; index >= 1; index -= 1) {
+        lower.push([upper[index][0], -upper[index][1]]);
+      }
+      const points = upper.concat(lower);
+      criticalCurveCache = { key: cacheKey, points };
+      return points;
+    }
+
+    function adaptiveParametricCurve(evaluate, start, end, coarseSegments, pixelsPerUnit, bounds) {
+      const output = [];
+      const cache = new Map();
+      const pointAt = parameter => {
+        const key = parameter.toPrecision(17);
+        if (!cache.has(key)) cache.set(key, evaluate(parameter));
+        return cache.get(key);
+      };
+      const nearView = (a, middle, b, padding = 0) => {
+        const minimumU = Math.min(a[0], middle[0], b[0]);
+        const maximumU = Math.max(a[0], middle[0], b[0]);
+        const minimumV = Math.min(a[1], middle[1], b[1]);
+        const maximumV = Math.max(a[1], middle[1], b[1]);
+        return maximumU + padding >= bounds.minU && minimumU - padding <= bounds.maxU
+          && maximumV + padding >= bounds.minV && minimumV - padding <= bounds.maxV;
+      };
+      const chordError = (a, middle, b) => {
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const denominator = Math.hypot(dx, dy);
+        if (denominator < 1e-30) return Math.hypot(middle[0] - a[0], middle[1] - a[1]);
+        return Math.abs(dy * middle[0] - dx * middle[1] + b[0] * a[1] - b[1] * a[0]) / denominator;
+      };
+      const appendSegment = (parameterA, pointA, parameterB, pointB, depth) => {
+        const middleParameter = 0.5 * (parameterA + parameterB);
+        const middlePoint = pointAt(middleParameter);
+        const worldLength = Math.hypot(pointB[0] - pointA[0], pointB[1] - pointA[1]);
+        const worldError = chordError(pointA, middlePoint, pointB);
+        const projectedLength = worldLength * pixelsPerUnit;
+        const projectedError = worldError * pixelsPerUnit;
+        // Keep a uniformly refined backbone so an ultra-small viewport cannot fall
+        // between three coarse samples.  Near the visible window, continue until
+        // both curvature and chord length are sub-pixel smooth.
+        const minimumDepth = 4;
+        const conservativePadding = Math.max(2.5 * worldError, 0.012 * worldLength, 2 / pixelsPerUnit);
+        const relevantToView = nearView(pointA, middlePoint, pointB, conservativePadding);
+        const shouldRefine = depth < 20 && output.length < 12000
+          && (depth < minimumDepth
+            || (relevantToView && (projectedError > 0.10 || projectedLength > 6)));
+        if (shouldRefine) {
+          appendSegment(parameterA, pointA, middleParameter, middlePoint, depth + 1);
+          appendSegment(middleParameter, middlePoint, parameterB, pointB, depth + 1);
+        } else {
+          output.push(pointB);
+        }
+      };
+      const first = pointAt(start);
+      output.push(first);
+      for (let index = 0; index < coarseSegments; index += 1) {
+        const parameterA = start + (end - start) * index / coarseSegments;
+        const parameterB = start + (end - start) * (index + 1) / coarseSegments;
+        appendSegment(parameterA, pointAt(parameterA), parameterB, pointAt(parameterB), 0);
+      }
+      return output;
+    }
+
+    function criticalCurveForView(params, pixelsPerUnit) {
+      const margin = 0.12 * screenView.halfExtent + 3 / Math.max(pixelsPerUnit, 1e-30);
+      const bounds = {
+        minU: screenView.centerU - screenView.halfExtent - margin,
+        maxU: screenView.centerU + screenView.halfExtent + margin,
+        minV: screenView.centerV - screenView.halfExtent - margin,
+        maxV: screenView.centerV + screenView.halfExtent + margin
+      };
+      const theta = params.inclination * Math.PI / 180;
+      const sinTheta = Math.sin(theta);
+      let circleRadius = null;
+      if (Math.abs(params.spin) < 1e-8) circleRadius = schwarzschildFiniteCriticalRadius(params.distance);
+      else if (Math.abs(sinTheta) < 1e-5) circleRadius = axisFiniteCriticalRadius(params);
+      if (circleRadius !== null) {
+        return adaptiveParametricCurve(
+          parameter => [circleRadius * Math.cos(TWO_PI * parameter), circleRadius * Math.sin(TWO_PI * parameter)],
+          0, 1, 72, pixelsPerUnit, bounds
+        );
+      }
+
+      const interval = asymptoticCriticalRadialInterval(params.spin, theta);
+      if (!interval) {
+        const radius = polarCriticalRadius(params.spin);
+        return adaptiveParametricCurve(
+          parameter => [radius * Math.cos(TWO_PI * parameter), radius * Math.sin(TWO_PI * parameter)],
+          0, 1, 72, pixelsPerUnit, bounds
+        );
+      }
+      const setup = observerSetup(params.distance, params.inclination, params.spin);
+      const constantMap = prepareScreenConstantMap(params, setup);
+      const upperPoint = parameter => {
+        const phase = Math.PI * parameter;
+        const radius = 0.5 * (interval.start + interval.end)
+          - 0.5 * (interval.end - interval.start) * Math.cos(phase);
+        const { xi, eta } = sphericalPhotonConstants(radius, params.spin);
+        const alpha = -xi / sinTheta;
+        const beta = (parameter <= 0 || parameter >= 1)
+          ? 0
+          : Math.sqrt(Math.max(interval.betaSquared(radius), 0));
+        return solveFiniteScreenPoint(constantMap, xi, eta, alpha, beta);
+      };
+      const upper = adaptiveParametricCurve(upperPoint, 0, 1, 72, pixelsPerUnit, bounds);
+      const lowerBounds = { minU: bounds.minU, maxU: bounds.maxU, minV: -bounds.maxV, maxV: -bounds.minV };
+      const lowerUpper = adaptiveParametricCurve(upperPoint, 1, 0, 72, pixelsPerUnit, lowerBounds);
+      const lower = lowerUpper.slice(1, -1).map(point => [point[0], -point[1]]);
+      return upper.concat(lower);
+    }
+
+    function modelParameters(mode = activeTraceMode, coordinateOverride = null) {
+      const mass = clamp(finiteNumber(ui.mass, 10), 0.1, 1e10);
+      const spin = clamp(finiteNumber(ui.spin, 0.9), -0.999, 0.999);
+      const inclination = clamp(finiteNumber(ui.inclination, 60), 0, 180);
+      const distance = clamp(finiteNumber(ui.observerRadius, DEFAULT_OBSERVER_DISTANCE), 20, 100000);
+      const coordinates = coordinateOverride || readCoordinates(mode);
+      const u = clamp(coordinates.u, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const v = clamp(coordinates.v, -SCREEN_EXTENT, SCREEN_EXTENT);
+      return { mass, spin, inclination, distance, u, v, impact: Math.hypot(u, v) };
+    }
+
+    function drawScreen() {
+      const { context: ctx, width, height } = setCanvasSize(ui.screenCanvas);
+      const layout = screenLayout(width, height);
+      const params = modelParameters();
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      const toCanvas = ([u, v]) => [
+        layout.left + layout.size / 2 + (u - screenView.centerU) * layout.scale,
+        layout.top + layout.size / 2 - (v - screenView.centerV) * layout.scale
+      ];
+      const minU = screenView.centerU - screenView.halfExtent;
+      const maxU = screenView.centerU + screenView.halfExtent;
+      const minV = screenView.centerV - screenView.halfExtent;
+      const maxV = screenView.centerV + screenView.halfExtent;
+      const rawGrid = Math.pow(10, Math.floor(Math.log10(2 * screenView.halfExtent / 6)));
+      const gridStep = [1, 2, 5, 10].map(factor => factor * rawGrid)
+        .find(step => 2 * screenView.halfExtent / step <= 10) || 10 * rawGrid;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(layout.left, layout.top, layout.size, layout.size);
+      ctx.clip();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#eceff2";
+      for (let u = Math.ceil(minU / gridStep) * gridStep; u <= maxU; u += gridStep) {
+        const [x] = toCanvas([u, 0]);
+        ctx.beginPath(); ctx.moveTo(x, layout.top); ctx.lineTo(x, layout.top + layout.size); ctx.stroke();
+      }
+      for (let v = Math.ceil(minV / gridStep) * gridStep; v <= maxV; v += gridStep) {
+        const [, y] = toCanvas([0, v]);
+        ctx.beginPath(); ctx.moveTo(layout.left, y); ctx.lineTo(layout.left + layout.size, y); ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#adb4bc";
+      if (minU <= 0 && maxU >= 0) {
+        const [x] = toCanvas([0, 0]);
+        ctx.beginPath(); ctx.moveTo(x, layout.top); ctx.lineTo(x, layout.top + layout.size); ctx.stroke();
+      }
+      if (minV <= 0 && maxV >= 0) {
+        const [, y] = toCanvas([0, 0]);
+        ctx.beginPath(); ctx.moveTo(layout.left, y); ctx.lineTo(layout.left + layout.size, y); ctx.stroke();
+      }
+
+      const curve = criticalCurveForView(params, layout.scale);
+      ctx.beginPath();
+      curve.forEach((point, index) => {
+        const [x, y] = toCanvas(point);
+        if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "#02050b";
+      ctx.fill();
+      ctx.strokeStyle = "#7e2723";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      if (activeTraceMode === "multi") {
+        ctx.fillStyle = "rgba(93,199,255,0.90)";
+        for (const point of multiSelectedPoints) {
+          const [x, y] = toCanvas([point.u, point.v]);
+          ctx.beginPath(); ctx.arc(x, y, 2.7, 0, TWO_PI); ctx.fill();
+        }
+      }
+      const [selectedX, selectedY] = toCanvas([params.u, params.v]);
+      ctx.strokeStyle = "#ef4c36";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(selectedX - 7, selectedY); ctx.lineTo(selectedX + 7, selectedY);
+      ctx.moveTo(selectedX, selectedY - 7); ctx.lineTo(selectedX, selectedY + 7);
+      ctx.stroke();
+      ctx.fillStyle = "#ffd34d";
+      ctx.beginPath(); ctx.arc(selectedX, selectedY, 3.2, 0, TWO_PI); ctx.fill();
+      ctx.restore();
+
+      ctx.strokeStyle = "#c4c9cf";
+      ctx.strokeRect(layout.left, layout.top, layout.size, layout.size);
+      ctx.fillStyle = "#5f6670";
+      ctx.font = "12px ui-sans-serif, sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText("α / M", layout.left + layout.size - 7, layout.top + layout.size / 2 - 7);
+      ctx.save();
+      ctx.translate(layout.left + layout.size / 2 + 9, layout.top + 15);
+      ctx.textAlign = "left";
+      ctx.fillText("β / M", 0, 0);
+      ctx.restore();
+      ui.screenZoom.textContent = `×${(SCREEN_EXTENT / screenView.halfExtent).toLocaleString("zh-CN", { maximumFractionDigits: 2 })}`;
+    }
+
+    function convexHull(points) {
+      const sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      if (sorted.length <= 2) return sorted;
+      const turn = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+      const lower = [];
+      for (const point of sorted) {
+        while (lower.length >= 2 && turn(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) lower.pop();
+        lower.push(point);
+      }
+      const upper = [];
+      for (let i = sorted.length - 1; i >= 0; i -= 1) {
+        const point = sorted[i];
+        while (upper.length >= 2 && turn(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) upper.pop();
+        upper.push(point);
+      }
+      lower.pop(); upper.pop();
+      return lower.concat(upper);
+    }
+
+    class KerrRenderer {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.context = canvas.getContext("2d");
+        this.defaultYaw = 0.80;
+        this.defaultPitch = 0.34;
+        this.yaw = this.defaultYaw;
+        this.pitch = this.defaultPitch;
+        this.cameraRight = [1, 0, 0];
+        this.cameraUp = [0, 0, 1];
+        this.cameraDepth = [0, 1, 0];
+        this.updateCameraBasis();
+        this.zoom = 1;
+        this.result = null;
+        this.params = null;
+        this.path = [];
+        this.visibleMode = "whole";
+        this.animatedRays = [];
+        this.nextRayId = 1;
+        this.trailFraction = 0.18;
+        this.playbackDirection = "reverse";
+        this.animationPaused = false;
+        this.pauseStartedAt = null;
+        this.animationFrameId = null;
+        this.onRaySetChanged = null;
+        this.dragging = false;
+        this.hovered = false;
+        this.lastPointer = { x: 0, y: 0 };
+        this.stars = this.createStars(210);
+        this.bindEvents();
+        this.resizeObserver = new ResizeObserver(() => this.draw());
+        this.resizeObserver.observe(canvas.parentElement);
+      }
+
+      createStars(count) {
+        let seed = 0x4b455252;
+        const random = () => {
+          seed = (1664525 * seed + 1013904223) >>> 0;
+          return seed / 0x100000000;
+        };
+        return Array.from({ length: count }, () => ({
+          x: random(), y: random(), radius: 0.35 + 1.05 * random(), alpha: 0.25 + 0.65 * random()
+        }));
+      }
+
+      resetView() {
+        this.yaw = this.defaultYaw;
+        this.pitch = this.defaultPitch;
+        this.updateCameraBasis();
+        this.zoom = 1;
+        this.draw();
+      }
+
+      updateCameraBasis() {
+        const cosine = Math.cos(this.pitch);
+        const sine = Math.sin(this.pitch);
+        const cosineYaw = Math.cos(this.yaw);
+        const sineYaw = Math.sin(this.yaw);
+        this.cameraDepth = [cosine * cosineYaw, cosine * sineYaw, sine];
+        this.cameraRight = [-sineYaw, cosineYaw, 0];
+        this.cameraUp = [-sine * cosineYaw, -sine * sineYaw, cosine];
+      }
+
+      setResult(result, params) {
+        this.result = result;
+        this.params = params;
+        this.path = this.trimPath(result?.points || [], 80);
+        this.hovered = false;
+        this.draw();
+      }
+
+      setAnimationMode(mode, params = this.params) {
+        this.visibleMode = mode;
+        this.params = params || this.params;
+        this.hovered = false;
+        this.ensureAnimationLoop();
+        this.draw();
+      }
+
+      setTrailFraction(value) {
+        this.trailFraction = clamp(value, 0.04, 0.45);
+        this.draw();
+      }
+
+      setPlaybackDirection(direction) {
+        this.playbackDirection = direction === "forward" ? "forward" : "reverse";
+        this.draw();
+      }
+
+      setAnimationPaused(paused) {
+        const now = performance.now();
+        if (paused === this.animationPaused) return;
+        if (paused) {
+          this.animationPaused = true;
+          this.pauseStartedAt = now;
+          if (this.animationFrameId !== null) cancelAnimationFrame(this.animationFrameId);
+          this.animationFrameId = null;
+        } else {
+          const delta = Math.max(0, now - (this.pauseStartedAt ?? now));
+          for (const ray of this.animatedRays) ray.startTime += delta;
+          this.animationPaused = false;
+          this.pauseStartedAt = null;
+          this.ensureAnimationLoop();
+        }
+        this.draw();
+      }
+
+      animatedRayCount(mode) {
+        return this.animatedRays.filter(ray => ray.mode === mode).length;
+      }
+
+      clearAnimatedRays(mode) {
+        const before = this.animatedRays.length;
+        this.animatedRays = this.animatedRays.filter(ray => ray.mode !== mode);
+        if (before !== this.animatedRays.length) this.onRaySetChanged?.();
+        this.draw();
+      }
+
+      removeAnimatedRay(rayId) {
+        const before = this.animatedRays.length;
+        this.animatedRays = this.animatedRays.filter(ray => ray.id !== rayId);
+        if (before !== this.animatedRays.length) this.onRaySetChanged?.();
+        this.draw();
+      }
+
+      addAnimatedRay(result, params, mode, sharedStartTime = performance.now()) {
+        const points = this.trimPath(result?.points || [], ANIMATION_RADIUS);
+        if (points.length < 2) return null;
+        const stride = Math.max(1, Math.ceil(points.length / 1800));
+        const sampled = points.filter((point, index) => index % stride === 0 || index === points.length - 1);
+        const affineStart = sampled[0].affine ?? 0;
+        const affineEnd = sampled[sampled.length - 1].affine ?? sampled.length - 1;
+        const affineSpan = Math.max(1e-9, affineEnd - affineStart);
+        const ray = {
+          id: this.nextRayId++, mode, points: sampled, params,
+          affineStart, affineEnd, affineSpan,
+          timelineStart: affineStart,
+          timelineEnd: affineEnd,
+          startTime: this.animationPaused ? (this.pauseStartedAt ?? performance.now()) : sharedStartTime,
+          duration: clamp(affineSpan * 95, 4200, 11500),
+          gap: 900,
+          loop: mode === "multi"
+        };
+        this.animatedRays.push(ray);
+        this.visibleMode = mode;
+        this.params = params;
+        this.onRaySetChanged?.();
+        this.ensureAnimationLoop();
+        this.draw();
+        return ray.id;
+      }
+
+      synchronizeAnimatedGroup(mode, startTime = performance.now() + 120) {
+        const rays = this.animatedRays.filter(ray => ray.mode === mode);
+        if (!rays.length) return;
+        const timelineStart = Math.max(...rays.map(ray => ray.affineStart));
+        const timelineEnd = Math.max(...rays.map(ray => ray.affineEnd));
+        const duration = clamp((timelineEnd - timelineStart) * 95, 4200, 11500);
+        const synchronizedStart = this.animationPaused
+          ? (this.pauseStartedAt ?? performance.now()) + Math.max(0, startTime - performance.now())
+          : startTime;
+        for (const ray of rays) {
+          ray.startTime = synchronizedStart;
+          ray.duration = duration;
+          ray.timelineStart = timelineStart;
+          ray.timelineEnd = timelineEnd;
+        }
+        this.ensureAnimationLoop();
+      }
+
+      ensureAnimationLoop() {
+        if (this.animationPaused || this.visibleMode === "whole" || this.animationFrameId !== null) return;
+        if (!this.animatedRays.some(ray => ray.mode === this.visibleMode)) return;
+        const tick = now => {
+          this.animationFrameId = null;
+          this.draw(now);
+          if (!this.animationPaused && this.visibleMode !== "whole"
+            && this.animatedRays.some(ray => ray.mode === this.visibleMode)) {
+            this.animationFrameId = requestAnimationFrame(tick);
+          }
+        };
+        this.animationFrameId = requestAnimationFrame(tick);
+      }
+
+      trimPath(points, radiusLimit) {
+        if (points.length < 2) return points.slice();
+        const output = [];
+        for (let i = 1; i < points.length; i += 1) {
+          const previous = points[i - 1];
+          const current = points[i];
+          const previousInside = previous.r <= radiusLimit;
+          const currentInside = current.r <= radiusLimit;
+          if (previousInside && output.length === 0) output.push(previous);
+          if (previousInside && currentInside) {
+            output.push(current);
+          } else if (previousInside !== currentInside) {
+            const fraction = clamp((radiusLimit - previous.r) / (current.r - previous.r), 0, 1);
+            output.push({
+              ...current,
+              x: previous.x + fraction * (current.x - previous.x),
+              y: previous.y + fraction * (current.y - previous.y),
+              z: previous.z + fraction * (current.z - previous.z),
+              r: radiusLimit
+            });
+          }
+        }
+        return output;
+      }
+
+      bindEvents() {
+        this.canvas.addEventListener("pointerdown", event => {
+          if (event.button !== 0) return;
+          this.dragging = true;
+          this.lastPointer = { x: event.clientX, y: event.clientY };
+          this.canvas.setPointerCapture(event.pointerId);
+        });
+        this.canvas.addEventListener("pointermove", event => {
+          if (this.dragging) {
+            const dx = event.clientX - this.lastPointer.x;
+            const dy = event.clientY - this.lastPointer.y;
+            this.lastPointer = { x: event.clientX, y: event.clientY };
+            this.yaw -= dx * 0.007;
+            this.pitch = clamp(this.pitch + dy * 0.007, -Math.PI / 2, Math.PI / 2);
+            this.updateCameraBasis();
+            this.draw();
+            return;
+          }
+          const rect = this.canvas.getBoundingClientRect();
+          this.hovered = this.distanceToProjectedPath(event.clientX - rect.left, event.clientY - rect.top) < 8;
+          this.canvas.style.cursor = this.hovered ? "pointer" : "grab";
+          this.draw();
+        });
+        const finishDrag = event => {
+          this.dragging = false;
+          if (event?.pointerId !== undefined && this.canvas.hasPointerCapture(event.pointerId)) {
+            this.canvas.releasePointerCapture(event.pointerId);
+          }
+        };
+        this.canvas.addEventListener("pointerup", finishDrag);
+        this.canvas.addEventListener("pointercancel", finishDrag);
+        this.canvas.addEventListener("pointerleave", () => {
+          if (!this.dragging) {
+            this.hovered = false;
+            this.draw();
+          }
+        });
+        this.canvas.addEventListener("wheel", event => {
+          event.preventDefault();
+          this.zoom = clamp(this.zoom * Math.exp(-event.deltaY * 0.0012), 0.25, 80);
+          this.draw();
+        }, { passive: false });
+        this.canvas.addEventListener("dblclick", () => this.resetView());
+      }
+
+      layout() {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleValue = Math.min(rect.width, rect.height) / 32 * this.zoom;
+        return { width: rect.width, height: rect.height, cx: rect.width / 2, cy: rect.height / 2, scale: scaleValue };
+      }
+
+      project(point, layout = this.layout()) {
+        const viewX = dot(point, this.cameraRight);
+        const viewY = dot(point, this.cameraUp);
+        const viewDepth = dot(point, this.cameraDepth);
+        return {
+          x: layout.cx + viewX * layout.scale,
+          y: layout.cy - viewY * layout.scale,
+          depth: viewDepth
+        };
+      }
+
+      cameraDirection() {
+        return this.cameraDepth;
+      }
+
+      horizonAxes() {
+        const spin = this.params?.spin || 0;
+        const radius = this.result?.horizon || (1 + Math.sqrt(1 - spin * spin));
+        return { equatorial: Math.sqrt(radius * radius + spin * spin), polar: radius };
+      }
+
+      occlusionGeometry() {
+        const axes = this.horizonAxes();
+        const direction = this.cameraDirection();
+        const invA2 = 1 / (axes.equatorial * axes.equatorial);
+        const invC2 = 1 / (axes.polar * axes.polar);
+        const quadraticA = (direction[0] ** 2 + direction[1] ** 2) * invA2
+          + direction[2] ** 2 * invC2;
+        return { direction, invA2, invC2, quadraticA };
+      }
+
+      pointOccluded(point, geometry = this.occlusionGeometry()) {
+        const { direction, invA2, invC2, quadraticA } = geometry;
+        const quadraticB = 2 * ((point[0] * direction[0] + point[1] * direction[1]) * invA2
+          + point[2] * direction[2] * invC2);
+        const quadraticC = (point[0] ** 2 + point[1] ** 2) * invA2
+          + point[2] ** 2 * invC2 - 1;
+        const discriminant = quadraticB * quadraticB - 4 * quadraticA * quadraticC;
+        if (discriminant < 0) return false;
+        const root = Math.sqrt(discriminant);
+        const t1 = (-quadraticB - root) / (2 * quadraticA);
+        const t2 = (-quadraticB + root) / (2 * quadraticA);
+        return t1 > 1e-5 || t2 > 1e-5;
+      }
+
+      interpolateWorld(a, b, fraction) {
+        return [
+          a[0] + fraction * (b[0] - a[0]),
+          a[1] + fraction * (b[1] - a[1]),
+          a[2] + fraction * (b[2] - a[2])
+        ];
+      }
+
+      visibilityBoundary(a, b, aOccluded, geometry) {
+        let left = a;
+        let right = b;
+        for (let iteration = 0; iteration < 16; iteration += 1) {
+          const middle = this.interpolateWorld(left, right, 0.5);
+          if (this.pointOccluded(middle, geometry) === aOccluded) left = middle;
+          else right = middle;
+        }
+        return this.interpolateWorld(left, right, 0.5);
+      }
+
+      visibleWorldSegments(a, b, geometry) {
+        const middle = this.interpolateWorld(a, b, 0.5);
+        const aOccluded = this.pointOccluded(a, geometry);
+        const middleOccluded = this.pointOccluded(middle, geometry);
+        const bOccluded = this.pointOccluded(b, geometry);
+        if (aOccluded === middleOccluded && middleOccluded === bOccluded) {
+          return aOccluded ? [] : [[a, b]];
+        }
+        const visible = [];
+        const halves = [
+          [a, middle, aOccluded, middleOccluded],
+          [middle, b, middleOccluded, bOccluded]
+        ];
+        for (const [fromWorld, toWorld, fromOccluded, toOccluded] of halves) {
+          if (fromOccluded === toOccluded) {
+            if (!fromOccluded) visible.push([fromWorld, toWorld]);
+            continue;
+          }
+          const boundary = this.visibilityBoundary(fromWorld, toWorld, fromOccluded, geometry);
+          const visibleFrom = fromOccluded ? boundary : fromWorld;
+          const visibleTo = toOccluded ? boundary : toWorld;
+          visible.push([visibleFrom, visibleTo]);
+        }
+        return visible;
+      }
+
+      drawOcclusionClippedSegment(ctx, layout, a, b, alpha, geometry) {
+        for (const [visibleFrom, visibleTo] of this.visibleWorldSegments(a, b, geometry)) {
+          this.drawAnimatedSegment(
+            ctx, this.project(visibleFrom, layout), this.project(visibleTo, layout), alpha
+          );
+        }
+      }
+
+      drawStars(ctx, width, height) {
+        ctx.fillStyle = "#02050b";
+        ctx.fillRect(0, 0, width, height);
+        for (const star of this.stars) {
+          ctx.fillStyle = `rgba(235,241,249,${star.alpha})`;
+          ctx.beginPath();
+          ctx.arc(star.x * width, star.y * height, star.radius, 0, TWO_PI);
+          ctx.fill();
+        }
+      }
+
+      drawAxes(ctx, layout) {
+        const axes = [
+          { endpoint: [9, 0, 0], label: "x" },
+          { endpoint: [0, 9, 0], label: "y" },
+          { endpoint: [0, 0, 9], label: "z" }
+        ];
+        const origin = this.project([0, 0, 0], layout);
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = "rgba(205,213,222,0.36)";
+        ctx.fillStyle = "rgba(221,227,234,0.68)";
+        ctx.font = "12px ui-sans-serif, sans-serif";
+        for (const axis of axes) {
+          const endpoint = this.project(axis.endpoint, layout);
+          ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(endpoint.x, endpoint.y); ctx.stroke();
+          ctx.fillText(axis.label, endpoint.x + 4, endpoint.y - 3);
+        }
+      }
+
+      drawSightline(ctx, layout) {
+        if (!this.params) return;
+        const theta = this.params.inclination * Math.PI / 180;
+        const spin = this.params.spin || 0;
+        const observerRadius = this.params.distance || DEFAULT_OBSERVER_DISTANCE;
+        const observerDirection = normalize([
+          Math.sqrt(observerRadius * observerRadius + spin * spin) * Math.sin(theta),
+          0,
+          observerRadius * Math.cos(theta)
+        ]);
+        const axes = this.horizonAxes();
+        const inverseSurfaceRadiusSquared = (
+          (observerDirection[0] ** 2 + observerDirection[1] ** 2)
+            / (axes.equatorial * axes.equatorial)
+          + observerDirection[2] ** 2 / (axes.polar * axes.polar)
+        );
+        const horizonIntersectionDistance = 1 / Math.sqrt(inverseSurfaceRadiusSquared);
+        const seamOverlap = 1.5 / layout.scale;
+        const start = this.project(scale(observerDirection, 45), layout);
+        const end = this.project(
+          scale(observerDirection, Math.max(0, horizonIntersectionDistance - seamOverlap)),
+          layout
+        );
+        ctx.save();
+        ctx.setLineDash([6, 8]);
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = "rgba(190,199,210,0.22)";
+        ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(end.x, end.y); ctx.stroke();
+        ctx.restore();
+      }
+
+      horizonHull(layout) {
+        const axes = this.horizonAxes();
+        const points = [];
+        for (let latitude = 0; latitude <= 18; latitude += 1) {
+          const theta = Math.PI * latitude / 18;
+          for (let longitude = 0; longitude < 48; longitude += 1) {
+            const phi = TWO_PI * longitude / 48;
+            const point = [
+              axes.equatorial * Math.sin(theta) * Math.cos(phi),
+              axes.equatorial * Math.sin(theta) * Math.sin(phi),
+              axes.polar * Math.cos(theta)
+            ];
+            const projected = this.project(point, layout);
+            points.push([projected.x, projected.y]);
+          }
+        }
+        return convexHull(points);
+      }
+
+      drawHorizon(ctx, layout) {
+        const hull = this.horizonHull(layout);
+        if (hull.length < 3) return;
+        const xs = hull.map(point => point[0]);
+        const ys = hull.map(point => point[1]);
+        const minX = Math.min(...xs), maxX = Math.max(...xs);
+        const minY = Math.min(...ys), maxY = Math.max(...ys);
+        const radius = Math.max(maxX - minX, maxY - minY) * 0.65;
+        const gradient = ctx.createRadialGradient(
+          minX + 0.38 * (maxX - minX),
+          minY + 0.34 * (maxY - minY),
+          0,
+          0.5 * (minX + maxX),
+          0.5 * (minY + maxY),
+          radius
+        );
+        gradient.addColorStop(0, "#0d1726");
+        gradient.addColorStop(0.48, "#060b14");
+        gradient.addColorStop(1, "#000103");
+        ctx.beginPath();
+        hull.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point[0], point[1]); else ctx.lineTo(point[0], point[1]);
+        });
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        ctx.lineWidth = 1.45;
+        ctx.strokeStyle = "rgba(126,39,35,0.92)";
+        ctx.stroke();
+      }
+
+      drawPathLayer(ctx, layout, width, color) {
+        if (this.path.length < 2) return;
+        const geometry = this.occlusionGeometry();
+        ctx.lineWidth = width;
+        ctx.lineCap = "butt";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        let lastProjected = null;
+        for (let index = 1; index < this.path.length; index += 1) {
+          const previous = this.path[index - 1];
+          const current = this.path[index];
+          const pieces = this.visibleWorldSegments(
+            [previous.x, previous.y, previous.z],
+            [current.x, current.y, current.z],
+            geometry
+          );
+          if (!pieces.length) {
+            lastProjected = null;
+            continue;
+          }
+          for (const [fromWorld, toWorld] of pieces) {
+            const from = this.project(fromWorld, layout);
+            const to = this.project(toWorld, layout);
+            const continuous = lastProjected
+              && Math.hypot(from.x - lastProjected.x, from.y - lastProjected.y) < 0.35;
+            if (!continuous) ctx.moveTo(from.x, from.y);
+            else ctx.lineTo(from.x, from.y);
+            ctx.lineTo(to.x, to.y);
+            lastProjected = to;
+          }
+        }
+        ctx.stroke();
+      }
+
+      drawPath(ctx, layout) {
+        this.drawPathLayer(ctx, layout, 3.0, "rgba(150,36,24,0.34)");
+        this.drawPathLayer(ctx, layout, 1.55, "rgba(255,103,21,0.95)");
+        this.drawPathLayer(ctx, layout, 0.55, "rgba(255,218,72,0.96)");
+      }
+
+      pointOnRay(ray, progress) {
+        const target = ray.affineStart + clamp(progress, 0, 1) * ray.affineSpan;
+        let low = 0;
+        let high = ray.points.length - 1;
+        while (high - low > 1) {
+          const middle = Math.floor((low + high) / 2);
+          if ((ray.points[middle].affine ?? middle) <= target) low = middle;
+          else high = middle;
+        }
+        const index = Math.min(ray.points.length - 2, low);
+        const a = ray.points[index];
+        const b = ray.points[index + 1];
+        const aAffine = a.affine ?? index;
+        const bAffine = b.affine ?? index + 1;
+        const fraction = clamp((target - aAffine) / Math.max(1e-12, bAffine - aAffine), 0, 1);
+        return [
+          a.x + fraction * (b.x - a.x),
+          a.y + fraction * (b.y - a.y),
+          a.z + fraction * (b.z - a.z)
+        ];
+      }
+
+      smoothstep(low, high, value) {
+        const t = clamp((value - low) / Math.max(1e-12, high - low), 0, 1);
+        return t * t * (3 - 2 * t);
+      }
+
+      drawAnimatedSegment(ctx, from, to, alpha) {
+        ctx.lineCap = "round";
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = `rgba(166,42,23,${0.48 * alpha})`;
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+        ctx.lineWidth = 1.35;
+        ctx.strokeStyle = `rgba(255,111,24,${0.96 * alpha})`;
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+        ctx.lineWidth = 0.55;
+        ctx.strokeStyle = `rgba(255,218,70,${alpha})`;
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+      }
+
+      drawAnimatedRays(ctx, layout, now) {
+        if (this.visibleMode === "whole") return;
+        const before = this.animatedRays.length;
+        this.animatedRays = this.animatedRays.filter(ray => ray.loop || now <= ray.startTime + ray.duration);
+        if (before !== this.animatedRays.length) this.onRaySetChanged?.();
+        const rays = this.animatedRays.filter(ray => ray.mode === this.visibleMode);
+        for (const ray of rays) {
+          const sinceStart = now - ray.startTime;
+          if (sinceStart < 0) continue;
+          const cycle = ray.duration + ray.gap;
+          const elapsed = ray.loop ? sinceStart % cycle : sinceStart;
+          if (elapsed < 0 || elapsed > ray.duration) continue;
+          const timelineProgress = clamp(elapsed / ray.duration, 0, 1);
+          const playbackProgress = this.playbackDirection === "forward" ? 1 - timelineProgress : timelineProgress;
+          const timelineStart = ray.timelineStart ?? ray.affineStart;
+          const timelineEnd = ray.timelineEnd ?? ray.affineEnd;
+          const timelineSpan = Math.max(1e-9, timelineEnd - timelineStart);
+          const targetAffine = timelineStart + playbackProgress * timelineSpan;
+          const headProgress = (targetAffine - ray.affineStart) / ray.affineSpan;
+          if (headProgress < 0 || headProgress > 1) continue;
+          const tailAffine = targetAffine + (this.playbackDirection === "forward" ? 1 : -1)
+            * this.trailFraction * timelineSpan;
+          const tailProgress = this.playbackDirection === "forward"
+            ? clamp((tailAffine - ray.affineStart) / ray.affineSpan, headProgress, 1)
+            : clamp((tailAffine - ray.affineStart) / ray.affineSpan, 0, headProgress);
+          const wholeFade = this.smoothstep(0, 0.07, timelineProgress)
+            * (1 - this.smoothstep(0.91, 1, timelineProgress));
+          const segments = clamp(Math.round(80 + 24 * Math.log2(Math.max(1, this.zoom))), 80, 192);
+          const geometry = this.occlusionGeometry();
+          let previousWorld = this.pointOnRay(ray, tailProgress);
+          for (let index = 1; index <= segments; index += 1) {
+            const fraction = index / segments;
+            const progress = tailProgress + fraction * (headProgress - tailProgress);
+            const world = this.pointOnRay(ray, progress);
+            const tailFade = this.smoothstep(0, 1, fraction);
+            this.drawOcclusionClippedSegment(
+              ctx, layout, previousWorld, world, wholeFade * tailFade, geometry
+            );
+            previousWorld = world;
+          }
+        }
+      }
+
+      drawSpecialPoint(ctx, layout) {
+        if (!this.hovered || !this.result?.points?.length) return;
+        const point = this.result.points[this.result.minIndex];
+        if (!point || this.pointOccluded([point.x, point.y, point.z])) return;
+        const projected = this.project([point.x, point.y, point.z], layout);
+        ctx.fillStyle = "#fff8eb";
+        ctx.strokeStyle = "#9d3729";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(projected.x, projected.y, 4.5, 0, TWO_PI); ctx.fill(); ctx.stroke();
+        const label = `rmin = ${this.result.minR.toFixed(8)} M`;
+        ctx.font = "12px ui-sans-serif, sans-serif";
+        const width = ctx.measureText(label).width + 10;
+        const labelX = projected.x + 10;
+        const labelY = projected.y - 12;
+        ctx.fillStyle = "rgba(2,5,11,0.78)";
+        ctx.fillRect(labelX - 4, labelY - 13, width, 19);
+        ctx.fillStyle = "#e9a08a";
+        ctx.fillText(label, labelX, labelY);
+      }
+
+      distanceToProjectedPath(x, y) {
+        if (this.path.length < 2) return Number.POSITIVE_INFINITY;
+        const layout = this.layout();
+        let best = Number.POSITIVE_INFINITY;
+        for (let index = 1; index < this.path.length; index += 1) {
+          const a = this.project([this.path[index - 1].x, this.path[index - 1].y, this.path[index - 1].z], layout);
+          const b = this.project([this.path[index].x, this.path[index].y, this.path[index].z], layout);
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const denominator = dx * dx + dy * dy;
+          const fraction = denominator > 0 ? clamp(((x - a.x) * dx + (y - a.y) * dy) / denominator, 0, 1) : 0;
+          best = Math.min(best, Math.hypot(x - (a.x + fraction * dx), y - (a.y + fraction * dy)));
+        }
+        return best;
+      }
+
+      draw(animationNow = performance.now()) {
+        const { context: ctx, width, height } = setCanvasSize(this.canvas);
+        const layout = this.layout();
+        ctx.clearRect(0, 0, width, height);
+        this.drawStars(ctx, width, height);
+        this.drawAxes(ctx, layout);
+        this.drawSightline(ctx, layout);
+        this.drawHorizon(ctx, layout);
+        if (this.visibleMode === "whole") {
+          this.drawPath(ctx, layout);
+          this.drawSpecialPoint(ctx, layout);
+        } else {
+          const now = this.animationPaused ? (this.pauseStartedAt ?? animationNow) : animationNow;
+          this.drawAnimatedRays(ctx, layout, now);
+        }
+      }
+    }
+
+    const renderer = new KerrRenderer(ui.orbitCanvas);
+
+    function normalizePolarDegrees(value) {
+      if (!Number.isFinite(value)) return 0;
+      const normalized = value >= -180 && value < 180
+        ? value
+        : ((value + 180) % 360 + 360) % 360 - 180;
+      return Math.abs(normalized) < Number.EPSILON ? 0 : normalized;
+    }
+
+    function fixedTextFromInput(rawText, normalizedValue) {
+      const value = Object.is(normalizedValue, -0) ? 0 : normalizedValue;
+      const text = String(rawText ?? "").trim();
+      const match = text.match(/^([+-]?)(\d*)(?:\.(\d*))?$/);
+      if (match && (match[2] || match[3]) && Number(text) === value) {
+        const sign = value < 0 ? "-" : "";
+        const integer = (match[2] || "0").replace(/^0+(?=\d)/, "") || "0";
+        const fraction = match[3] || "";
+        if (fraction.length <= DISPLAY_DECIMALS) {
+          return `${sign}${integer}.${fraction.padEnd(DISPLAY_DECIMALS, "0")}`;
+        }
+      }
+      return value.toFixed(DISPLAY_DECIMALS);
+    }
+
+    function decimalTextToScaledInteger(text) {
+      const match = String(text).trim().match(/^([+-]?)(\d*)(?:\.(\d*))?$/);
+      if (!match || (!match[2] && !match[3])) return null;
+      const fraction = match[3] || "";
+      if (fraction.length > DISPLAY_DECIMALS) return null;
+      const scaleValue = 10n ** BigInt(DISPLAY_DECIMALS);
+      const integerPart = BigInt(match[2] || "0") * scaleValue;
+      const fractionPart = BigInt((fraction || "0").padEnd(DISPLAY_DECIMALS, "0"));
+      const magnitude = integerPart + fractionPart;
+      return match[1] === "-" ? -magnitude : magnitude;
+    }
+
+    function scaledIntegerToFixedText(value) {
+      const scaleValue = 10n ** BigInt(DISPLAY_DECIMALS);
+      const sign = value < 0n ? "-" : "";
+      const magnitude = value < 0n ? -value : value;
+      const integer = magnitude / scaleValue;
+      const fraction = String(magnitude % scaleValue).padStart(DISPLAY_DECIMALS, "0");
+      return `${sign}${integer}.${fraction}`;
+    }
+
+    function rememberDigitCaret(input) {
+      if (Number.isInteger(input.selectionStart)) digitCaretPositions.set(input, input.selectionStart);
+    }
+
+    function digitStepAtCaret(input) {
+      const text = input.value;
+      let caret = digitCaretPositions.get(input);
+      if (!Number.isInteger(caret)) {
+        const decimal = text.indexOf(".");
+        caret = decimal >= 0 ? decimal + 3 : text.length;
+      }
+      caret = clamp(caret, 0, text.length);
+      let digitIndex = caret > 0 && /\d/.test(text[caret - 1]) ? caret - 1 : caret;
+      while (digitIndex < text.length && !/\d/.test(text[digitIndex])) digitIndex += 1;
+      if (digitIndex >= text.length) {
+        digitIndex = Math.max(0, caret - 1);
+        while (digitIndex > 0 && !/\d/.test(text[digitIndex])) digitIndex -= 1;
+      }
+      const decimalIndex = text.indexOf(".") >= 0 ? text.indexOf(".") : text.length;
+      const exponent = digitIndex < decimalIndex
+        ? decimalIndex - digitIndex - 1
+        : decimalIndex - digitIndex;
+      return Math.pow(10, exponent);
+    }
+
+    function formatDigitStep(step) {
+      if (step >= 1) return step.toFixed(0);
+      const decimals = Math.max(0, Math.round(-Math.log10(step)));
+      return step.toFixed(decimals);
+    }
+
+    function updateDigitStepDisplay(input) {
+      const display = input.closest("[data-trace-mode]")?.querySelector("[data-digit-step-display]");
+      if (display) display.textContent = formatDigitStep(digitStepAtCaret(input));
+    }
+
+    function exactDigitStep(text, step, direction) {
+      const scaledValue = decimalTextToScaledInteger(text);
+      if (scaledValue === null) return null;
+      const exponent = Math.round(Math.log10(step));
+      const scaledExponent = DISPLAY_DECIMALS + exponent;
+      if (scaledExponent < 0) return null;
+      const scaledStep = 10n ** BigInt(scaledExponent);
+      return scaledIntegerToFixedText(scaledValue + BigInt(direction) * scaledStep);
+    }
+
+    function coordinateInput(mode, component) {
+      return ui.coordinateInputs.find(input => (
+        input.dataset.coordinateMode === mode && input.dataset.coordinateComponent === component
+      ));
+    }
+
+    function coordinateSystemForMode(mode) {
+      return ui.coordinateSystemControls.find(control => control.dataset.coordinateMode === mode);
+    }
+
+    function readCoordinates(mode) {
+      const control = coordinateSystemForMode(mode);
+      if (control?.value === "polar") {
+        const rho = clamp(finiteNumber(coordinateInput(mode, "rho"), 4), 0, Math.sqrt(2) * SCREEN_EXTENT);
+        const phiDegrees = finiteNumber(coordinateInput(mode, "phi"), polarAngles[mode] || 0);
+        const phi = phiDegrees * Math.PI / 180;
+        return { u: rho * Math.cos(phi), v: rho * Math.sin(phi) };
+      }
+      return {
+        u: finiteNumber(coordinateInput(mode, "alpha"), 4),
+        v: finiteNumber(coordinateInput(mode, "beta"), 0)
+      };
+    }
+
+    function coordinatesFromMode(mode) {
+      const current = readCoordinates(mode);
+      const control = coordinateSystemForMode(mode);
+      if (control?.value === "polar") {
+        const rhoInput = coordinateInput(mode, "rho");
+        const phiInput = coordinateInput(mode, "phi");
+        const rho = clamp(finiteNumber(rhoInput, Math.hypot(current.u, current.v)), 0, Math.sqrt(2) * SCREEN_EXTENT);
+        const phiDegrees = finiteNumber(phiInput, polarAngles[mode] || 0);
+        const phi = phiDegrees * Math.PI / 180;
+        polarAngles[mode] = phiDegrees;
+        return { u: clamp(rho * Math.cos(phi), -SCREEN_EXTENT, SCREEN_EXTENT), v: clamp(rho * Math.sin(phi), -SCREEN_EXTENT, SCREEN_EXTENT), textOverride: { rho: fixedTextFromInput(rhoInput.value, rho), phi: fixedTextFromInput(phiInput.value, phiDegrees) } };
+      }
+      const alphaInput = coordinateInput(mode, "alpha");
+      const betaInput = coordinateInput(mode, "beta");
+      const u = clamp(finiteNumber(alphaInput, current.u), -SCREEN_EXTENT, SCREEN_EXTENT);
+      const v = clamp(finiteNumber(betaInput, current.v), -SCREEN_EXTENT, SCREEN_EXTENT);
+      return {
+        u,
+        v,
+        textOverride: {
+          alpha: fixedTextFromInput(alphaInput.value, u),
+          beta: fixedTextFromInput(betaInput.value, v)
+        }
+      };
+    }
+
+    function syncCoordinateInputs(u, v, textOverride = {}, targetMode = null) {
+      const safeU = clamp(u, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const safeV = clamp(v, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const rho = Math.hypot(safeU, safeV);
+      for (const input of ui.coordinateInputs) {
+        const mode = input.dataset.coordinateMode;
+        if (targetMode && mode !== targetMode) continue;
+        if (textOverride.phi !== undefined && Number.isFinite(Number(textOverride.phi))) {
+          polarAngles[mode] = Number(textOverride.phi);
+        } else if (rho > 1e-15) {
+          polarAngles[mode] = normalizePolarDegrees(Math.atan2(safeV, safeU) * 180 / Math.PI);
+        }
+        const values = { alpha: safeU, beta: safeV, rho, phi: polarAngles[mode] };
+        const component = input.dataset.coordinateComponent;
+        input.value = textOverride[component] ?? values[component].toFixed(DISPLAY_DECIMALS);
+      }
+    }
+
+    function commitCoordinateInput(input) {
+      const mode = input.dataset.coordinateMode;
+      const { u, v, textOverride } = coordinatesFromMode(mode);
+      syncCoordinateInputs(u, v, textOverride, mode);
+      if (mode === "whole") queueTrace();
+      drawScreen();
+      updateDigitStepDisplay(input);
+    }
+
+    function applyDigitStep(input, direction) {
+      rememberDigitCaret(input);
+      const caret = digitCaretPositions.get(input) ?? input.value.length;
+      const step = digitStepAtCaret(input);
+      input.value = exactDigitStep(input.value, step, direction)
+        ?? (finiteNumber(input, 0) + direction * step).toFixed(DISPLAY_DECIMALS);
+      commitCoordinateInput(input);
+      input.focus({ preventScroll: true });
+      const restored = clamp(caret, 0, input.value.length);
+      input.setSelectionRange(restored, restored);
+      digitCaretPositions.set(input, restored);
+      updateDigitStepDisplay(input);
+    }
+
+    function updateCoordinateSystem(control) {
+      const mode = control.dataset.coordinateMode;
+      for (const fields of ui.coordinateFields) {
+        if (fields.dataset.coordinateMode === mode) {
+          fields.hidden = fields.dataset.coordinateFields !== control.value;
+        }
+      }
+      const first = coordinateInput(mode, control.value === "polar" ? "rho" : "alpha");
+      if (first) updateDigitStepDisplay(first);
+    }
+
+    function updateDiagnostics(result, params) {
+      const horizon = 1 + Math.sqrt(1 - params.spin * params.spin);
+      const equatorial = Math.sqrt(horizon * horizon + params.spin * params.spin);
+      ui.horizonRadius.textContent = horizon.toFixed(10);
+      ui.horizonAxes.textContent = `${equatorial.toFixed(8)}M / ${horizon.toFixed(8)}M`;
+      const physicalHorizon = horizon * RG_SUN_KM * params.mass;
+      ui.horizonRadius.title = `r₊ = ${physicalHorizon.toLocaleString("zh-CN", { maximumFractionDigits: 3 })} km`;
+    }
+
+    function updateSingleRayCount() {
+      ui.singleRayCount.textContent = `${renderer.animatedRayCount("single")} 条`;
+      ui.clearSingleRays.disabled = renderer.animatedRayCount("single") === 0;
+    }
+
+    function renderMultiPointList() {
+      ui.multiPointCount.textContent = `${multiSelectedPoints.length} 个`;
+      const fragment = document.createDocumentFragment();
+      multiSelectedPoints.forEach((point, index) => {
+        const item = document.createElement("li");
+        const number = document.createElement("span");
+        number.textContent = `#${index + 1}`;
+        const coordinates = document.createElement("span");
+        coordinates.className = "point-list-coordinates";
+        coordinates.textContent = `α=${point.u.toFixed(8)}  β=${point.v.toFixed(8)}`;
+        const remove = document.createElement("button");
+        remove.className = "point-delete-button";
+        remove.type = "button";
+        remove.textContent = "删除";
+        remove.setAttribute("aria-label", `删除第 ${index + 1} 根光线`);
+        remove.addEventListener("click", () => {
+          if (point.animationRayId) renderer.removeAnimatedRay(point.animationRayId);
+          multiSelectedPoints.splice(index, 1);
+          renderMultiPointList();
+          drawScreen();
+        });
+        item.append(number, coordinates, remove);
+        fragment.append(item);
+      });
+      ui.multiPointList.replaceChildren(fragment);
+      ui.startMultiRays.disabled = multiSelectedPoints.length === 0;
+      ui.clearMultiPoints.disabled = multiSelectedPoints.length === 0;
+    }
+
+    function updateAnimationPauseButton() {
+      ui.animationPause.textContent = renderer.animationPaused ? "继续" : "暂停";
+      ui.animationPause.setAttribute("aria-pressed", String(renderer.animationPaused));
+    }
+
+    function setActiveTraceMode(mode) {
+      activeTraceMode = mode;
+      ui.playbackControl.hidden = mode === "whole";
+      if (mode === "whole") renderer.setResult(currentResult, modelParameters("whole"));
+      else renderer.setAnimationMode(mode, modelParameters(mode));
+      drawScreen();
+      updateSingleRayCount();
+      renderMultiPointList();
+      updateAnimationPauseButton();
+    }
+
+    function traceForParams(params) {
+      return integrateKerrRay(params);
+    }
+
+    function addSingleAnimatedRay() {
+      const params = modelParameters("single");
+      ui.calculationState.textContent = "正在积分单根光线…";
+      try {
+        const result = traceForParams(params);
+        updateDiagnostics(result, params);
+        renderer.setResult(result, params);
+        renderer.addAnimatedRay(result, params, "single", performance.now() + 50);
+        renderer.setAnimationMode("single", params);
+        ui.calculationState.textContent = `${result.accepted} 个接受步`;
+      } catch (error) {
+        ui.calculationState.textContent = "积分失败";
+        console.error(error);
+      }
+      updateSingleRayCount();
+      drawScreen();
+    }
+
+    function addMultiSelectedPoint() {
+      const params = modelParameters("multi");
+      multiSelectedPoints.push({ u: params.u, v: params.v, animationRayId: null });
+      renderMultiPointList();
+      drawScreen();
+    }
+
+    async function startMultiAnimatedRays() {
+      if (!multiSelectedPoints.length) return;
+      const base = modelParameters("multi");
+      renderer.clearAnimatedRays("multi");
+      for (const point of multiSelectedPoints) point.animationRayId = null;
+      let latest = null;
+      let latestParams = null;
+      for (let index = 0; index < multiSelectedPoints.length; index += 1) {
+        const point = multiSelectedPoints[index];
+        ui.calculationState.textContent = `正在积分 ${index + 1}/${multiSelectedPoints.length}…`;
+        const params = { ...base, u: point.u, v: point.v, impact: Math.hypot(point.u, point.v) };
+        try {
+          const result = traceForParams(params);
+          point.animationRayId = renderer.addAnimatedRay(result, params, "multi", Number.POSITIVE_INFINITY);
+          latest = result;
+          latestParams = params;
+        } catch (error) {
+          console.error(error);
+        }
+        if (index % 2 === 1) await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+      renderer.synchronizeAnimatedGroup("multi", performance.now() + 140);
+      renderer.setAnimationMode("multi", base);
+      if (latest && latestParams) {
+        updateDiagnostics(latest, latestParams);
+        ui.calculationState.textContent = `${multiSelectedPoints.length} 根光线已同步`;
+      }
+      renderMultiPointList();
+    }
+
+    function runTrace() {
+      traceTimer = null;
+      const params = modelParameters("whole");
+      ui.mass.value = String(params.mass);
+      ui.spin.value = params.spin.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      ui.inclination.value = String(params.inclination);
+      ui.observerRadius.value = String(params.distance);
+      ui.calculationState.textContent = "正在积分…";
+      try {
+        currentResult = integrateKerrRay(params);
+        updateDiagnostics(currentResult, params);
+        drawScreen();
+        renderer.setResult(currentResult, params);
+        if (activeTraceMode !== "whole") renderer.setAnimationMode(activeTraceMode, modelParameters(activeTraceMode));
+        ui.calculationState.textContent = `${currentResult.accepted} 个接受步`;
+      } catch (error) {
+        currentResult = null;
+        ui.calculationState.textContent = "积分失败";
+        console.error(error);
+      }
+    }
+
+    function queueTrace(delay = 70) {
+      if (traceTimer !== null) clearTimeout(traceTimer);
+      traceTimer = setTimeout(runTrace, delay);
+    }
+
+    function csvNumber(value) {
+      return Number.isFinite(value) ? Number(value).toPrecision(17) : "";
+    }
+
+    function downloadGeodesicData() {
+      if (!currentResult?.points?.length) runTrace();
+      if (!currentResult?.points?.length) return;
+      const params = modelParameters("whole");
+      const rows = [
+        "# CONGL Kerr null geodesic",
+        "# coordinates,Cartesian Kerr-Schild",
+        "# units,G=c=M=1",
+        `# status,${currentResult.status}`,
+        `# mass_solar,${csvNumber(params.mass)}`,
+        `# spin_a_over_M,${csvNumber(params.spin)}`,
+        `# observer_inclination_deg,${csvNumber(params.inclination)}`,
+        `# observer_radius_over_M,${csvNumber(params.distance)}`,
+        `# alpha_over_M,${csvNumber(params.u)}`,
+        `# beta_over_M,${csvNumber(params.v)}`,
+        `# conserved_E_signed,${csvNumber(currentResult.energy)}`,
+        `# conserved_Lz_over_M,${csvNumber(currentResult.angularMomentum)}`,
+        `# Carter_Q_over_M2,${csvNumber(currentResult.carter)}`,
+        `# minimum_Kerr_Schild_r_over_M,${csvNumber(currentResult.minR)}`,
+        `# max_relative_null_constraint,${csvNumber(currentResult.maxNullError)}`,
+        `# max_relative_Carter_drift,${csvNumber(currentResult.maxCarterError)}`,
+        "index,lambda_over_M,t_KS_over_M,r_KS_over_M,x_over_M,y_over_M,z_over_M,p_x,p_y,p_z,dr_dlambda,relative_null_error"
+      ];
+      currentResult.points.forEach((point, index) => {
+        rows.push([
+          index,
+          csvNumber(point.affine), csvNumber(point.time), csvNumber(point.r),
+          csvNumber(point.x), csvNumber(point.y), csvNumber(point.z),
+          csvNumber(point.px), csvNumber(point.py), csvNumber(point.pz),
+          csvNumber(point.radialVelocity), csvNumber(point.nullError)
+        ].join(","));
+      });
+      const blob = new Blob(["\ufeff", rows.join("\n"), "\n"], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const token = value => value.toFixed(5).replace("-", "m").replace(".", "p");
+      link.href = url;
+      link.download = `congl-kerr-a-${token(params.spin)}-alpha-${token(params.u)}-beta-${token(params.v)}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function screenCoordinatesFromPointer(event) {
+      const rect = ui.screenCanvas.getBoundingClientRect();
+      const layout = screenLayout(rect.width, rect.height);
+      return {
+        u: screenView.centerU + (event.clientX - rect.left - layout.left - layout.size / 2) / layout.scale,
+        v: screenView.centerV - (event.clientY - rect.top - layout.top - layout.size / 2) / layout.scale
+      };
+    }
+
+    function selectScreenPoint(event) {
+      const raw = screenCoordinatesFromPointer(event);
+      const u = clamp(raw.u, -SCREEN_EXTENT, SCREEN_EXTENT);
+      const v = clamp(raw.v, -SCREEN_EXTENT, SCREEN_EXTENT);
+      syncCoordinateInputs(u, v);
+      drawScreen();
+      if (activeTraceMode === "whole") queueTrace(0);
+      else if (activeTraceMode === "single") addSingleAnimatedRay();
+      else addMultiSelectedPoint();
+    }
+
+    function runSelfTests() {
+      const tests = [];
+      const record = (name, condition) => tests.push({ name, condition: Boolean(condition) });
+      try {
+        const axisInitial = initialRay({ spin: 0.9, inclination: 0, distance: 100, u: 4, v: 2 });
+        record("axis observer", relativeNullError(axisInitial.state, axisInitial.pT, 0.9) < 2e-12);
+        const inclinedInitial = initialRay({ spin: 0.9, inclination: 61, distance: 100, u: -4, v: 1.5 });
+        record("inclined observer", relativeNullError(inclinedInitial.state, inclinedInitial.pT, 0.9) < 2e-12);
+        const setup = inclinedInitial.setup;
+        const tetrad = [setup.time, setup.radial, setup.alpha, setup.beta];
+        let orthogonal = true;
+        for (let i = 0; i < tetrad.length; i += 1) {
+          for (let j = 0; j < tetrad.length; j += 1) {
+            const target = i === j ? (i === 0 ? -1 : 1) : 0;
+            orthogonal &&= Math.abs(metricDot(setup.metric, tetrad[i], tetrad[j]) - target) < 2e-12;
+          }
+        }
+        record("observer tetrad", orthogonal);
+        const fields = kerrFields([7.2, -1.4, 3.1], 0.8);
+        record("Kerr-Schild radius", Math.abs((7.2 ** 2 + (-1.4) ** 2) / (fields.r2 + 0.8 ** 2) + 3.1 ** 2 / fields.r2 - 1) < 2e-12);
+        const capture = integrateKerrRay({ spin: 0, inclination: 70, distance: 80, u: 4, v: 0 }, { rtol: 2e-7, atol: 2e-9 });
+        const escape = integrateKerrRay({ spin: 0, inclination: 70, distance: 80, u: 7, v: 0 }, { rtol: 2e-7, atol: 2e-9 });
+        record("Schwarzschild capture", capture.status === "capture");
+        record("Schwarzschild escape", escape.status === "escape");
+        const captureEndpoint = capture.points[capture.points.length - 1];
+        const captureMomentumBound = Math.max(
+          ...capture.points.flatMap(point => [Math.abs(point.px), Math.abs(point.py), Math.abs(point.pz)])
+        );
+        record(
+          "past-horizon chart regularity",
+          Math.abs(captureEndpoint.r / capture.horizon - 1) < 5e-9
+            && captureMomentumBound < 10
+        );
+        record("constraint preservation", Math.max(capture.maxNullError, escape.maxNullError) < 2e-5);
+        record("Carter preservation", Math.max(capture.maxCarterError, escape.maxCarterError) < 2e-4);
+        const spinMirrorA = integrateKerrRay({ spin: 0.7, inclination: 90, distance: 60, u: 6, v: 0 }, { rtol: 5e-7, atol: 5e-9 });
+        const spinMirrorB = integrateKerrRay({ spin: -0.7, inclination: 90, distance: 60, u: -6, v: 0 }, { rtol: 5e-7, atol: 5e-9 });
+        record("spin reflection", spinMirrorA.status === spinMirrorB.status && Math.abs(spinMirrorA.minR - spinMirrorB.minR) < 2e-3);
+        const farParams = { spin: 0.8, inclination: 53, distance: 100000, u: 3.5, v: -1.2 };
+        const farInitial = initialRay(farParams);
+        const theta = farParams.inclination * Math.PI / 180;
+        const xi = farInitial.angularMomentum / farInitial.energy;
+        const eta = farInitial.carter / (farInitial.energy * farInitial.energy);
+        const expectedXi = -farParams.u * Math.sin(theta);
+        const expectedEta = farParams.v * farParams.v
+          + (farParams.u * farParams.u - farParams.spin * farParams.spin) * Math.cos(theta) ** 2;
+        record("Bardeen far-screen map", Math.abs(xi - expectedXi) < 2e-4 && Math.abs(eta - expectedEta) < 5e-4);
+        const boundaryParams = { spin: 0.9, inclination: 60, distance: 1000, u: 0, v: 0 };
+        const boundary = criticalCurve(boundaryParams);
+        const leftEdge = Math.min(...boundary.map(point => point[0]));
+        const rightEdge = Math.max(...boundary.map(point => point[0]));
+        const leftOutside = integrateKerrRay({ ...boundaryParams, u: leftEdge - 5e-4 }, { rtol: 2e-7, atol: 2e-9 });
+        const leftInside = integrateKerrRay({ ...boundaryParams, u: leftEdge + 5e-4 }, { rtol: 2e-7, atol: 2e-9 });
+        const rightOutside = integrateKerrRay({ ...boundaryParams, u: rightEdge + 5e-4 }, { rtol: 2e-7, atol: 2e-9 });
+        const rightInside = integrateKerrRay({ ...boundaryParams, u: rightEdge - 5e-4 }, { rtol: 2e-7, atol: 2e-9 });
+        record("finite critical curve left classification", leftOutside.status === "escape" && leftInside.status === "capture");
+        record("finite critical curve right classification", rightOutside.status === "escape" && rightInside.status === "capture");
+      } catch (error) {
+        console.error("CONGL Kerr self-test error", error);
+        tests.push({ name: "exception", condition: false });
+      }
+      const passed = tests.filter(test => test.condition).length;
+      ui.selfTest.textContent = `${passed}/${tests.length}`;
+      ui.selfTest.dataset.tests = JSON.stringify(tests);
+      if (passed !== tests.length) console.warn("CONGL Kerr self-tests", tests);
+    }
+
+    for (const input of ui.coordinateInputs) {
+      input.addEventListener("click", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
+      input.addEventListener("keyup", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
+      input.addEventListener("select", () => { rememberDigitCaret(input); updateDigitStepDisplay(input); });
+      input.addEventListener("change", () => commitCoordinateInput(input));
+      input.addEventListener("blur", () => commitCoordinateInput(input));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commitCoordinateInput(input);
+          if (input.dataset.coordinateMode === "single") addSingleAnimatedRay();
+          if (input.dataset.coordinateMode === "multi") addMultiSelectedPoint();
+          input.blur();
+        }
+      });
+    }
+
+    for (const button of document.querySelectorAll("[data-step-target]")) {
+      button.addEventListener("mousedown", event => event.preventDefault());
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.stepTarget);
+        applyDigitStep(input, Number(button.dataset.stepDirection));
+      });
+    }
+
+    for (const control of ui.coordinateSystemControls) {
+      control.addEventListener("change", () => updateCoordinateSystem(control));
+    }
+    for (const panel of ui.traceModes) {
+      panel.addEventListener("toggle", () => {
+        if (panel.open) setActiveTraceMode(panel.dataset.traceMode);
+      });
+    }
+    for (const control of ui.trailLengthControls) {
+      control.addEventListener("input", () => {
+        trailFraction = Number(control.value) / 100;
+        for (const other of ui.trailLengthControls) other.value = control.value;
+        for (const display of ui.trailLengthDisplays) display.textContent = `${control.value}%`;
+        renderer.setTrailFraction(trailFraction);
+      });
+    }
+    ui.addSingleByInput.addEventListener("click", addSingleAnimatedRay);
+    ui.clearSingleRays.addEventListener("click", () => renderer.clearAnimatedRays("single"));
+    ui.addMultiByInput.addEventListener("click", addMultiSelectedPoint);
+    ui.clearMultiPoints.addEventListener("click", () => {
+      renderer.clearAnimatedRays("multi");
+      multiSelectedPoints.splice(0);
+      renderMultiPointList();
+      drawScreen();
+    });
+    ui.startMultiRays.addEventListener("click", startMultiAnimatedRays);
+    ui.playbackDirection.addEventListener("change", () => {
+      renderer.setPlaybackDirection(ui.playbackDirection.value);
+    });
+    ui.animationPause.addEventListener("click", () => {
+      renderer.setAnimationPaused(!renderer.animationPaused);
+      updateAnimationPauseButton();
+    });
+    renderer.onRaySetChanged = () => {
+      updateSingleRayCount();
+      renderMultiPointList();
+    };
+    ui.downloadGeodesic.addEventListener("click", downloadGeodesicData);
+    for (const input of [ui.mass, ui.spin, ui.inclination, ui.observerRadius]) {
+      input.addEventListener("input", () => {
+        renderer.clearAnimatedRays("single");
+        renderer.clearAnimatedRays("multi");
+        queueTrace(100);
+        drawScreen();
+      });
+      input.addEventListener("change", () => queueTrace(0));
+    }
+
+    ui.screenCanvas.addEventListener("pointerdown", event => {
+      if (event.shiftKey) {
+        screenPanning = true;
+        const pointer = screenCoordinatesFromPointer(event);
+        Object.assign(screenPanStart, {
+          x: pointer.u,
+          y: pointer.v,
+          centerU: screenView.centerU,
+          centerV: screenView.centerV
+        });
+        ui.screenCanvas.setPointerCapture(event.pointerId);
+      } else {
+        selectScreenPoint(event);
+      }
+    });
+
+    ui.screenCanvas.addEventListener("pointermove", event => {
+      if (!screenPanning) return;
+      const pointer = screenCoordinatesFromPointer(event);
+      const centerLimit = SCREEN_EXTENT - screenView.halfExtent;
+      screenView.centerU = clamp(screenPanStart.centerU + screenPanStart.x - pointer.u, -centerLimit, centerLimit);
+      screenView.centerV = clamp(screenPanStart.centerV + screenPanStart.y - pointer.v, -centerLimit, centerLimit);
+      drawScreen();
+    });
+
+    const stopScreenPan = event => {
+      screenPanning = false;
+      if (event?.pointerId !== undefined && ui.screenCanvas.hasPointerCapture(event.pointerId)) {
+        ui.screenCanvas.releasePointerCapture(event.pointerId);
+      }
+    };
+    ui.screenCanvas.addEventListener("pointerup", stopScreenPan);
+    ui.screenCanvas.addEventListener("pointercancel", stopScreenPan);
+
+    ui.screenCanvas.addEventListener("wheel", event => {
+      event.preventDefault();
+      const before = screenCoordinatesFromPointer(event);
+      const nextExtent = clamp(screenView.halfExtent * Math.exp(event.deltaY * 0.0013), 1e-10, SCREEN_EXTENT);
+      const ratio = nextExtent / screenView.halfExtent;
+      screenView.centerU = before.u - (before.u - screenView.centerU) * ratio;
+      screenView.centerV = before.v - (before.v - screenView.centerV) * ratio;
+      screenView.halfExtent = nextExtent;
+      const centerLimit = SCREEN_EXTENT - screenView.halfExtent;
+      screenView.centerU = clamp(screenView.centerU, -centerLimit, centerLimit);
+      screenView.centerV = clamp(screenView.centerV, -centerLimit, centerLimit);
+      drawScreen();
+    }, { passive: false });
+
+    window.addEventListener("resize", () => { drawScreen(); renderer.draw(); });
+
+    for (const control of ui.coordinateSystemControls) updateCoordinateSystem(control);
+    syncCoordinateInputs(4, 0);
+    renderer.setTrailFraction(trailFraction);
+    renderer.setPlaybackDirection("reverse");
+    updateSingleRayCount();
+    renderMultiPointList();
+    drawScreen();
+    runTrace();
+    setTimeout(runSelfTests, 250);
+  </script>
+</body>
+</html>
