@@ -1,6 +1,6 @@
 import {getCliClient} from 'sanity/cli'
 
-const client = getCliClient({apiVersion: '2026-09-04'})
+const client = getCliClient({apiVersion: '2026-09-05'})
 
 async function main() {
   const ids = await client.fetch<string[]>(
@@ -12,9 +12,21 @@ async function main() {
   const transaction = client.transaction()
   ids.forEach((id) => {
     transaction.patch(id, (patch) =>
-      patch.setIfMissing({'visualizationsInterface.principlesPdfLabel': '打开使用手册 PDF'}),
+      patch
+        .set({
+          'visualizationsInterface.openLabel': '独立打开',
+          'visualizationsInterface.principlesHeading': '使用手册',
+          'visualizationsInterface.principlesPdfLabel': '打开使用手册 PDF',
+        })
+        .unset([
+          'visualizationsInterface.domainLabel',
+          'visualizationsInterface.authorLabel',
+          'visualizationsInterface.relatedCoursesLabel',
+          'visualizationsInterface.instructionsHeading',
+        ]),
     )
   })
+
   await transaction.commit()
   console.log(`已更新 ${ids.length} 份可视化实验室页面设置。`)
 }

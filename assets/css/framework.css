@@ -965,32 +965,20 @@ button.filter-button {
 	width: 100%;
 }
 
-.template-meta {
+.visual-intro-panel {
 	background: var(--framework-soft);
 	border: 1px solid var(--framework-line);
-	display: grid;
-	gap: 1rem;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
 	margin-bottom: 2rem;
-	padding: 1.2rem;
+	padding: 1.5rem;
 }
 
-.template-meta div {
-	min-width: 0;
-}
-
-.template-meta strong {
-	display: block;
-	font-family: "Source Sans Pro", Helvetica, sans-serif;
-	font-size: 0.72rem;
-	letter-spacing: 0.08em;
-	margin-bottom: 0.35rem;
-	text-transform: uppercase;
-}
-
-.template-meta span {
+.visual-intro-panel p,
+.visual-intro-panel li {
 	color: var(--framework-muted);
-	font-size: 0.9rem;
+}
+
+.visual-intro-panel > :last-child {
+	margin-bottom: 0;
 }
 
 .person-card {
@@ -1142,7 +1130,6 @@ button.filter-button {
 	.people-grid,
 		.profile-layout,
 		.lecture-note-layout,
-		.template-meta,
 	.course-card-grid,
 	.course-facts {
 		grid-template-columns: 1fr;

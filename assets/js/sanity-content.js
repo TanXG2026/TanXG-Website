@@ -717,20 +717,11 @@
 		if (!root) return Promise.resolve();
 		var slugValue = new URLSearchParams(window.location.search).get('slug');
 		if (!slugValue) return Promise.resolve();
-		var query = '*[_type == "visualization" && slug.current == ' + quote(slugValue) + '][0]{title,summary,author,relatedCourses,sitePath,externalUrl,instructions,"principlesPdfUrl":principlesPdf.asset->url,domains[]->{title,code}}';
+		var query = '*[_type == "visualization" && slug.current == ' + quote(slugValue) + '][0]{title,summary,sitePath,externalUrl,instructions,"principlesPdfUrl":principlesPdf.asset->url}';
 		return apiQuery(query).then(function (item) {
 			if (!item) return;
 			setText(root, '[data-visual-title]', item.title);
 			setText(root, '[data-visual-summary]', item.summary);
-			var values = [
-				[uiText('visualizations.domainLabel'), (item.domains || []).map(function (domain) { return domain.code; }).join('、')],
-				[uiText('visualizations.authorLabel'), item.author],
-				[uiText('visualizations.relatedCoursesLabel'), (item.relatedCourses || []).join('、')],
-			];
-			root.querySelectorAll('[data-visual-meta]').forEach(function (meta, index) {
-				setText(meta, 'strong', values[index][0]);
-				setText(meta, 'span', values[index][1] || uiText('common.emptyValue'));
-			});
 			var frame = root.querySelector('[data-visual-frame]');
 			var open = root.querySelector('[data-visual-open]');
 			var source = item.externalUrl || siteUrl(item.sitePath);
