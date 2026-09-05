@@ -443,10 +443,7 @@ const visualization = defineType({
     enabledField,
     defineField({name: 'title', title: '项目名称', type: 'string', validation: (rule) => rule.required()}),
     slugField,
-    defineField({name: 'domains', title: '研究领域标签', type: 'array', of: [defineArrayMember({type: 'reference', to: [{type: 'researchDomain'}]})]}),
     defineField({name: 'summary', title: '项目简介', type: 'text', rows: 4}),
-    defineField({name: 'author', title: '作者', type: 'string'}),
-    defineField({name: 'relatedCourses', title: '关联课程', type: 'array', of: [defineArrayMember({type: 'string'})]}),
     defineField({
       name: 'previewImage',
       title: '预览图',
@@ -464,7 +461,7 @@ const visualization = defineType({
       options: {accept: 'application/pdf'},
     }),
   ],
-  preview: {select: {title: 'title', subtitle: 'author', media: 'previewImage'}},
+  preview: {select: {title: 'title', media: 'previewImage'}},
 })
 
 const communityPost = defineType({
