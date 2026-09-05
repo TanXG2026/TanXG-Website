@@ -975,6 +975,7 @@ button.filter-button {
 .visual-intro-panel p,
 .visual-intro-panel li {
 	color: var(--framework-muted);
+	white-space: pre-line;
 }
 
 .visual-intro-panel > :last-child {
