@@ -629,9 +629,9 @@
     <section class="workspace" aria-label="三维 Kerr 零测地线图像">
       <div class="orbit-wrap" id="orbitWrap">
         <canvas id="orbitCanvas" aria-label="可拖动旋转和滚轮缩放的三维 Kerr 零测地线"></canvas>
-        <div class="playback-control" id="playbackControl" hidden>
+        <div class="playback-control" id="playbackControl">
           <label for="playbackDirection">动画方向</label>
-          <select id="playbackDirection"><option value="reverse" selected>反向追踪</option><option value="forward">正向追踪</option></select>
+          <select id="playbackDirection"><option value="reverse" selected>过去指向</option><option value="forward">未来指向</option></select>
           <button id="animationPause" type="button" aria-pressed="false">暂停</button>
         </div>
         <div class="calculation-state" id="calculationState" aria-live="polite"></div>
@@ -2719,7 +2719,6 @@
 
     function setActiveTraceMode(mode) {
       activeTraceMode = mode;
-      ui.playbackControl.hidden = mode === "whole";
       if (mode === "whole") renderer.setResult(currentResult, modelParameters("whole"));
       else renderer.setAnimationMode(mode, modelParameters(mode));
       drawScreen();
