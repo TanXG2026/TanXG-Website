@@ -814,7 +814,10 @@ button.filter-button {
 	padding-top: 0;
 }
 
-.textbook-list strong,
+.textbook-list strong {
+	display: inline;
+}
+
 .textbook-list span {
 	display: block;
 }
