@@ -360,6 +360,7 @@
 				return item;
 			}
 			item.appendChild(createTextElement('strong', '', book.title || uiText('learning.textbookFallback')));
+			item.appendChild(document.createTextNode('，'));
 			item.appendChild(createTextElement('span', '', book.author || uiText('learning.authorFallback')));
 			return item;
 		});

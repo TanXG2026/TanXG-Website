@@ -819,13 +819,12 @@ button.filter-button {
 }
 
 .textbook-list span {
-	display: block;
+	display: inline;
 }
 
 .textbook-list span {
 	color: var(--framework-muted);
-	font-size: 0.85rem;
-	margin-left: 1.2rem;
+	font-size: 0.9rem;
 }
 
 .domain-grid {
